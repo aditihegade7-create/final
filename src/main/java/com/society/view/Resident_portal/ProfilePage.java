@@ -1,15 +1,14 @@
 package com.society.view.Resident_portal;
-
 import java.io.File;
+import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-
 import com.society.controller.ImageUploadController;
 import com.society.controller.Resident_Controller.ProfileController;
 import com.society.model.Resident_model.ProfileModel;
 import com.society.view.ScreenSize;
 import com.society.view.Welcome.LogInPage;
-
+import javafx.animation.FadeTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -21,6 +20,11 @@ import javafx.scene.control.Separator;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -33,6 +37,8 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.Duration;
+import javafx.animation.ScaleTransition;
 
 public class ProfilePage {
 
@@ -59,9 +65,7 @@ public class ProfilePage {
         }
 
 
-        loggedInEmail =
-                email.trim()
-                        .toLowerCase();
+        loggedInEmail =email.trim().toLowerCase();
     }
 
 
@@ -78,16 +82,14 @@ public class ProfilePage {
     // CONTROLLER
     // =====================================================
 
-    ProfileController controller =
-            new ProfileController();
+    ProfileController controller = new ProfileController();
 
 
         // =====================================================
         // LOAD PROFILE
         // =====================================================
 
-        ProfileModel profile =
-                controller.getProfile(
+        ProfileModel profile =controller.getProfile(
                         loggedInEmail
                 );
 
@@ -96,32 +98,23 @@ public class ProfilePage {
         // DEFAULT VALUES
         // =====================================================
 
-        String nameText =
-                "Resident";
+        String nameText ="Resident";
 
-        String emailText =
-                loggedInEmail;
+        String emailText = loggedInEmail;
 
-        String phoneText =
-                "";
+        String phoneText = "";
 
-        String flatText =
-                "";
+        String flatText = "";
 
-        String wingText =
-                "";
+        String wingText = "";
 
-        String societyText =
-                "";
+        String societyText ="";
 
-        String residentTypeText =
-                "Resident";
+        String residentTypeText ="Resident";
 
-        String statusText =
-                "Active";
+        String statusText = "Active";
 
-        String profileImageUrl =
-                "";
+        String profileImageUrl ="";
 
 
         // =====================================================
@@ -135,8 +128,7 @@ public class ProfilePage {
                             .trim()
                             .isEmpty()) {
 
-                nameText =
-                        profile.getName();
+                nameText =profile.getName();
             }
 
 
@@ -145,36 +137,30 @@ public class ProfilePage {
                             .trim()
                             .isEmpty()) {
 
-                emailText =
-                        profile.getEmail();
+                emailText =profile.getEmail();
             }
 
 
             if (profile.getPhone() != null) {
 
-                phoneText =
-                        profile.getPhone();
+                phoneText =profile.getPhone();
             }
-
 
             if (profile.getFlat() != null) {
 
-                flatText =
-                        profile.getFlat();
+                flatText =profile.getFlat();
             }
 
 
             if (profile.getWing() != null) {
 
-                wingText =
-                        profile.getWing();
+                wingText =profile.getWing();
             }
 
 
             if (profile.getSocietyName() != null) {
 
-                societyText =
-                        profile.getSocietyName();
+                societyText =profile.getSocietyName();
             }
 
 
@@ -183,8 +169,7 @@ public class ProfilePage {
                             .trim()
                             .isEmpty()) {
 
-                residentTypeText =
-                        profile.getResidentType();
+                residentTypeText =profile.getResidentType();
             }
 
 
@@ -193,15 +178,13 @@ public class ProfilePage {
                             .trim()
                             .isEmpty()) {
 
-                statusText =
-                        profile.getStatus();
+                statusText =profile.getStatus();
             }
 
 
             if (profile.getProfileImageUrl() != null) {
 
-                profileImageUrl =
-                        profile.getProfileImageUrl();
+                profileImageUrl =profile.getProfileImageUrl();
             }
         }
 
@@ -210,31 +193,56 @@ public class ProfilePage {
         // SIDEBAR
         // =====================================================
 
-        panel panelobj =
-                new panel(stage, residentEmail);
+        panel panelobj =new panel(stage, residentEmail);
 
-
-        // =====================================================
-        // ROOT
+                // =====================================================
+        // ROOT + FULL SCREEN BACKGROUND IMAGE
         // =====================================================
 
-        BorderPane root =
-                new BorderPane();
+        BorderPane root =new BorderPane();
 
-        root.setLeft(
-                panelobj.getSidebar()
+        URL imageURL =getClass().getResource( "/background-Dashboard5.jpeg"
+                );
+
+        if (imageURL != null) {
+
+        Image backgroundImage =new Image( imageURL.toExternalForm()
+                );
+
+        BackgroundImage background = new BackgroundImage( backgroundImage,
+                        BackgroundRepeat.NO_REPEAT,
+                        BackgroundRepeat.NO_REPEAT,
+                        BackgroundPosition.CENTER,
+                        new BackgroundSize(
+                                100,
+                                100,
+                                true,
+                                true,
+                                false,
+                                true
+                        )
+                );
+
+        root.setBackground(new Background(background)
         );
 
+        } else {
 
-        // =====================================================
+        System.out.println(
+                "❌ Background image NOT FOUND: /background-Dashboard5.jpeg"
+        );
+        }
+
+        root.setLeft(panelobj.getSidebar()
+        );
+
+    // =====================================================
         // MAIN AREA
         // =====================================================
 
-        VBox mainArea =
-                new VBox();
+        VBox mainArea =new VBox();
 
-        mainArea.setStyle(
-                "-fx-background-color:#e8ddd5;"
+        mainArea.setStyle( "-fx-background-color:transparent;"
         );
 
 
@@ -242,24 +250,23 @@ public class ProfilePage {
         // HEADER
         // =====================================================
 
-        HBox header =
-                new HBox();
+        HBox header =new HBox();
 
         header.setPrefHeight(
-                105
+                80
         );
+        header.setMinHeight(80);
+header.setMaxHeight(80);
 
-        header.setPadding(
-                new Insets(
-                        25,
-                        40,
-                        25,
+        header.setPadding(new Insets(
+                        15,
+                        30,
+                        15,
                         30
                 )
         );
 
-        header.setAlignment(
-                Pos.CENTER_LEFT
+        header.setAlignment( Pos.CENTER_LEFT
         );
 
         header.setStyle(
@@ -267,32 +274,25 @@ public class ProfilePage {
         );
 
 
-        VBox headerTitle =
-                new VBox(3);
+        VBox headerTitle = new VBox(4);
 
 
-        Label headerMain =
-                new Label(
+        Label headerMain = new Label(
                         "My Profile"
                 );
 
-        headerMain.setFont(
-                Font.font(
+        headerMain.setFont(Font.font(
                         "System",
                         FontWeight.BOLD,
                         24
                 )
         );
 
-        headerMain.setTextFill(
-                Color.WHITE
+        headerMain.setTextFill(Color.WHITE
         );
 
 
-        Label headerSubtitle =
-                new Label(
-                        "Manage your personal and account information"
-                );
+        Label headerSubtitle = new Label("Manage your personal and account information");
 
         headerSubtitle.setFont(
                 Font.font(
@@ -301,9 +301,7 @@ public class ProfilePage {
                 )
         );
 
-        headerSubtitle.setTextFill(
-                Color.WHITE
-        );
+        headerSubtitle.setTextFill(Color.WHITE);
 
 
         headerTitle.getChildren().addAll(
@@ -312,8 +310,7 @@ public class ProfilePage {
         );
 
 
-        Region headerSpacer =
-                new Region();
+        Region headerSpacer =new Region();
 
         HBox.setHgrow(
                 headerSpacer,
@@ -321,55 +318,33 @@ public class ProfilePage {
         );
 
 
-        LocalDate today =
-                LocalDate.now();
+        LocalDate today =LocalDate.now();
 
 
-        Label day =
-                new Label(
-                        today.format(
-                                DateTimeFormatter.ofPattern(
-                                        "EEEE"
-                                )
-                        )
+        Label day =new Label(today.format(DateTimeFormatter.ofPattern( "EEEE"))
                 );
 
-        day.setFont(
-                Font.font(
-                        "System",
+        day.setFont(Font.font("System",
                         FontWeight.BOLD,
                         13
                 )
         );
 
-        day.setTextFill(
-                Color.WHITE
+        day.setTextFill(Color.WHITE
         );
 
 
-        Label date =
-                new Label(
-                        today.format(
-                                DateTimeFormatter.ofPattern(
-                                        "dd MMMM yyyy"
-                                )
-                        )
-                );
+        Label date =new Label(today.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"
+                                )  ));
 
-        date.setFont(
-                Font.font(
+        date.setFont(Font.font(
                         "System",
                         12
-                )
-        );
+                ));
 
-        date.setTextFill(
-                Color.WHITE
-        );
+        date.setTextFill(Color.WHITE);
 
-
-        VBox dateBox =
-                new VBox(2);
+        VBox dateBox =new VBox(2);
 
         dateBox.setAlignment(
                 Pos.CENTER_RIGHT
@@ -392,11 +367,9 @@ public class ProfilePage {
         // CONTENT AREA
         // =====================================================
 
-        VBox contentArea =
-                new VBox(18);
+        VBox contentArea =new VBox(18);
 
-        contentArea.setPadding(
-                new Insets(
+        contentArea.setPadding(new Insets(
                         20,
                         35,
                         25,
@@ -404,17 +377,30 @@ public class ProfilePage {
                 )
         );
 
-        contentArea.setStyle(
-                "-fx-background-color:#e8ddd5;"
+        
+        contentArea.setStyle("-fx-background-color:transparent;"
         );
 
+        // =====================================================
+        // PAGE CONTENT ANIMATION
+        // Sidebar and Header are NOT animated
+        // =====================================================
+
+        FadeTransition pageFade = new FadeTransition(
+                        Duration.millis(700),
+                        contentArea
+                );
+
+        pageFade.setFromValue(0.0);
+        pageFade.setToValue(1.0);
+        pageFade.setCycleCount(1);
+        pageFade.play();
 
         // =====================================================
         // PROFILE CARD
         // =====================================================
 
-        VBox profileCard =
-                new VBox(16);
+        VBox profileCard =new VBox(16);
 
         profileCard.setPrefWidth(
                 320
@@ -448,8 +434,7 @@ public class ProfilePage {
         // PHOTO
         // =====================================================
 
-        StackPane photoContainer =
-                new StackPane();
+        StackPane photoContainer = new StackPane();
 
         photoContainer.setPrefSize(
                 115,
@@ -473,8 +458,7 @@ public class ProfilePage {
         // CHANGE PHOTO
         // =====================================================
 
-        Button changePhotoButton =
-                new Button(
+        Button changePhotoButton = new Button(
                         "Change Photo"
                 );
 
@@ -501,43 +485,34 @@ public class ProfilePage {
         // NAME
         // =====================================================
 
-        Label nameLabel =
-                new Label(
-                        nameText
+        Label nameLabel =new Label(nameText
                 );
 
-        nameLabel.setFont(
-                Font.font(
+        nameLabel.setFont( Font.font(
                         "System",
                         FontWeight.BOLD,
                         21
                 )
         );
 
-        nameLabel.setTextFill(
-                Color.web("#3E2723")
+        nameLabel.setTextFill(Color.web("#3E2723")
         );
 
 
-        Label roleLabel =
-                new Label(
-                        residentTypeText
+        Label roleLabel = new Label(  residentTypeText
                 );
 
-        roleLabel.setFont(
-                Font.font(
+        roleLabel.setFont(Font.font(
                         "System",
                         14
                 )
         );
 
-        roleLabel.setTextFill(
-                Color.web("#789098")
+        roleLabel.setTextFill(Color.web("#789098")
         );
 
 
-        String flatDisplay =
-                flatText;
+        String flatDisplay =flatText;
 
 
         if (!wingText.isEmpty()) {
@@ -547,27 +522,20 @@ public class ProfilePage {
         }
 
 
-        Label flatLabel =
-                new Label(
-                        flatDisplay
+        Label flatLabel =new Label( flatDisplay
                 );
 
-        flatLabel.setFont(
-                Font.font(
-                        "System",
+        flatLabel.setFont(Font.font("System",
                         FontWeight.BOLD,
                         13
                 )
         );
 
-        flatLabel.setTextFill(
-                Color.web("#593a32")
+        flatLabel.setTextFill(Color.web("#593a32")
         );
 
 
-        Label statusLabel =
-                new Label(
-                        statusText
+        Label statusLabel = new Label( statusText
                 );
 
         statusLabel.setFont(
@@ -583,8 +551,7 @@ public class ProfilePage {
         );
 
 
-        VBox identity =
-                new VBox(5);
+        VBox identity =new VBox(5);
 
         identity.setAlignment(
                 Pos.CENTER
@@ -597,18 +564,13 @@ public class ProfilePage {
                 statusLabel
         );
 
-
-        Separator profileSeparator =
-                new Separator();
-
+        Separator profileSeparator =new Separator();
 
         // =====================================================
         // EDIT BUTTON
         // =====================================================
 
-        Button editButton =
-                new Button(
-                        "Edit Profile"
+        Button editButton = new Button("Edit Profile"
                 );
 
         editButton.setPrefWidth(
@@ -627,15 +589,11 @@ public class ProfilePage {
                 "-fx-cursor:hand;"
         );
 
-
         // =====================================================
         // SAVE BUTTON
         // =====================================================
 
-        Button saveButton =
-                new Button(
-                        "Save Changes"
-                );
+        Button saveButton =new Button("Save Changes");
 
         saveButton.setPrefWidth(
                 165
@@ -666,9 +624,7 @@ public class ProfilePage {
         // LOGOUT
         // =====================================================
 
-        Button logoutButton =
-                new Button(
-                        "Logout"
+        Button logoutButton =new Button("Logout"
                 );
 
         logoutButton.setPrefWidth(
@@ -690,8 +646,7 @@ public class ProfilePage {
         );
 
 
-        VBox profileButtons =
-                new VBox(10);
+        VBox profileButtons =new VBox(10);
 
         profileButtons.setAlignment(
                 Pos.CENTER
@@ -717,8 +672,7 @@ public class ProfilePage {
         // INFORMATION CARD
         // =====================================================
 
-        VBox informationCard =
-                new VBox(17);
+        VBox informationCard =new VBox(17);
 
         informationCard.setPrefWidth(
                 790
@@ -748,83 +702,69 @@ public class ProfilePage {
         // PERSONAL INFORMATION
         // =====================================================
 
-        Label personalTitle =
-                createSectionTitle(
-                        "Personal Information"
+        Label personalTitle =createSectionTitle("Personal Information"
                 );
 
 
-        Separator personalSeparator =
-                new Separator();
+        Separator personalSeparator =new Separator();
 
 
-        TextField nameField =
-                createField(
+        TextField nameField =createField(
                         nameText
                 );
 
 
-        TextField emailField =
-                createField(
+        TextField emailField =createField(
                         emailText
                 );
 
 
-        TextField phoneField =
-                createField(
+        TextField phoneField =createField(
                         phoneText
                 );
 
 
-        Label flatValue =
-                createValueLabel(
+        Label flatValue =createValueLabel(
                         flatText
                 );
 
 
-        Label wingValue =
-                createValueLabel(
+        Label wingValue =createValueLabel(
                         wingText
                 );
 
 
-        HBox nameRow =
-                createEditableInfoRow(
+        HBox nameRow =createEditableInfoRow(
                         "Full Name",
                         nameField
                 );
 
 
-        HBox emailRow =
-                createEditableInfoRow(
+        HBox emailRow =createEditableInfoRow(
                         "Email",
                         emailField
                 );
 
 
-        HBox phoneRow =
-                createEditableInfoRow(
+        HBox phoneRow =createEditableInfoRow(
                         "Phone Number",
                         phoneField
                 );
 
 
-        HBox flatRow =
-                createInfoRow(
+        HBox flatRow =createInfoRow(
                         "Flat Number",
                         flatValue
                 );
 
 
-        HBox wingRow =
-                createInfoRow(
+        HBox wingRow = createInfoRow(
                         "Wing",
                         wingValue
                 );
 
 
-        VBox personalSection =
-                new VBox(7);
+        VBox personalSection = new VBox(7);
 
         personalSection.getChildren().addAll(
                 personalTitle,
@@ -835,63 +775,46 @@ public class ProfilePage {
                 flatRow,
                 wingRow
         );
-
-
         // =====================================================
         // ACCOUNT INFORMATION
         // =====================================================
 
-        Label accountTitle =
-                createSectionTitle(
+        Label accountTitle =createSectionTitle(
                         "Account Information"
                 );
 
-
-        Separator accountSeparator =
-                new Separator();
+        Separator accountSeparator =new Separator();
 
 
-        Label accountStatusValue =
-                createValueLabel(
-                        statusText
+        Label accountStatusValue =createValueLabel( statusText
                 );
 
 
-        Label accountTypeValue =
-                createValueLabel(
-                        residentTypeText
-                );
+        Label accountTypeValue =createValueLabel(residentTypeText);
 
 
-        Label societyValue =
-                createValueLabel(
-                        societyText
-                );
+        Label societyValue =createValueLabel( societyText );
 
 
-        HBox accountStatusRow =
-                createInfoRow(
+        HBox accountStatusRow = createInfoRow(
                         "Account Status",
                         accountStatusValue
                 );
 
 
-        HBox accountTypeRow =
-                createInfoRow(
+        HBox accountTypeRow =createInfoRow(
                         "Account Type",
                         accountTypeValue
                 );
 
 
-        HBox societyRow =
-                createInfoRow(
+        HBox societyRow =createInfoRow(
                         "Society",
                         societyValue
                 );
 
 
-        VBox accountSection =
-                new VBox(7);
+        VBox accountSection =new VBox(7);
 
         accountSection.getChildren().addAll(
                 accountTitle,
@@ -906,36 +829,30 @@ public class ProfilePage {
         // SECURITY
         // =====================================================
 
-        Label securityTitle =
-                createSectionTitle(
+        Label securityTitle =createSectionTitle(
                         "Security"
                 );
 
 
-        Separator securitySeparator =
-                new Separator();
+        Separator securitySeparator =new Separator();
 
 
-        Label passwordLabel =
-                new Label(
+        Label passwordLabel =new Label(
                         "Password"
                 );
 
-        passwordLabel.setFont(
-                Font.font(
+        passwordLabel.setFont(Font.font(
                         "System",
                         FontWeight.BOLD,
                         13
                 )
         );
 
-        passwordLabel.setTextFill(
-                Color.web("#607D8B")
+        passwordLabel.setTextFill(Color.web("#607D8B")
         );
 
 
-        Label passwordValue =
-                new Label(
+        Label passwordValue =new Label(
                         "••••••••••••"
                 );
 
@@ -951,8 +868,7 @@ public class ProfilePage {
         );
 
 
-        VBox passwordInfo =
-                new VBox(4);
+        VBox passwordInfo =new VBox(4);
 
         passwordInfo.getChildren().addAll(
                 passwordLabel,
@@ -960,8 +876,7 @@ public class ProfilePage {
         );
 
 
-        Region securitySpacer =
-                new Region();
+        Region securitySpacer =new Region();
 
         HBox.setHgrow(
                 securitySpacer,
@@ -969,8 +884,7 @@ public class ProfilePage {
         );
 
 
-        Button changePasswordButton =
-                new Button(
+        Button changePasswordButton =new Button(
                         "Change Password"
                 );
 
@@ -994,8 +908,7 @@ public class ProfilePage {
         );
 
 
-        HBox securityRow =
-                new HBox();
+        HBox securityRow = new HBox();
 
         securityRow.setAlignment(
                 Pos.CENTER_LEFT
@@ -1008,8 +921,7 @@ public class ProfilePage {
         );
 
 
-        VBox securitySection =
-                new VBox(7);
+        VBox securitySection =new VBox(7);
 
         securitySection.getChildren().addAll(
                 securityTitle,
@@ -1032,18 +944,11 @@ public class ProfilePage {
         // Flat and Wing are read-only.
         // =====================================================
 
-        nameField.setEditable(
-                false
-        );
+        nameField.setEditable(false);
 
-        phoneField.setEditable(
-                false
-        );
+        phoneField.setEditable( false);
 
-        emailField.setEditable(
-                false
-        );
-
+        emailField.setEditable(false);
 
         // =====================================================
         // EDIT PROFILE
@@ -1051,33 +956,19 @@ public class ProfilePage {
 
         editButton.setOnAction(e -> {
 
-            nameField.setEditable(
-                    true
-            );
-
-            phoneField.setEditable(
-                    true
-            );
-
-
-            editButton.setVisible(
-                    false
-            );
-
-            editButton.setManaged(
-                    false
-            );
-
-
-            saveButton.setVisible(
-                    true
-            );
-
-            saveButton.setManaged(
-                    true
-            );
+            nameField.setEditable(true);
+            
+            phoneField.setEditable(true);
+            
+            editButton.setVisible(false);
+            
+            editButton.setManaged( false);
+            
+            saveButton.setVisible(true);
+            
+            saveButton.setManaged(true);
+            
         });
-
 
         // =====================================================
         // SAVE PROFILE
@@ -1085,13 +976,11 @@ public class ProfilePage {
 
         saveButton.setOnAction(e -> {
 
-            String updatedName =
-                    nameField.getText()
+            String updatedName =nameField.getText()
                             .trim();
 
 
-            String updatedPhone =
-                    phoneField.getText()
+            String updatedPhone =phoneField.getText()
                             .trim();
 
 
@@ -1119,8 +1008,7 @@ public class ProfilePage {
             }
 
 
-            boolean updated =
-                    controller.updateProfile(
+            boolean updated =controller.updateProfile(
                             loggedInEmail,
                             updatedName,
                             updatedPhone
@@ -1129,44 +1017,25 @@ public class ProfilePage {
 
             if (updated) {
 
-                nameLabel.setText(
-                        updatedName
-                );
+                nameLabel.setText(updatedName );
 
+                nameField.setEditable(false);
 
-                nameField.setEditable(
-                        false
-                );
+                phoneField.setEditable(false);
 
-                phoneField.setEditable(
-                        false
-                );
+                editButton.setVisible(true);
 
+                editButton.setManaged(true);
 
-                editButton.setVisible(
-                        true
-                );
+                saveButton.setVisible(false );
 
-                editButton.setManaged(
-                        true
-                );
-
-
-                saveButton.setVisible(
-                        false
-                );
-
-                saveButton.setManaged(
-                        false
-                );
-
+                saveButton.setManaged( false);
 
                 showAlert(
                         Alert.AlertType.INFORMATION,
                         "Profile",
                         "Profile updated successfully."
                 );
-
 
             } else {
 
@@ -1185,19 +1054,11 @@ public class ProfilePage {
 
         changePhotoButton.setOnAction(e -> {
 
-            FileChooser fileChooser =
-                    new FileChooser();
+            FileChooser fileChooser =new FileChooser();
 
 
-            fileChooser.setTitle(
-                    "Select Profile Photo"
-            );
-
-
-            fileChooser
-                    .getExtensionFilters()
-                    .add(
-                            new FileChooser.ExtensionFilter(
+            fileChooser.setTitle("Select Profile Photo");
+            fileChooser.getExtensionFilters().add( new FileChooser.ExtensionFilter(
                                     "Image Files",
                                     "*.png",
                                     "*.jpg",
@@ -1207,10 +1068,7 @@ public class ProfilePage {
                     );
 
 
-            File file =
-                    fileChooser.showOpenDialog(
-                            stage
-                    );
+            File file =fileChooser.showOpenDialog(stage );
 
 
             if (file == null) {
@@ -1220,18 +1078,15 @@ public class ProfilePage {
 
             try {
 
-                ImageUploadController uploader =
-                        new ImageUploadController();
+                ImageUploadController uploader = new ImageUploadController();
 
 
-                String imageUrl =
-                        uploader.imageUpload(
+                String imageUrl = uploader.imageUpload(
                                 file
                         );
 
 
-                if (imageUrl == null ||
-                        imageUrl.trim().isEmpty()) {
+                if (imageUrl == null || imageUrl.trim().isEmpty()) {
 
                     showAlert(
                             Alert.AlertType.ERROR,
@@ -1243,8 +1098,7 @@ public class ProfilePage {
                 }
 
 
-                boolean saved =
-                        controller.updateProfileImage(
+                boolean saved = controller.updateProfileImage(
                                 loggedInEmail,
                                 imageUrl
                         );
@@ -1311,34 +1165,24 @@ public class ProfilePage {
 
         logoutButton.setOnAction(e -> {
 
-            loggedInEmail =
-                    "";
+            loggedInEmail = "";
 
+            LogInPage loginPage =new LogInPage();
 
-            LogInPage loginPage =
-                    new LogInPage();
-
-
-            stage.setScene(
-                    loginPage.createScene(
+            stage.setScene(loginPage.createScene(
                             stage
                     )
             );
-
-
             stage.show();
         });
-
 
         // =====================================================
         // PROFILE LAYOUT
         // =====================================================
 
-        HBox profileLayout =
-                new HBox(20);
+        HBox profileLayout =new HBox(20);
 
-        profileLayout.setAlignment(
-                Pos.TOP_LEFT
+        profileLayout.setAlignment(Pos.TOP_LEFT
         );
 
 
@@ -1352,7 +1196,6 @@ public class ProfilePage {
                 profileLayout
         );
 
-
         // =====================================================
         // MAIN AREA
         // =====================================================
@@ -1362,17 +1205,13 @@ public class ProfilePage {
                 contentArea
         );
 
-
         // =====================================================
         // ROOT
         // =====================================================
 
-        root.setCenter(
-                mainArea
-        );
+        root.setCenter(mainArea);
 
-
-        // =====================================================
+        //=====================================================
         // SCENE
         // =====================================================
 
@@ -1382,7 +1221,6 @@ public class ProfilePage {
                 ScreenSize.getHeight()
         );
     }
-
 
     // =========================================================
     // LOAD PROFILE IMAGE
@@ -1398,8 +1236,7 @@ public class ProfilePage {
                 .clear();
 
 
-        Image image =
-                null;
+        Image image =null;
 
 
         // =====================================================
@@ -1411,8 +1248,7 @@ public class ProfilePage {
 
             try {
 
-                image =
-                        new Image(
+                image =new Image(
                                 imageUrl,
                                 115,
                                 115,
@@ -1428,34 +1264,18 @@ public class ProfilePage {
         }
 
 
-        if (image != null &&
-                !image.isError()) {
+        if (image != null && !image.isError()) {
 
-            ImageView imageView =
-                    new ImageView(
-                            image
-                    );
+            ImageView imageView = new ImageView( image  );
 
 
-            imageView.setFitWidth(
-                    115
-            );
+            imageView.setFitWidth(11);
 
+            imageView.setFitHeight(115);
 
-            imageView.setFitHeight(
-                    115
-            );
+            imageView.setPreserveRatio( false);
 
-
-            imageView.setPreserveRatio(
-                    false
-            );
-
-
-            imageView.setSmooth(
-                    true
-            );
-
+            imageView.setSmooth(true);
 
             Circle clip =
                     new Circle(
@@ -1485,21 +1305,18 @@ public class ProfilePage {
         // FALLBACK INITIALS
         // =====================================================
 
-        Circle circle =
-                new Circle(
+        Circle circle =new Circle(
                         57.5,
                         Color.web("#789098")
                 );
 
 
-        String initials =
-                getInitials(
+        String initials =getInitials(
                         name
                 );
 
 
-        Label initialsLabel =
-                new Label(
+        Label initialsLabel =new Label(
                         initials
                 );
 
@@ -1673,28 +1490,23 @@ public class ProfilePage {
     private TextField createField(
             String text) {
 
-        TextField field =
-                new TextField(
+        TextField field = new TextField(
                         text == null
                                 ? ""
                                 : text
                 );
 
-
         field.setPrefWidth(
                 500
         );
-
 
         field.setMinWidth(
                 500
         );
 
-
         field.setPrefHeight(
                 34
         );
-
 
         field.setStyle(
                 "-fx-background-color:white;" +
@@ -1705,10 +1517,8 @@ public class ProfilePage {
                 "-fx-font-size:13px;"
         );
 
-
         return field;
     }
-
 
     // =========================================================
     // READ-ONLY ROW
@@ -1718,49 +1528,38 @@ public class ProfilePage {
             String labelText,
             Label value) {
 
-        Label label =
-                new Label(
+        Label label =new Label(
                         labelText
                 );
-
 
         label.setPrefWidth(
                 120
         );
 
-
-        label.setFont(
-                Font.font(
+        label.setFont(Font.font(
                         "System",
                         FontWeight.BOLD,
                         13
                 )
         );
 
-
         label.setTextFill(
                 Color.web("#263238")
         );
 
-
-        HBox row =
-                new HBox(15);
-
+        HBox row =new HBox(15);
 
         row.setAlignment(
                 Pos.CENTER_LEFT
         );
-
 
         row.getChildren().addAll(
                 label,
                 value
         );
 
-
         return row;
     }
-
 
     // =========================================================
     // EDITABLE ROW
@@ -1770,49 +1569,36 @@ public class ProfilePage {
             String labelText,
             TextField field) {
 
-        Label label =
-                new Label(
-                        labelText
-                );
-
+        Label label =new Label(labelText);
 
         label.setPrefWidth(
                 120
         );
 
-
-        label.setFont(
-                Font.font(
+        label.setFont(Font.font(
                         "System",
                         FontWeight.BOLD,
                         13
                 )
         );
 
-
         label.setTextFill(
                 Color.web("#263238")
         );
 
-
-        HBox row =
-                new HBox(15);
-
+        HBox row = new HBox(15);
 
         row.setAlignment(
                 Pos.CENTER_LEFT
         );
-
 
         row.getChildren().addAll(
                 label,
                 field
         );
 
-
         return row;
     }
-
 
     // =========================================================
     // CHANGE PASSWORD DIALOG
@@ -1822,133 +1608,89 @@ public class ProfilePage {
             Stage owner,
             ProfileController controller) {
 
-        Stage dialog =
-                new Stage();
-
+        Stage dialog =new Stage();
 
         dialog.setTitle(
                 "Change Password"
         );
 
-
         dialog.initOwner(
                 owner
         );
 
+        VBox box =new VBox(12);
 
-        VBox box =
-                new VBox(12);
-
-
-        box.setPadding(
-                new Insets(25)
+        box.setPadding( new Insets(25)
         );
-
 
         box.setPrefWidth(
                 380
         );
 
-
-        box.setStyle(
-                "-fx-background-color:white;"
+        box.setStyle("-fx-background-color:white;"
         );
 
-
-        Label title =
-                new Label(
+        Label title =new Label(
                         "Change Password"
                 );
 
-
-        title.setFont(
-                Font.font(
+        title.setFont(Font.font(
                         "System",
                         FontWeight.BOLD,
                         20
                 )
         );
-
-
         title.setTextFill(
                 Color.web("#3E2723")
         );
-
-
-        PasswordField currentPassword =
-                new PasswordField();
-
+        PasswordField currentPassword =new PasswordField();
 
         currentPassword.setPromptText(
                 "Current Password"
         );
 
-
         currentPassword.setPrefHeight(
                 38
         );
 
+        PasswordField newPassword =new PasswordField();
 
-        PasswordField newPassword =
-                new PasswordField();
-
-
-        newPassword.setPromptText(
-                "New Password"
+        newPassword.setPromptText("New Password"
         );
-
-
         newPassword.setPrefHeight(
                 38
         );
 
+        PasswordField confirmPassword = new PasswordField();
 
-        PasswordField confirmPassword =
-                new PasswordField();
-
-
-        confirmPassword.setPromptText(
-                "Confirm Password"
+        confirmPassword.setPromptText("Confirm Password"
         );
-
 
         confirmPassword.setPrefHeight(
                 38
         );
 
-
-        Button cancelButton =
-                new Button(
+        Button cancelButton =new Button(
                         "Cancel"
                 );
-
 
         cancelButton.setPrefWidth(
                 110
         );
 
-
         cancelButton.setPrefHeight(
                 38
         );
 
-
-        Button changeButton =
-                new Button(
+        Button changeButton =new Button(
                         "Change Password"
                 );
 
-
-        changeButton.setPrefWidth(
-                145
+        changeButton.setPrefWidth(145
         );
 
-
-        changeButton.setPrefHeight(
-                38
+        changeButton.setPrefHeight(38
         );
-
-
         changeButton.setStyle(
                 "-fx-background-color:#593a32;" +
                 "-fx-text-fill:white;" +
@@ -1956,21 +1698,16 @@ public class ProfilePage {
                 "-fx-background-radius:7;"
         );
 
-
-        HBox buttons =
-                new HBox(10);
-
+        HBox buttons =new HBox(10);
 
         buttons.setAlignment(
                 Pos.CENTER_RIGHT
         );
 
-
         buttons.getChildren().addAll(
                 cancelButton,
                 changeButton
         );
-
 
         box.getChildren().addAll(
                 title,
@@ -1988,18 +1725,15 @@ public class ProfilePage {
 
         changeButton.setOnAction(e -> {
 
-            String current =
-                    currentPassword
+            String current = currentPassword
                             .getText();
 
 
-            String newPass =
-                    newPassword
+            String newPass = newPassword
                             .getText();
 
 
-            String confirm =
-                    confirmPassword
+            String confirm = confirmPassword
                             .getText();
 
 
@@ -2041,8 +1775,7 @@ public class ProfilePage {
             }
 
 
-            boolean changed =
-                    controller.changePassword(
+            boolean changed = controller.changePassword(
                             loggedInEmail,
                             current,
                             newPass
@@ -2072,21 +1805,16 @@ public class ProfilePage {
         });
 
 
-        Scene scene =
-                new Scene(
+        Scene scene =new Scene(
                         box
                 );
 
 
-        dialog.setScene(
-                scene
+        dialog.setScene( scene
         );
-
 
         dialog.showAndWait();
     }
-
-
     // =========================================================
     // ALERT
     // =========================================================
@@ -2096,26 +1824,21 @@ public class ProfilePage {
             String title,
             String message) {
 
-        Alert alert =
-                new Alert(
+        Alert alert =new Alert(
                         type
                 );
-
 
         alert.setTitle(
                 title
         );
 
-
         alert.setHeaderText(
                 null
         );
 
-
         alert.setContentText(
                 message
         );
-
 
         alert.showAndWait();
     }

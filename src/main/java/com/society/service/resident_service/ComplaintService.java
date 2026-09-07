@@ -3,12 +3,16 @@ package com.society.service.resident_service;
 import com.society.dao.Resident_dao.ComplaintDAO;
 import com.society.model.Resident_model.ComplaintModel;
 
+import javafx.scene.control.Label;
+
+import java.io.File;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
 public class ComplaintService {
-
+  
     // =========================================================
     // DAO
     // =========================================================
@@ -39,9 +43,9 @@ public class ComplaintService {
             String flatNumber,
             String category,
             String title,
-            String description,
-            String imageFileName,
-            String preferredDate)
+            Label description,
+            String selectedFile,
+            LocalDate preferredDateValue)
             throws Exception {
 
         // =====================================================
@@ -73,15 +77,15 @@ public class ComplaintService {
         }
 
         if (description == null
-                || description.trim().isEmpty()) {
+                || description.getText().trim().isEmpty()) {
 
             throw new IllegalArgumentException(
                     "Complaint description is required."
             );
         }
 
-        if (preferredDate == null
-                || preferredDate.trim().isEmpty()) {
+        if (preferredDateValue == null
+                || preferredDateValue.toString().isEmpty()) {
 
             throw new IllegalArgumentException(
                     "Preferred date is required."
@@ -142,7 +146,7 @@ public class ComplaintService {
         // =====================================================
 
         complaint.setDescription(
-                description.trim()
+                description.getText().trim()
         );
 
         // =====================================================
@@ -150,9 +154,9 @@ public class ComplaintService {
         // =====================================================
 
         complaint.setImageFileName(
-                imageFileName == null
+                selectedFile == null
                         ? ""
-                        : imageFileName
+                        : selectedFile
         );
 
         // =====================================================
@@ -160,8 +164,8 @@ public class ComplaintService {
         // =====================================================
 
         complaint.setPreferredDate(
-                preferredDate.trim()
-        );
+        preferredDateValue.toString()
+);
 
         // =====================================================
         // DEFAULT STATUS

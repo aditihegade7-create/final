@@ -5,6 +5,8 @@ import com.society.model.Resident_model.Amenities;
 import com.society.service.resident_service.RazorpayService;
 import com.society.view.ScreenSize;
 
+import javafx.animation.FadeTransition;
+import javafx.animation.ScaleTransition;
 import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -19,6 +21,12 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.image.Image;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
@@ -31,6 +39,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import javafx.util.Duration;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -68,8 +77,7 @@ public class AmenitiesBooking {
             "06:00 PM - 08:00 PM"
     );
 
-    private static final DateTimeFormatter TIME_FORMATTER =
-            DateTimeFormatter.ofPattern("hh:mm a", Locale.ENGLISH);
+    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("hh:mm a", Locale.ENGLISH);
 
     public AmenitiesBooking(
             String residentName,
@@ -84,33 +92,59 @@ public class AmenitiesBooking {
          * AmenitiesController resolves the secretary dynamically
          * from the logged-in resident.
          */
-        this.amenitiesController =
-                new AmenitiesController(this.loginEmail);
+        this.amenitiesController = new AmenitiesController(this.loginEmail);
 
         this.razorpay = new RazorpayService();
     }
 
     public Scene getAminityScene(Stage stage) {
 
-        panel panelobj = new panel(stage, loginEmail);
+      //  panel panelobj = new panel(stage, loginEmail);
 
         BorderPane root = new BorderPane();
 
+        // Sidebar
+        panel panelobj = new panel(stage, loginEmail);
         root.setLeft(panelobj.getSidebar());
+       
+        /* ================================
+        * FULL SCREEN BACKGROUND IMAGE
+        * ================================ */
 
         BorderPane mainArea = new BorderPane();
 
+        Image backgroundImage = new Image(getClass().getResource("/background-Dashboard5.jpeg").toExternalForm()
+        );
+
+        BackgroundSize backgroundSize = new BackgroundSize(
+                100,
+                100,
+                true,
+                true,
+                false,
+                true
+        );
+
+        BackgroundImage bgImage = new BackgroundImage(backgroundImage,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundPosition.CENTER,
+                backgroundSize
+        );
+
+        mainArea.setBackground(new Background(bgImage));
+
         VBox heading = new VBox(3);
         heading.setPadding(new Insets(15, 20, 15, 20));
-        heading.setStyle("-fx-background-color: white;");
+        heading.setStyle("-fx-background-color: #4e342e;");
 
         Label title = new Label("Book Amenity");
         title.setFont(Font.font("System", FontWeight.BOLD, 28));
-        title.setTextFill(Color.web("#4e342e"));
+        title.setTextFill(Color.web("#fffdfc"));
 
         Label subtitle = new Label("Reserve society amenities");
         subtitle.setFont(Font.font("System", 14));
-        subtitle.setTextFill(Color.web("#757575"));
+        subtitle.setTextFill(Color.web("#ffffff"));
 
         heading.getChildren().addAll(title, subtitle);
 
@@ -118,7 +152,11 @@ public class AmenitiesBooking {
 
         VBox content = new VBox(20);
         content.setPadding(new Insets(27, 38, 30, 38));
-        content.setStyle("-fx-background-color: #e8ddd5;");
+        content.setStyle(
+        "-fx-background-color: transparent;"
+);
+        //content.setStyle("-fx-background-color: #e8ddd5;");
+
 
         cardsContainer = new VBox(15);
 
@@ -138,11 +176,25 @@ public class AmenitiesBooking {
                 ScrollPane.ScrollBarPolicy.NEVER
         );
         scrollPane.setStyle(
-                "-fx-background: #e8ddd5;" +
-                "-fx-background-color: #e8ddd5;"
+                "-fx-background-color: transparent;" +
+                "-fx-background: transparent;"
         );
 
+        scrollPane.lookupAll(".viewport").forEach(node -> {
+        node.setStyle("-fx-background-color: transparent;");
+        });
+
         mainArea.setCenter(scrollPane);
+
+        // ================= BODY ANIMATION =================
+
+        FadeTransition fadeTransition = new FadeTransition( Duration.millis(800), content );
+
+        fadeTransition.setFromValue(0.0);
+        fadeTransition.setToValue(1.0);
+        fadeTransition.setCycleCount(1);
+
+        fadeTransition.play();
 
         root.setCenter(mainArea);
 
@@ -162,8 +214,7 @@ public class AmenitiesBooking {
 
         if (amenities == null || amenities.isEmpty()) {
 
-            Label empty =
-                    new Label("No amenities available.");
+            Label empty = new Label("No amenities available.");
 
             empty.setFont(
                     Font.font(
@@ -184,8 +235,7 @@ public class AmenitiesBooking {
 
         for (int i = 0; i < 3; i++) {
 
-            ColumnConstraints column =
-                    new ColumnConstraints();
+            ColumnConstraints column = new ColumnConstraints();
 
             column.setPercentWidth(33.33);
             column.setHgrow(Priority.ALWAYS);
@@ -198,8 +248,7 @@ public class AmenitiesBooking {
 
         for (Amenities amenity : amenities) {
 
-            VBox card =
-                    createAmenityCard(amenity);
+            VBox card = createAmenityCard(amenity);
 
             grid.add(card, column, row);
 
@@ -233,8 +282,7 @@ public class AmenitiesBooking {
                 "-fx-background-radius: 8;"
         );
 
-        Label name =
-                new Label(
+        Label name =new Label(
                         safe(amenity.getAmenityName())
                 );
 
@@ -250,15 +298,13 @@ public class AmenitiesBooking {
                 Color.web("#4e342e")
         );
 
-        Label price =
-                new Label(
+        Label price = new Label(
                         formatPrice(
                                 amenity.getPrice()
                         )
                 );
 
-        price.setFont(
-                Font.font(
+        price.setFont( Font.font(
                         "System",
                         FontWeight.BOLD,
                         14
@@ -269,8 +315,7 @@ public class AmenitiesBooking {
                 Color.web("#263238")
         );
 
-        Label description =
-                new Label(
+        Label description = new Label(
                         safe(amenity.getDescription())
                 );
 
@@ -284,15 +329,13 @@ public class AmenitiesBooking {
                 Font.font("System", 13)
         );
 
-        HBox bottomRow =
-                new HBox(10);
+        HBox bottomRow = new HBox(10);
 
         bottomRow.setAlignment(
                 Pos.CENTER_LEFT
         );
 
-        Label availability =
-                new Label(
+        Label availability =new Label(
                         safe(amenity.getAvailability())
                 );
 
@@ -308,16 +351,14 @@ public class AmenitiesBooking {
                 Color.web("#00843D")
         );
 
-        Region spacer =
-                new Region();
+        Region spacer = new Region();
 
         HBox.setHgrow(
                 spacer,
                 Priority.ALWAYS
         );
 
-        Button bookButton =
-                new Button("Book");
+        Button bookButton = new Button("Book");
 
         bookButton.setPrefWidth(76);
         bookButton.setPrefHeight(30);
@@ -332,6 +373,8 @@ public class AmenitiesBooking {
         bookButton.setOnAction(
                 e -> showBookingDialog(amenity)
         );
+
+        addButtonAnimation(bookButton);
 
         bottomRow.getChildren().addAll(
                 availability,
@@ -349,6 +392,69 @@ public class AmenitiesBooking {
         return card;
     }
 
+    private void addButtonAnimation(Button button) {
+
+        // Mouse Hover
+        button.setOnMouseEntered(e -> {
+
+                ScaleTransition scale =
+                        new ScaleTransition(
+                                Duration.millis(150),
+                                button
+                        );
+
+                scale.setToX(1.08);
+                scale.setToY(1.08);
+
+                scale.play();
+        });
+
+        // Mouse Exit
+        button.setOnMouseExited(e -> {
+
+                ScaleTransition scale =
+                        new ScaleTransition(
+                                Duration.millis(150),
+                                button
+                        );
+
+                scale.setToX(1.0);
+                scale.setToY(1.0);
+
+                scale.play();
+        });
+
+        // Mouse Press
+        button.setOnMousePressed(e -> {
+
+                ScaleTransition scale =
+                        new ScaleTransition(
+                                Duration.millis(80),
+                                button
+                        );
+
+                scale.setToX(0.94);
+                scale.setToY(0.94);
+
+                scale.play();
+        });
+
+        // Mouse Release
+        button.setOnMouseReleased(e -> {
+
+                ScaleTransition scale =
+                        new ScaleTransition(
+                                Duration.millis(100),
+                                button
+                        );
+
+                scale.setToX(1.08);
+                scale.setToY(1.08);
+
+                scale.play();
+        });
+        }
+
     private String formatPrice(String price) {
 
         if (price == null ||
@@ -357,8 +463,7 @@ public class AmenitiesBooking {
             return "₹ 0";
         }
 
-        String number =
-                price.replaceAll(
+        String number = price.replaceAll(
                         "[^0-9.]",
                         ""
                 );
@@ -381,8 +486,7 @@ public class AmenitiesBooking {
             return;
         }
 
-        VBox box =
-                new VBox(15);
+        VBox box = new VBox(15);
 
         box.setAlignment(
                 Pos.CENTER
@@ -396,8 +500,7 @@ public class AmenitiesBooking {
                 "-fx-background-color: #e8ddd5;"
         );
 
-        Label title =
-                new Label(
+        Label title = new Label(
                         "Book " +
                         safe(amenity.getAmenityName())
                 );
@@ -414,8 +517,7 @@ public class AmenitiesBooking {
                 Color.web("#4e342e")
         );
 
-        Label residentLabel =
-                new Label(
+        Label residentLabel = new Label(
                         "Resident: " +
                         residentName
                 );
@@ -428,8 +530,7 @@ public class AmenitiesBooking {
                 )
         );
 
-        Label flatLabel =
-                new Label(
+        Label flatLabel = new Label(
                         "Flat No: " +
                         flatNo
                 );
@@ -442,21 +543,18 @@ public class AmenitiesBooking {
                 )
         );
 
-        Label dateLabel =
-                new Label(
+        Label dateLabel = new Label(
                         "Select Date"
                 );
 
-        dateLabel.setFont(
-                Font.font(
+        dateLabel.setFont( Font.font(
                         "System",
                         FontWeight.BOLD,
                         14
                 )
         );
 
-        DatePicker datePicker =
-                new DatePicker(
+        DatePicker datePicker = new DatePicker(
                         LocalDate.now()
                 );
 
@@ -494,8 +592,7 @@ public class AmenitiesBooking {
                 }
         );
 
-        Label timeLabel =
-                new Label(
+        Label timeLabel = new Label(
                         "Select Time Slot"
                 );
 
@@ -507,8 +604,7 @@ public class AmenitiesBooking {
                 )
         );
 
-        ComboBox<String> timeSlot =
-                new ComboBox<>();
+        ComboBox<String> timeSlot = new ComboBox<>();
 
         timeSlot.setPrefWidth(250);
 
@@ -561,51 +657,37 @@ public class AmenitiesBooking {
                             return;
                         }
 
-                        Object unavailableValue =
-                                comboBox.getProperties().get(
+                        Object unavailableValue = comboBox.getProperties().get(
                                         "unavailableSlots"
                                 );
 
-                        Object endedValue =
-                                comboBox.getProperties().get(
+                        Object endedValue = comboBox.getProperties().get(
                                         "endedSlots"
                                 );
 
-                        Set<?> unavailable =
-                                unavailableValue instanceof Set<?>
+                        Set<?> unavailable =  unavailableValue instanceof Set<?>
                                         ? (Set<?>) unavailableValue
                                         : java.util.Collections.emptySet();
 
-                        Set<?> ended =
-                                endedValue instanceof Set<?>
+                        Set<?> ended = endedValue instanceof Set<?>
                                         ? (Set<?>) endedValue
                                         : java.util.Collections.emptySet();
 
                         if (unavailable.contains(item)) {
 
-                            setText(
-                                    item +
-                                    "  (UNAVAILABLE)"
-                            );
+                            setText(item + "  (UNAVAILABLE)");
 
                             setDisable(true);
 
-                            setStyle(
-                                    "-fx-text-fill: #b02a37;"
-                            );
+                            setStyle("-fx-text-fill: #b02a37;");
 
                         } else if (ended.contains(item)) {
 
-                            setText(
-                                    item +
-                                    "  (ENDED)"
-                            );
+                            setText(item +"(ENDED)" );
 
                             setDisable(true);
 
-                            setStyle(
-                                    "-fx-text-fill: #757575;"
-                            );
+                            setStyle("-fx-text-fill: #757575;");
 
                         } else {
 
@@ -613,9 +695,7 @@ public class AmenitiesBooking {
 
                             setDisable(false);
 
-                            setStyle(
-                                    "-fx-text-fill: #16823b;"
-                            );
+                            setStyle("-fx-text-fill: #16823b;" );
                         }
                     }
                 }
@@ -645,43 +725,31 @@ public class AmenitiesBooking {
                             return;
                         }
 
-                        Object unavailableValue =
-                                timeSlot.getProperties().get(
+                        Object unavailableValue =timeSlot.getProperties().get(
                                         "unavailableSlots"
                                 );
 
-                        Object endedValue =
-                                timeSlot.getProperties().get(
+                        Object endedValue =timeSlot.getProperties().get(
                                         "endedSlots"
                                 );
 
-                        Set<?> unavailable =
-                                unavailableValue instanceof Set<?>
+                        Set<?> unavailable =unavailableValue instanceof Set<?>
                                         ? (Set<?>) unavailableValue
                                         : java.util.Collections.emptySet();
 
-                        Set<?> ended =
-                                endedValue instanceof Set<?>
+                        Set<?> ended = endedValue instanceof Set<?>
                                         ? (Set<?>) endedValue
                                         : java.util.Collections.emptySet();
 
                         if (unavailable.contains(item)) {
 
-                            setText(
-                                    item +
-                                    "  (UNAVAILABLE)"
-                            );
+                            setText(item +"(UNAVAILABLE)" );
 
-                            setStyle(
-                                    "-fx-text-fill: #b02a37;"
-                            );
+                            setStyle("-fx-text-fill: #b02a37;");
 
                         } else if (ended.contains(item)) {
 
-                            setText(
-                                    item +
-                                    "  (ENDED)"
-                            );
+                            setText( item +"  (ENDED)" );
 
                             setStyle(
                                     "-fx-text-fill: #757575;"
@@ -709,23 +777,19 @@ public class AmenitiesBooking {
                         return;
                     }
 
-                    Object unavailableValue =
-                            timeSlot.getProperties().get(
+                    Object unavailableValue = timeSlot.getProperties().get(
                                     "unavailableSlots"
                             );
 
-                    Object endedValue =
-                            timeSlot.getProperties().get(
+                    Object endedValue =timeSlot.getProperties().get(
                                     "endedSlots"
                             );
 
-                    Set<?> unavailable =
-                            unavailableValue instanceof Set<?>
+                    Set<?> unavailable = unavailableValue instanceof Set<?>
                                     ? (Set<?>) unavailableValue
                                     : java.util.Collections.emptySet();
 
-                    Set<?> ended =
-                            endedValue instanceof Set<?>
+                    Set<?> ended =endedValue instanceof Set<?>
                                     ? (Set<?>) endedValue
                                     : java.util.Collections.emptySet();
 
@@ -743,8 +807,7 @@ public class AmenitiesBooking {
                         timeSlot.getSelectionModel()
                                 .clearSelection();
 
-                        showError(
-                                "This time slot has already ended for today."
+                        showError( "This time slot has already ended for today."
                         );
                     }
                 }
@@ -771,9 +834,7 @@ public class AmenitiesBooking {
                 timeSlot
         );
 
-        Button paymentButton =
-                new Button(
-                        "Continue to Payment"
+        Button paymentButton = new Button("Continue to Payment"
                 );
 
         paymentButton.setStyle(
@@ -784,15 +845,15 @@ public class AmenitiesBooking {
                 "-fx-background-radius: 6;"
         );
 
-        Stage popup =
-                new Stage();
+        addButtonAnimation(paymentButton);
+
+        Stage popup = new Stage();
 
         popup.setTitle(
                 "Book Amenity"
         );
 
-        popup.setScene(
-                new Scene(
+        popup.setScene( new Scene(
                         box,
                         400,
                         480
@@ -801,11 +862,9 @@ public class AmenitiesBooking {
 
         paymentButton.setOnAction(e -> {
 
-            LocalDate selectedDate =
-                    datePicker.getValue();
+            LocalDate selectedDate =datePicker.getValue();
 
-            String selectedSlot =
-                    timeSlot.getValue();
+            String selectedSlot =timeSlot.getValue();
 
             if (selectedDate == null) {
 
@@ -819,51 +878,40 @@ public class AmenitiesBooking {
             if (selectedDate.isBefore(
                     LocalDate.now())) {
 
-                showError(
-                        "Please select today or a future date."
+                showError( "Please select today or a future date."
                 );
 
                 return;
             }
 
-            if (selectedSlot == null ||
-                    selectedSlot.trim().isEmpty()) {
+            if (selectedSlot == null ||selectedSlot.trim().isEmpty()) {
 
-                showError(
-                        "Please select time slot."
+                showError( "Please select time slot."
                 );
 
                 return;
             }
 
-            Object unavailableValue =
-                    timeSlot.getProperties().get(
-                            "unavailableSlots"
+            Object unavailableValue = timeSlot.getProperties().get( "unavailableSlots"
                     );
 
-            Object endedValue =
-                    timeSlot.getProperties().get(
-                            "endedSlots"
+            Object endedValue = timeSlot.getProperties().get( "endedSlots"
                     );
 
-            Set<?> unavailable =
-                    unavailableValue instanceof Set<?>
+            Set<?> unavailable =unavailableValue instanceof Set<?>
                             ? (Set<?>) unavailableValue
                             : java.util.Collections.emptySet();
 
-            Set<?> ended =
-                    endedValue instanceof Set<?>
+            Set<?> ended = endedValue instanceof Set<?>
                             ? (Set<?>) endedValue
                             : java.util.Collections.emptySet();
 
-            if (unavailable.contains(
-                    selectedSlot)) {
+            if (unavailable.contains( selectedSlot)) {
 
                 timeSlot.getSelectionModel()
                         .clearSelection();
 
-                showError(
-                        "This time slot is already unavailable."
+                showError( "This time slot is already unavailable."
                 );
 
                 return;
@@ -871,36 +919,29 @@ public class AmenitiesBooking {
 
             if (ended.contains(selectedSlot)) {
 
-                timeSlot.getSelectionModel()
-                        .clearSelection();
+                timeSlot.getSelectionModel() .clearSelection();
 
-                showError(
-                        "This time slot has already ended."
+                showError( "This time slot has already ended."
                 );
 
                 return;
             }
 
-            String[] times =
-                    selectedSlot.split(" - ");
+            String[] times =selectedSlot.split(" - ");
 
             if (times.length != 2) {
 
-                showError(
-                        "Invalid time slot selected."
+                showError( "Invalid time slot selected."
                 );
 
                 return;
             }
 
-            String startTime =
-                    times[0].trim();
+            String startTime =times[0].trim();
 
-            String endTime =
-                    times[1].trim();
+            String endTime = times[1].trim();
 
-            String bookingDate =
-                    selectedDate.toString();
+            String bookingDate = selectedDate.toString();
 
             /*
              * IMPORTANT:
@@ -922,11 +963,9 @@ public class AmenitiesBooking {
                         timeSlot
                 );
 
-                timeSlot.getSelectionModel()
-                        .clearSelection();
+                timeSlot.getSelectionModel().clearSelection();
 
-                showError(
-                        "This time slot is no longer available. Please select another slot."
+                showError( "This time slot is no longer available. Please select another slot."
                 );
 
                 return;
@@ -961,23 +1000,18 @@ public class AmenitiesBooking {
             LocalDate selectedDate,
             ComboBox<String> timeSlot) {
 
-        if (amenity == null ||
-                selectedDate == null ||
-                timeSlot == null) {
+        if (amenity == null || selectedDate == null || timeSlot == null) {
 
             return;
         }
 
-        Set<String> unavailableSlots =
-                new HashSet<>();
+        Set<String> unavailableSlots = new HashSet<>();
 
-        Set<String> endedSlots =
-                new HashSet<>();
+        Set<String> endedSlots = new HashSet<>();
 
         try {
 
-            String bookingDate =
-                    selectedDate.toString();
+            String bookingDate = selectedDate.toString();
 
             /*
              * Only ACCEPTED bookings are returned here.
@@ -985,9 +1019,7 @@ public class AmenitiesBooking {
              * PENDING requests do not block the slot.
              * REJECTED requests do not block the slot.
              */
-            Set<String> accepted =
-                    amenitiesController
-                            .getUnavailableAcceptedSlots(
+            Set<String> accepted =amenitiesController .getUnavailableAcceptedSlots(
                                     amenity,
                                     bookingDate
                             );
@@ -1006,23 +1038,19 @@ public class AmenitiesBooking {
             if (selectedDate.isEqual(
                     LocalDate.now())) {
 
-                LocalTime now =
-                        LocalTime.now();
+                LocalTime now =LocalTime.now();
 
                 for (String slot : TIME_SLOTS) {
 
-                    String[] times =
-                            slot.split(" - ");
+                    String[] times = slot.split(" - ");
 
                     if (times.length != 2) {
                         continue;
                     }
 
-                    LocalTime end =
-                            parseTime(times[1]);
+                    LocalTime end =parseTime(times[1]);
 
-                    if (end != null &&
-                            !now.isBefore(end)) {
+                    if (end != null && !now.isBefore(end)) {
 
                         endedSlots.add(slot);
                     }
@@ -1046,24 +1074,20 @@ public class AmenitiesBooking {
              * Re-create the item list so JavaFX redraws
              * the cells using the latest properties.
              */
-            timeSlot.getItems().setAll(
-                    TIME_SLOTS
+            timeSlot.getItems().setAll( TIME_SLOTS
             );
 
-            timeSlot.getSelectionModel()
-                    .clearSelection();
+            timeSlot.getSelectionModel().clearSelection();
 
             if (unavailableSlots.isEmpty() &&
                     endedSlots.isEmpty()) {
 
-                timeSlot.setPromptText(
-                        "Select time slot"
+                timeSlot.setPromptText( "Select time slot"
                 );
 
             } else {
 
-                timeSlot.setPromptText(
-                        "Select an available time slot"
+                timeSlot.setPromptText( "Select an available time slot"
                 );
             }
 
@@ -1101,14 +1125,11 @@ public class AmenitiesBooking {
 
         try {
 
-            String price =
-                    amenity.getPrice();
+            String price = amenity.getPrice();
 
-            if (price == null ||
-                    price.trim().isEmpty()) {
+            if (price == null ||price.trim().isEmpty()) {
 
-                throw new NumberFormatException(
-                        "Price is empty"
+                throw new NumberFormatException("Price is empty"
                 );
             }
 
@@ -1118,8 +1139,7 @@ public class AmenitiesBooking {
                             ""
                     );
 
-            amount =
-                    Double.parseDouble(number);
+            amount =Double.parseDouble(number);
 
             if (amount <= 0) {
 
@@ -1138,25 +1158,19 @@ public class AmenitiesBooking {
             return;
         }
 
-        Stage processingStage =
-                createProcessingStage();
+        Stage processingStage =createProcessingStage();
 
         processingStage.show();
 
-        final double finalAmount =
-                amount;
+        final double finalAmount =amount;
 
-        Task<String> paymentTask =
-                new Task<String>() {
+        Task<String> paymentTask = new Task<String>() {
 
                     @Override
                     protected String call()
                             throws Exception {
 
-                        return razorpay
-                                .createPaymentLink(
-                                        finalAmount,
-                                        safe(
+                        return razorpay.createPaymentLink( finalAmount,safe(
                                                 amenity.getAmenityName()
                                         ) +
                                         " Booking"
@@ -1168,14 +1182,11 @@ public class AmenitiesBooking {
 
             processingStage.close();
 
-            String paymentUrl =
-                    paymentTask.getValue();
+            String paymentUrl = paymentTask.getValue();
 
-            if (paymentUrl == null ||
-                    paymentUrl.trim().isEmpty()) {
+            if (paymentUrl == null || paymentUrl.trim().isEmpty()) {
 
-                showError(
-                        "Razorpay did not return a payment link."
+                showError( "Razorpay did not return a payment link."
                 );
 
                 return;
@@ -1183,8 +1194,7 @@ public class AmenitiesBooking {
 
             try {
 
-                razorpay.openPaymentPage(
-                        paymentUrl
+                razorpay.openPaymentPage( paymentUrl
                 );
 
                 showPaymentWaiting(
@@ -1199,8 +1209,7 @@ public class AmenitiesBooking {
 
                 ex.printStackTrace();
 
-                showError(
-                        "Unable to open Razorpay payment page."
+                showError(  "Unable to open Razorpay payment page."
                 );
             }
         });
@@ -1209,20 +1218,17 @@ public class AmenitiesBooking {
 
             processingStage.close();
 
-            Throwable error =
-                    paymentTask.getException();
+            Throwable error = paymentTask.getException();
 
             if (error != null) {
                 error.printStackTrace();
             }
 
-            showError(
-                    "Unable to create Razorpay payment."
+            showError( "Unable to create Razorpay payment."
             );
         });
 
-        Thread thread =
-                new Thread(paymentTask);
+        Thread thread = new Thread(paymentTask);
 
         thread.setDaemon(true);
         thread.start();
@@ -1230,45 +1236,26 @@ public class AmenitiesBooking {
 
     private Stage createProcessingStage() {
 
-        VBox box =
-                new VBox(18);
+        VBox box = new VBox(18);
 
-        box.setAlignment(
-                Pos.CENTER
+        box.setAlignment( Pos.CENTER
         );
 
-        box.setPadding(
-                new Insets(30)
+        box.setPadding( new Insets(30)
         );
 
-        box.setStyle(
-                "-fx-background-color: #e8ddd5;"
+        box.setStyle( "-fx-background-color: #e8ddd5;"
         );
 
-        Label title =
-                new Label(
-                        "Creating Payment..."
-                );
+        Label title = new Label("Creating Payment..." );
 
-        title.setFont(
-                Font.font(
-                        "System",
-                        FontWeight.BOLD,
-                        22
-                )
-        );
+        title.setFont( Font.font( "System",FontWeight.BOLD,22 ) );
 
-        title.setTextFill(
-                Color.web("#4e342e")
-        );
+        title.setTextFill(Color.web("#4e342e"));
 
-        ProgressIndicator progress =
-                new ProgressIndicator();
+        ProgressIndicator progress =new ProgressIndicator();
 
-        Label message =
-                new Label(
-                        "Please wait while we connect to Razorpay."
-                );
+        Label message = new Label( "Please wait while we connect to Razorpay." );
 
         message.setWrapText(true);
 
@@ -1278,11 +1265,9 @@ public class AmenitiesBooking {
                 message
         );
 
-        Stage stage =
-                new Stage();
+        Stage stage = new Stage();
 
-        stage.setTitle(
-                "Payment"
+        stage.setTitle("Payment"
         );
 
         stage.setScene(
@@ -1305,25 +1290,18 @@ public class AmenitiesBooking {
             String endTime,
             double amount) {
 
-        VBox box =
-                new VBox(18);
+        VBox box = new VBox(18);
 
-        box.setAlignment(
-                Pos.CENTER
+        box.setAlignment( Pos.CENTER
         );
 
-        box.setPadding(
-                new Insets(30)
+        box.setPadding( new Insets(30)
         );
 
-        box.setStyle(
-                "-fx-background-color: #e8ddd5;"
+        box.setStyle( "-fx-background-color: #e8ddd5;"
         );
 
-        Label title =
-                new Label(
-                        "Payment Processing"
-                );
+        Label title = new Label( "Payment Processing");
 
         title.setFont(
                 Font.font(
@@ -1333,15 +1311,12 @@ public class AmenitiesBooking {
                 )
         );
 
-        title.setTextFill(
-                Color.web("#4e342e")
+        title.setTextFill(Color.web("#4e342e")
         );
 
-        ProgressIndicator progress =
-                new ProgressIndicator();
+        ProgressIndicator progress = new ProgressIndicator();
 
-        Label message =
-                new Label(
+        Label message = new Label(
                         "Razorpay payment page has been opened.\n\n" +
                         "Complete your payment there.\n" +
                         "After successful payment, come back here."
@@ -1349,27 +1324,22 @@ public class AmenitiesBooking {
 
         message.setWrapText(true);
 
-        message.setAlignment(
-                Pos.CENTER
+        message.setAlignment( Pos.CENTER
         );
 
-        Label amountLabel =
-                new Label(
+        Label amountLabel =  new Label(
                         "Amount: ₹ " +
                         amount
                 );
 
-        amountLabel.setFont(
-                Font.font(
+        amountLabel.setFont(Font.font(
                         "System",
                         FontWeight.BOLD,
                         16
                 )
         );
 
-        Button completedButton =
-                new Button(
-                        "I Have Completed Payment"
+        Button completedButton = new Button( "I Have Completed Payment"
                 );
 
         completedButton.setStyle(
@@ -1380,8 +1350,9 @@ public class AmenitiesBooking {
                 "-fx-background-radius: 6;"
         );
 
-        Button cancelButton =
-                new Button("Cancel");
+        Button cancelButton = new Button("Cancel");
+
+        addButtonAnimation(cancelButton);
 
         HBox buttons =
                 new HBox(
@@ -1402,11 +1373,9 @@ public class AmenitiesBooking {
                 buttons
         );
 
-        Stage stage =
-                new Stage();
+        Stage stage = new Stage();
 
-        stage.setTitle(
-                "Razorpay Payment"
+        stage.setTitle( "Razorpay Payment"
         );
 
         stage.setScene(
@@ -1449,22 +1418,13 @@ public class AmenitiesBooking {
             String endTime,
             double amount) {
 
-        Alert alert =
-                new Alert(
-                        Alert.AlertType.CONFIRMATION
-                );
+        Alert alert = new Alert( Alert.AlertType.CONFIRMATION );
 
-        alert.setTitle(
-                "Payment Verification"
-        );
+        alert.setTitle("Payment Verification" );
 
-        alert.setHeaderText(
-                "Was your payment successful?"
-        );
+        alert.setHeaderText("Was your payment successful?" );
 
-        alert.setContentText(
-                "Confirm only if Razorpay shows that your payment was successful."
-        );
+        alert.setContentText( "Confirm only if Razorpay shows that your payment was successful." );
 
         alert.showAndWait().ifPresent(
                 result -> {
@@ -1525,8 +1485,7 @@ public class AmenitiesBooking {
              * paymentStatus = SUCCESS
              * bookingStatus = PENDING
              */
-            String bookingId =
-                    amenitiesController.saveBooking(
+            String bookingId =amenitiesController.saveBooking(
                             amenity,
                             bookingDate,
                             startTime,
@@ -1541,54 +1500,37 @@ public class AmenitiesBooking {
 
             if (bookingId != null) {
 
-                showPaymentSuccess(
-                        bookingId
-                );
+                showPaymentSuccess(bookingId);
 
                 loadAmenities();
                 loadUpcomingBookings();
 
             } else {
 
-                showError(
-                        "Payment completed but booking could not be saved because the slot is no longer available."
-                );
+                showError( "Payment completed but booking could not be saved because the slot is no longer available." );
             }
 
         } catch (Exception e) {
 
             e.printStackTrace();
 
-            showError(
-                    "Error while saving booking."
-            );
+            showError( "Error while saving booking.");
         }
     }
 
     private VBox createUpcomingBooking() {
 
-        VBox section =
-                new VBox(15);
+        VBox section =new VBox(15);
 
-        Label title =
-                new Label(
-                        "Upcoming Booking"
-                );
+        Label title = new Label( "Upcoming Booking");
 
-        title.setFont(
-                Font.font(
-                        "System",
-                        FontWeight.BOLD,
-                        18
-                )
+        title.setFont(Font.font("System", FontWeight.BOLD,18 )
         );
 
-        title.setTextFill(
-                Color.web("#263238")
+        title.setTextFill( Color.web("#4e342e")
         );
 
-        upcomingBookingsContainer =
-                new VBox(10);
+        upcomingBookingsContainer =new VBox(10);
 
         section.getChildren().addAll(
                 title,
@@ -1612,14 +1554,9 @@ public class AmenitiesBooking {
 
         if (isEmpty(loginEmail)) {
 
-            Label error =
-                    new Label(
-                            "Unable to identify logged-in resident."
-                    );
+            Label error = new Label("Unable to identify logged-in resident.");
 
-            error.setTextFill(
-                    Color.web("#b02a37")
-            );
+            error.setTextFill( Color.web("#b02a37"));
 
             upcomingBookingsContainer
                     .getChildren()
@@ -1628,17 +1565,12 @@ public class AmenitiesBooking {
             return;
         }
 
-        List<Map<String, Object>> bookings =
-                amenitiesController
-                        .getResidentBookings(
-                                loginEmail
-                        );
+        List<Map<String, Object>> bookings = amenitiesController .getResidentBookings(loginEmail );
 
         if (bookings == null ||
                 bookings.isEmpty()) {
 
-            Label empty =
-                    new Label(
+            Label empty =new Label(
                             "You have no upcoming bookings."
                     );
 
@@ -1650,7 +1582,7 @@ public class AmenitiesBooking {
             );
 
             empty.setTextFill(
-                    Color.web("#757575")
+                    Color.web("#4e342e")
             );
 
             upcomingBookingsContainer
@@ -1848,15 +1780,10 @@ public class AmenitiesBooking {
                         )
                 );
 
-        time.setFont(
-                Font.font(
-                        "System",
-                        14
-                )
+        time.setFont(Font.font("System",14)
         );
 
-        Label flat =
-                new Label(
+        Label flat =new Label(
                         "Flat: " +
                         getValue(
                                 booking,
@@ -1864,15 +1791,13 @@ public class AmenitiesBooking {
                         )
                 );
 
-        flat.setFont(
-                Font.font(
+        flat.setFont(Font.font(
                         "System",
                         14
                 )
         );
 
-        Label resident =
-                new Label(
+        Label resident =new Label(
                         "Resident: " +
                         getValue(
                                 booking,
@@ -1880,15 +1805,13 @@ public class AmenitiesBooking {
                         )
                 );
 
-        resident.setFont(
-                Font.font(
+        resident.setFont(Font.font(
                         "System",
                         14
                 )
         );
 
-        Label amount =
-                new Label(
+        Label amount =new Label(
                         "Amount: ₹ " +
                         getValue(
                                 booking,
@@ -1896,38 +1819,32 @@ public class AmenitiesBooking {
                         )
                 );
 
-        amount.setFont(
-                Font.font(
+        amount.setFont(Font.font(
                         "System",
                         14
                 )
         );
 
-        String bookingStatus =
-                getValue(
+        String bookingStatus = getValue(
                         booking,
                         "bookingStatus"
                 );
 
         if (bookingStatus.isEmpty()) {
-            bookingStatus = "PENDING";
+ bookingStatus = "PENDING";
         }
 
-        Label statusLabel =
-                new Label(
-                        bookingStatus.toUpperCase()
+        Label statusLabel = new Label( bookingStatus.toUpperCase()
                 );
 
-        statusLabel.setFont(
-                Font.font(
+        statusLabel.setFont(Font.font(
                         "System",
                         FontWeight.BOLD,
                         13
                 )
         );
 
-        statusLabel.setPadding(
-                new Insets(
+        statusLabel.setPadding(new Insets(
                         6,
                         14,
                         6,
@@ -1935,8 +1852,7 @@ public class AmenitiesBooking {
                 )
         );
 
-        if ("ACCEPTED".equalsIgnoreCase(
-                bookingStatus)) {
+        if ("ACCEPTED".equalsIgnoreCase( bookingStatus)) {
 
             statusLabel.setStyle(
                     "-fx-background-color: #d8f3df;" +
@@ -1944,8 +1860,7 @@ public class AmenitiesBooking {
                     "-fx-background-radius: 15;"
             );
 
-        } else if ("REJECTED".equalsIgnoreCase(
-                bookingStatus)) {
+        } else if ("REJECTED".equalsIgnoreCase( bookingStatus)) {
 
             statusLabel.setStyle(
                     "-fx-background-color: #f8d7da;" +
@@ -1953,8 +1868,7 @@ public class AmenitiesBooking {
                     "-fx-background-radius: 15;"
             );
 
-        } else if ("PROGRESS".equalsIgnoreCase(
-                bookingStatus)) {
+        } else if ("PROGRESS".equalsIgnoreCase( bookingStatus)) {
 
             statusLabel.setStyle(
                     "-fx-background-color: #dbeafe;" +
@@ -1971,28 +1885,21 @@ public class AmenitiesBooking {
             );
         }
 
-        HBox statusRow =
-                new HBox();
+        HBox statusRow =new HBox();
 
-        statusRow.setAlignment(
-                Pos.CENTER_LEFT
+        statusRow.setAlignment(Pos.CENTER_LEFT
         );
 
-        Label statusText =
-                new Label(
-                        "Booking Status:"
+        Label statusText =new Label( "Booking Status:"
                 );
 
-        statusText.setFont(
-                Font.font(
-                        "System",
+        statusText.setFont(Font.font( "System",
                         FontWeight.BOLD,
                         14
                 )
         );
 
-        Region statusSpacer =
-                new Region();
+        Region statusSpacer =new Region();
 
         HBox.setHgrow(
                 statusSpacer,
@@ -2005,8 +1912,7 @@ public class AmenitiesBooking {
                 statusLabel
         );
 
-        String paymentStatus =
-                getValue(
+        String paymentStatus =getValue(
                         booking,
                         "paymentStatus"
                 );
@@ -2015,34 +1921,19 @@ public class AmenitiesBooking {
             paymentStatus = "UNKNOWN";
         }
 
-        Label paymentLabel =
-                new Label(
-                        "Payment: " +
-                        paymentStatus.toUpperCase()
-                );
+        Label paymentLabel =new Label("Payment: " + paymentStatus.toUpperCase() );
 
-        paymentLabel.setFont(
-                Font.font(
-                        "System",
-                        FontWeight.BOLD,
-                        13
-                )
+        paymentLabel.setFont(Font.font("System",FontWeight.BOLD,13)
         );
 
-        if ("PAID".equalsIgnoreCase(
-                paymentStatus)
-                ||
-                "SUCCESS".equalsIgnoreCase(
-                        paymentStatus)) {
+        if ("PAID".equalsIgnoreCase(paymentStatus) ||"SUCCESS".equalsIgnoreCase(paymentStatus)) {
 
-            paymentLabel.setTextFill(
-                    Color.web("#16823b")
+            paymentLabel.setTextFill(Color.web("#16823b")
             );
 
         } else {
 
-            paymentLabel.setTextFill(
-                    Color.web("#856404")
+            paymentLabel.setTextFill(Color.web("#856404")
             );
         }
 
@@ -2061,36 +1952,27 @@ public class AmenitiesBooking {
         return card;
     }
 
-    private String getValue(
-            Map<String, Object> data,
-            String key) {
+    private String getValue(Map<String, Object> data,String key) {
 
-        if (data == null ||
-                key == null) {
+        if (data == null || key == null) {
 
             return "";
         }
 
-        Object value =
-                data.get(key);
+        Object value =data.get(key);
 
         return value == null
                 ? ""
                 : value.toString();
     }
 
-    private String formatDate(
-            String date) {
+    private String formatDate(String date) {
 
         try {
 
-            LocalDate localDate =
-                    LocalDate.parse(date);
+            LocalDate localDate =LocalDate.parse(date);
 
-            return localDate.format(
-                    DateTimeFormatter.ofPattern(
-                            "dd MMM yyyy"
-                    )
+            return localDate.format( DateTimeFormatter.ofPattern("dd MMM yyyy" )
             );
 
         } catch (Exception e) {
@@ -2099,21 +1981,13 @@ public class AmenitiesBooking {
         }
     }
 
-    private void showPaymentSuccess(
-            String bookingId) {
+    private void showPaymentSuccess(String bookingId) {
 
-        Alert alert =
-                new Alert(
-                        Alert.AlertType.INFORMATION
-                );
+        Alert alert =new Alert(Alert.AlertType.INFORMATION );
 
-        alert.setTitle(
-                "Booking Request Submitted"
-        );
+        alert.setTitle( "Booking Request Submitted" );
 
-        alert.setHeaderText(
-                "✓ Payment Successful"
-        );
+        alert.setHeaderText("✓ Payment Successful" );
 
         alert.setContentText(
                 "Your payment was successful and your amenity booking request has been sent to the Secretary.\n\n" +
@@ -2128,56 +2002,42 @@ public class AmenitiesBooking {
 
     private void showPaymentFailed() {
 
-        Alert alert =
-                new Alert(
-                        Alert.AlertType.WARNING
+        Alert alert =new Alert(Alert.AlertType.WARNING
                 );
 
-        alert.setTitle(
-                "Payment"
+        alert.setTitle( "Payment"
         );
 
-        alert.setHeaderText(
-                "Payment Not Completed"
+        alert.setHeaderText( "Payment Not Completed"
         );
 
-        alert.setContentText(
-                "Your amenity has not been booked."
+        alert.setContentText( "Your amenity has not been booked."
         );
 
         alert.showAndWait();
     }
 
-    private void showError(
-            String message) {
+    private void showError(String message) {
 
-        Alert alert =
-                new Alert(
-                        Alert.AlertType.ERROR
+        Alert alert = new Alert(Alert.AlertType.ERROR
                 );
 
-        alert.setTitle(
-                "Error"
+        alert.setTitle( "Error"
         );
 
         alert.setHeaderText(null);
 
-        alert.setContentText(
-                message
+        alert.setContentText( message
         );
 
         alert.showAndWait();
     }
 
-    private static LocalTime parseTime(
-            String value) {
+    private static LocalTime parseTime( String value) {
 
         try {
 
-            return LocalTime.parse(
-                    value.trim()
-                            .toUpperCase(
-                                    Locale.ENGLISH
+            return LocalTime.parse(value.trim() .toUpperCase( Locale.ENGLISH
                             ),
                     TIME_FORMATTER
             );
@@ -2188,29 +2048,20 @@ public class AmenitiesBooking {
         }
     }
 
-    private static String safe(
-            String value) {
+    private static String safe(String value) {
 
         return value == null
-                ? ""
-                : value.trim();
+                ? "": value.trim();
     }
 
-    private static String normalizeEmail(
-            String value) {
+    private static String normalizeEmail(String value) {
 
         return value == null
-                ? ""
-                : value.trim()
-                        .toLowerCase(
-                                Locale.ENGLISH
-                        );
+  ? "" : value.trim() .toLowerCase(Locale.ENGLISH);
     }
 
-    private static boolean isEmpty(
-            String value) {
+    private static boolean isEmpty(String value) {
 
-        return value == null ||
-                value.trim().isEmpty();
+        return value == null ||value.trim().isEmpty();
     }
 }

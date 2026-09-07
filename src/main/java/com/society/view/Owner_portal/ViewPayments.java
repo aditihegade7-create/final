@@ -6,54 +6,64 @@ import java.util.List;
 
 import com.society.controller.Owner_Controller.PaymentController;
 import com.society.model.Owner_model.PaymentModel;
+import com.society.view.ScreenSize;
 
+import javafx.animation.FadeTransition;
+import javafx.animation.ParallelTransition;
+import javafx.animation.ScaleTransition;
+import javafx.animation.TranslateTransition;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-
 import javafx.scene.Scene;
-
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
-
+import javafx.scene.image.Image;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
-
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 public class ViewPayments {
 
     private static final PaymentController paymentController =
             new PaymentController();
 
-
     // =========================================================
     // CREATE SCENE
     // =========================================================
 
-    public static Scene createScene(Stage stage, String ownerEmail) {
+    public static Scene createScene(
+            Stage stage,
+            String ownerEmail) {
 
         BorderPane root =
                 new BorderPane();
 
-
         // =====================================================
-        // SIDEBAR
+        // SIDEBAR - LEFT
         // =====================================================
 
         OwnerSidebar sidebar =
-        new OwnerSidebar(stage, ownerEmail);
+                new OwnerSidebar(
+                        stage,
+                        ownerEmail
+                );
+
         root.setLeft(
                 sidebar.getSidebar()
         );
-
 
         // =====================================================
         // MAIN CONTENT
@@ -72,130 +82,179 @@ public class ViewPayments {
                 Pos.TOP_LEFT
         );
 
-        mainContent.setStyle(
-                "-fx-background-color:#e8ddd5;"
-        );
+        // =====================================================
+        // BACKGROUND IMAGE
+        // =====================================================
 
+        Image image =
+                new Image(
+                        ViewPayments.class
+                                .getResource(
+                                        "/background-Dashboard5.jpeg"
+                                )
+                                .toExternalForm()
+                );
+
+        BackgroundImage backgroundImage =
+                new BackgroundImage(
+                        image,
+                        BackgroundRepeat.NO_REPEAT,
+                        BackgroundRepeat.NO_REPEAT,
+                        BackgroundPosition.CENTER,
+                        new BackgroundSize(
+                                100,
+                                100,
+                                true,
+                                true,
+                                false,
+                                true
+                        )
+                );
+
+        mainContent.setBackground(
+                new Background(
+                        backgroundImage
+                )
+        );
 
         // =====================================================
         // HEADER
         // =====================================================
 
-        HBox header =
-                new HBox();
+       
 
-        header.setPrefWidth(900);
-        header.setPrefHeight(80);
+// =====================================================
+// HEADER
+// =====================================================
 
-        header.setPadding(
-                new Insets(20)
+HBox header =
+        new HBox();
+
+header.setPrefHeight(80);
+
+header.setPadding(
+        new Insets(15, 25, 15, 25)
+);
+
+header.setAlignment(
+        Pos.CENTER_LEFT
+);
+
+header.setStyle(
+        "-fx-background-color:#4e342e;"
+);
+
+// =====================================================
+// HEADER TEXT
+// =====================================================
+
+VBox headerText =
+        new VBox(4);
+
+Label greeting =
+        new Label(
+                "Payments"
         );
 
-        header.setAlignment(
-                Pos.CENTER_LEFT
+greeting.setStyle(
+        "-fx-font-family:'Bodoni MT';" +
+        "-fx-font-size:24px;" +
+        "-fx-font-weight:bold;" +
+        "-fx-text-fill:white;"
+);
+
+Label description =
+        new Label(
+                "View all rental and maintenance payments"
         );
 
-        header.setStyle(
-                "-fx-background-color:#4e342e;"
-        );
+description.setStyle(
+        "-fx-font-size:14px;" +
+        "-fx-text-fill:white;"
+);
 
+headerText.getChildren().addAll(
+        greeting,
+        description
+);
 
-        VBox vb =
-                new VBox();
+// =====================================================
+// SPACER
+// =====================================================
 
+Region headerSpacer =
+        new Region();
 
-        Label greeting =
-                new Label("Payments");
+HBox.setHgrow(
+        headerSpacer,
+        Priority.ALWAYS
+);
 
-        greeting.setStyle(
-                "-fx-font-size:24px;" +
-                "-fx-font-weight:bold;" +
-                "-fx-text-fill:#ffffff;"
-        );
+// =====================================================
+// DATE
+// =====================================================
 
+LocalDate today =
+        LocalDate.now();
 
-        Label description =
-                new Label(
-                        "View all rental and maintenance payment"
-                );
+Label day =
+        new Label();
 
-        description.setStyle(
-                "-fx-font-size:12px;" +
-                "-fx-text-fill:#ffffff;"
-        );
+Label date =
+        new Label();
 
-
-        vb.getChildren().addAll(
-                greeting,
-                description
-        );
-
-
-        Region spacer =
-                new Region();
-
-        HBox.setHgrow(
-                spacer,
-                Priority.ALWAYS
-        );
-
-
-        Label day =
-                new Label();
-
-        Label date =
-                new Label();
-
-
-        LocalDate today =
-                LocalDate.now();
-
-
-        day.setText(
-                today.format(
-                        DateTimeFormatter.ofPattern(
-                                "EEEE"
-                        )
+day.setText(
+        today.format(
+                DateTimeFormatter.ofPattern(
+                        "EEEE"
                 )
-        );
+        )
+);
 
-        day.setStyle(
-                "-fx-text-fill:#ffffff;"
-        );
-
-
-        date.setText(
-                today.format(
-                        DateTimeFormatter.ofPattern(
-                                "dd MMMM yyyy"
-                        )
+date.setText(
+        today.format(
+                DateTimeFormatter.ofPattern(
+                        "dd MMMM yyyy"
                 )
-        );
+        )
+);
 
-        date.setStyle(
-                "-fx-text-fill:#ffffff;"
-        );
+day.setStyle(
+        "-fx-text-fill:white;" +
+        "-fx-font-size:13px;"
+);
 
+date.setStyle(
+        "-fx-text-fill:white;" +
+        "-fx-font-size:12px;"
+);
 
-        VBox vb1 =
-                new VBox();
+VBox dateBox =
+        new VBox(3);
 
-        vb1.getChildren().addAll(
-                day,
-                date
-        );
+dateBox.setAlignment(
+        Pos.CENTER_RIGHT
+);
 
+dateBox.getChildren().addAll(
+        day,
+        date
+);
 
-        header.getChildren().addAll(
-                vb,
-                spacer,
-                vb1
-        );
+// =====================================================
+// ADD HEADER COMPONENTS
+// =====================================================
 
+header.getChildren().addAll(
+        headerText,
+        headerSpacer,
+        dateBox
+);
 
-        mainContent.getChildren().add(
-                header
-        );
+mainContent.getChildren().add(
+        header
+);
+
 
 
         // =====================================================
@@ -211,9 +270,8 @@ public class ViewPayments {
                 TableView.CONSTRAINED_RESIZE_POLICY
         );
 
-
         // =====================================================
-        // DATE COLUMN
+        // DATE
         // =====================================================
 
         TableColumn<PaymentModel, String>
@@ -224,9 +282,8 @@ public class ViewPayments {
                 new PropertyValueFactory<>("date")
         );
 
-
         // =====================================================
-        // TENANT COLUMN
+        // TENANT
         // =====================================================
 
         TableColumn<PaymentModel, String>
@@ -237,9 +294,8 @@ public class ViewPayments {
                 new PropertyValueFactory<>("tenant")
         );
 
-
         // =====================================================
-        // FLAT COLUMN
+        // FLAT
         // =====================================================
 
         TableColumn<PaymentModel, String>
@@ -250,9 +306,8 @@ public class ViewPayments {
                 new PropertyValueFactory<>("flat")
         );
 
-
         // =====================================================
-        // PAYMENT FOR COLUMN
+        // PAYMENT FOR
         // =====================================================
 
         TableColumn<PaymentModel, String>
@@ -263,9 +318,8 @@ public class ViewPayments {
                 new PropertyValueFactory<>("paymentFor")
         );
 
-
         // =====================================================
-        // AMOUNT COLUMN
+        // AMOUNT
         // =====================================================
 
         TableColumn<PaymentModel, String>
@@ -276,9 +330,8 @@ public class ViewPayments {
                 new PropertyValueFactory<>("amount")
         );
 
-
         // =====================================================
-        // STATUS COLUMN
+        // STATUS
         // =====================================================
 
         TableColumn<PaymentModel, String>
@@ -289,7 +342,6 @@ public class ViewPayments {
                 new PropertyValueFactory<>("status")
         );
 
-
         table.getColumns().addAll(
                 dateColumn,
                 tenantColumn,
@@ -299,16 +351,26 @@ public class ViewPayments {
                 statusColumn
         );
 
-
         // =====================================================
         // LOAD FIRESTORE PAYMENTS
         // =====================================================
 
-        List<PaymentModel> payments =
-                paymentController.getOwnerPayments(
-                        ownerEmail
-                );
+        List<PaymentModel> payments;
 
+        try {
+
+            payments =
+                    paymentController.getOwnerPayments(
+                            ownerEmail
+                    );
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            payments =
+                    FXCollections.observableArrayList();
+        }
 
         ObservableList<PaymentModel>
                 paymentList =
@@ -316,22 +378,37 @@ public class ViewPayments {
                         payments
                 );
 
-
         table.setItems(
                 paymentList
         );
 
+        // =====================================================
+        // TABLE STYLE
+        // =====================================================
 
         table.setStyle(
                 "-fx-background-color:white;" +
-                "-fx-border-color:#D5DDE0;"
+                "-fx-border-color:#D5DDE0;" +
+                "-fx-border-radius:8;" +
+                "-fx-background-radius:8;"
         );
-
 
         mainContent.getChildren().add(
                 table
         );
 
+        // =====================================================
+        // EMPTY TABLE MESSAGE
+        // =====================================================
+
+        if (payments.isEmpty()) {
+
+            table.setPlaceholder(
+                    new Label(
+                            "No payment records found."
+                    )
+            );
+        }
 
         // =====================================================
         // SUMMARY
@@ -342,7 +419,6 @@ public class ViewPayments {
 
         summary.setSpacing(15);
 
-
         VBox received =
                 createSummaryBox(
                         "Total Received",
@@ -351,7 +427,6 @@ public class ViewPayments {
                                 "Received"
                         )
                 );
-
 
         VBox pending =
                 createSummaryBox(
@@ -362,7 +437,6 @@ public class ViewPayments {
                         )
                 );
 
-
         VBox overdue =
                 createSummaryBox(
                         "Overdue",
@@ -372,7 +446,6 @@ public class ViewPayments {
                         )
                 );
 
-
         VBox total =
                 createSummaryBox(
                         "Total",
@@ -381,6 +454,25 @@ public class ViewPayments {
                         )
                 );
 
+        HBox.setHgrow(
+                received,
+                Priority.ALWAYS
+        );
+
+        HBox.setHgrow(
+                pending,
+                Priority.ALWAYS
+        );
+
+        HBox.setHgrow(
+                overdue,
+                Priority.ALWAYS
+        );
+
+        HBox.setHgrow(
+                total,
+                Priority.ALWAYS
+        );
 
         summary.getChildren().addAll(
                 received,
@@ -389,40 +481,38 @@ public class ViewPayments {
                 total
         );
 
-
         mainContent.getChildren().add(
                 summary
         );
 
+        // =====================================================
+        // ANIMATIONS
+        // =====================================================
+
+//   animateHeader(header);
+        animateTable(table);
+        animateSummary(summary);
 
         // =====================================================
-        // MAIN AREA
+        // ROOT
         // =====================================================
 
-        BorderPane mainarea =
-                new BorderPane();
-
-        mainarea.setCenter(
+        root.setCenter(
                 mainContent
         );
 
+        Scene scene =
+                new Scene(
+                        root,
+                        ScreenSize.getWidth(),
+                        ScreenSize.getHeight()
+                );
 
-        root.setCenter(
-                mainarea
-        );
+        stage.setScene(scene);
+        stage.setMaximized(true);
 
-
-        // =====================================================
-        // SCENE
-        // =====================================================
-
-        return new Scene(
-                root,
-                1500,
-                750
-        );
+        return scene;
     }
-
 
     // =========================================================
     // CALCULATE STATUS TOTAL
@@ -434,9 +524,7 @@ public class ViewPayments {
 
         double total = 0;
 
-
-        for (PaymentModel payment :
-                payments) {
+        for (PaymentModel payment : payments) {
 
             if (payment.getStatus() != null &&
                     payment.getStatus()
@@ -450,10 +538,8 @@ public class ViewPayments {
             }
         }
 
-
         return formatAmount(total);
     }
-
 
     // =========================================================
     // CALCULATE ALL TOTAL
@@ -464,19 +550,15 @@ public class ViewPayments {
 
         double total = 0;
 
-
-        for (PaymentModel payment :
-                payments) {
+        for (PaymentModel payment : payments) {
 
             total += parseAmount(
                     payment.getAmount()
             );
         }
 
-
         return formatAmount(total);
     }
-
 
     // =========================================================
     // PARSE AMOUNT
@@ -491,7 +573,6 @@ public class ViewPayments {
             return 0;
         }
 
-
         try {
 
             String cleanAmount =
@@ -499,7 +580,6 @@ public class ViewPayments {
                             .replace("₹", "")
                             .replace(",", "")
                             .trim();
-
 
             return Double.parseDouble(
                     cleanAmount
@@ -510,7 +590,6 @@ public class ViewPayments {
             return 0;
         }
     }
-
 
     // =========================================================
     // FORMAT AMOUNT
@@ -524,7 +603,6 @@ public class ViewPayments {
                 amount
         );
     }
-
 
     // =========================================================
     // SUMMARY BOX
@@ -547,18 +625,18 @@ public class ViewPayments {
 
         box.setStyle(
                 "-fx-background-color:#F4F7F8;" +
-                "-fx-background-radius:8;"
+                "-fx-background-radius:8;" +
+                "-fx-border-color:#D5DDE0;" +
+                "-fx-border-radius:8;"
         );
-
 
         Label titleLabel =
                 new Label(title);
 
         titleLabel.setStyle(
                 "-fx-font-size:13px;" +
-                "-fx-text-fill:#546E7A;"
+                "-fx-text-fill:#4e342e;"
         );
-
 
         Label valueLabel =
                 new Label(value);
@@ -569,13 +647,174 @@ public class ViewPayments {
                 "-fx-text-fill:#102A43;"
         );
 
-
         box.getChildren().addAll(
                 titleLabel,
                 valueLabel
         );
 
-
         return box;
+    }
+
+    // =========================================================
+    // HEADER ANIMATION
+    // =========================================================
+
+  
+
+    // =========================================================
+    // TABLE ANIMATION
+    // =========================================================
+
+    private static void animateTable(
+            TableView<PaymentModel> table) {
+
+        table.setOpacity(0);
+
+        table.setScaleX(0.97);
+        table.setScaleY(0.97);
+
+        FadeTransition fade =
+                new FadeTransition(
+                        Duration.millis(700),
+                        table
+                );
+
+        fade.setFromValue(0);
+        fade.setToValue(1);
+
+        fade.setDelay(
+                Duration.millis(200)
+        );
+
+        ScaleTransition scale =
+                new ScaleTransition(
+                        Duration.millis(700),
+                        table
+                );
+
+        scale.setFromX(0.97);
+        scale.setFromY(0.97);
+
+        scale.setToX(1.0);
+        scale.setToY(1.0);
+
+        scale.setDelay(
+                Duration.millis(200)
+        );
+
+        new ParallelTransition(
+                fade,
+                scale
+        ).play();
+
+        // =====================================================
+        // TABLE HOVER
+        // =====================================================
+
+        table.setOnMouseEntered(e -> {
+
+            ScaleTransition hover =
+                    new ScaleTransition(
+                            Duration.millis(150),
+                            table
+                    );
+
+            hover.setToX(1.005);
+            hover.setToY(1.005);
+
+            hover.play();
+        });
+
+        table.setOnMouseExited(e -> {
+
+            ScaleTransition hover =
+                    new ScaleTransition(
+                            Duration.millis(150),
+                            table
+                    );
+
+            hover.setToX(1.0);
+            hover.setToY(1.0);
+
+            hover.play();
+        });
+    }
+
+    // =========================================================
+    // SUMMARY ANIMATION
+    // =========================================================
+
+    private static void animateSummary(
+            HBox summary) {
+
+        summary.setOpacity(0);
+        summary.setTranslateY(20);
+
+        FadeTransition fade =
+                new FadeTransition(
+                        Duration.millis(600),
+                        summary
+                );
+
+        fade.setFromValue(0);
+        fade.setToValue(1);
+
+        fade.setDelay(
+                Duration.millis(500)
+        );
+
+        TranslateTransition translate =
+                new TranslateTransition(
+                        Duration.millis(600),
+                        summary
+                );
+
+        translate.setFromY(20);
+        translate.setToY(0);
+
+        translate.setDelay(
+                Duration.millis(500)
+        );
+
+        new ParallelTransition(
+                fade,
+                translate
+        ).play();
+
+        // =====================================================
+        // SUMMARY HOVER
+        // =====================================================
+
+        for (javafx.scene.Node node :
+                summary.getChildren()) {
+
+            node.setOnMouseEntered(e -> {
+
+                ScaleTransition scale =
+                        new ScaleTransition(
+                                Duration.millis(150),
+                                node
+                        );
+
+                scale.setToX(1.05);
+                scale.setToY(1.05);
+
+                scale.play();
+            });
+
+            node.setOnMouseExited(e -> {
+
+                ScaleTransition scale =
+                        new ScaleTransition(
+                                Duration.millis(150),
+                                node
+                        );
+
+                scale.setToX(1.0);
+                scale.setToY(1.0);
+
+                scale.play();
+            });
+        }
     }
 }
