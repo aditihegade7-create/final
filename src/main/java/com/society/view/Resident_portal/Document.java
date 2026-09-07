@@ -1,3 +1,4 @@
+
 package com.society.view.Resident_portal;
 
 import java.awt.Desktop;
@@ -8,15 +9,16 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.society.controller.ImageUploadController;
-import com.society.service.resident_service.ResidentSession;
-import com.society.view.ScreenSize;
-
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.society.config.FirebaseConfig;
+import com.society.controller.ImageUploadController;
+import com.society.service.resident_service.ResidentSession;
+import com.society.view.ScreenSize;
 
+import javafx.animation.FadeTransition;
+import javafx.animation.ScaleTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -24,6 +26,12 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -31,6 +39,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 public class Document {
 
@@ -61,39 +70,73 @@ public class Document {
 
         BorderPane root = new BorderPane();
 
+        // =====================================================
+        // BACKGROUND IMAGE
+        // =====================================================
+
+        Image backgroundImage = new Image(
+                getClass()
+                        .getResource("/background-Dashboard5.jpeg")
+                        .toExternalForm()
+        );
+
+        BackgroundSize backgroundSize = new BackgroundSize(
+                100,
+                100,
+                true,
+                true,
+                false,
+                true
+        );
+
+        BackgroundImage bgImage = new BackgroundImage(
+                backgroundImage,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundPosition.CENTER,
+                backgroundSize
+        );
+
+        root.setBackground(
+                new Background(bgImage)
+        );
+
+        // =====================================================
+        // SIDEBAR - STATIC LEFT
+        // =====================================================
+
         root.setLeft(
                 panelobj.getSidebar()
         );
 
         // =====================================================
-        // MAIN CONTENT
+        // MAIN AREA
         // =====================================================
 
-        VBox mainContent = new VBox(20);
+        BorderPane mainArea = new BorderPane();
 
-        mainContent.setPadding(
-                new Insets(
-                        0,
-                        40,
-                        30,
-                        40
-                )
-        );
-
-        mainContent.setStyle(
-                "-fx-background-color:#e8ddd5;"
+        mainArea.setStyle(
+                "-fx-background-color:transparent;"
         );
 
         // =====================================================
         // HEADER
+        // HEADER IS DIRECTLY ATTACHED TO SIDEBAR
         // =====================================================
 
         HBox header = new HBox();
 
-        header.setPrefHeight(100);
+        header.setPrefHeight(80);
+        header.setMinHeight(80);
+        header.setMaxHeight(80);
 
         header.setPadding(
-                new Insets(20)
+                new Insets(
+                        15,
+                        30,
+                        15,
+                        30
+                )
         );
 
         header.setAlignment(
@@ -200,6 +243,35 @@ public class Document {
         );
 
         // =====================================================
+        // IMPORTANT
+        // HEADER DIRECTLY IN MAIN AREA
+        // NO LEFT/RIGHT PADDING
+        // =====================================================
+
+        mainArea.setTop(
+                header
+        );
+
+        // =====================================================
+        // DOCUMENT CONTENT
+        // =====================================================
+
+        VBox mainContent = new VBox(20);
+
+        mainContent.setPadding(
+                new Insets(
+                        20,
+                        40,
+                        30,
+                        40
+                )
+        );
+
+        mainContent.setStyle(
+                "-fx-background-color:transparent;"
+        );
+
+        // =====================================================
         // REQUIRED DOCUMENTS CARD
         // =====================================================
 
@@ -229,7 +301,7 @@ public class Document {
         cardTitle.setStyle(
                 "-fx-font-size:19px;" +
                 "-fx-font-weight:bold;" +
-                "-fx-text-fill:#333333;"
+                "-fx-text-fill:#4e342e;"
         );
 
         Label cardDescription =
@@ -239,7 +311,7 @@ public class Document {
 
         cardDescription.setStyle(
                 "-fx-font-size:13px;" +
-                "-fx-text-fill:#888888;"
+                "-fx-text-fill:#4e342e;"
         );
 
         VBox cardHeading =
@@ -299,17 +371,55 @@ public class Document {
         );
 
         // =====================================================
-        // MAIN CONTENT
+        // ANIMATED CONTENT
         // =====================================================
 
-        mainContent.getChildren().addAll(
-                header,
+        VBox animatedContent =
+                new VBox(20);
+
+        animatedContent.getChildren().add(
                 documentCard
         );
 
-        root.setCenter(
+        // =====================================================
+        // DOCUMENT CONTENT
+        // =====================================================
+
+        mainContent.getChildren().add(
+                animatedContent
+        );
+
+        // =====================================================
+        // SET DOCUMENT CONTENT BELOW HEADER
+        // =====================================================
+
+        mainArea.setCenter(
                 mainContent
         );
+
+        // =====================================================
+        // SET MAIN AREA IN ROOT
+        // =====================================================
+
+        root.setCenter(
+                mainArea
+        );
+
+        // =====================================================
+        // FADE ANIMATION
+        // ONLY DOCUMENT CARD
+        // =====================================================
+
+        FadeTransition documentFade =
+                new FadeTransition(
+                        Duration.millis(700),
+                        animatedContent
+                );
+
+        documentFade.setFromValue(0.0);
+        documentFade.setToValue(1.0);
+        documentFade.setCycleCount(1);
+        documentFade.play();
 
         // =====================================================
         // FETCH EXISTING DOCUMENTS
@@ -326,6 +436,69 @@ public class Document {
                 ScreenSize.getWidth(),
                 ScreenSize.getHeight()
         );
+    }
+
+    // =========================================================
+    // BUTTON ANIMATION
+    // =========================================================
+
+    private void addButtonAnimation(Button button) {
+
+        // Hover
+        button.setOnMouseEntered(e -> {
+
+            ScaleTransition scale =
+                    new ScaleTransition(
+                            Duration.millis(150),
+                            button
+                    );
+
+            scale.setToX(1.07);
+            scale.setToY(1.07);
+            scale.play();
+        });
+
+        // Mouse Exit
+        button.setOnMouseExited(e -> {
+
+            ScaleTransition scale =
+                    new ScaleTransition(
+                            Duration.millis(150),
+                            button
+                    );
+
+            scale.setToX(1.0);
+            scale.setToY(1.0);
+            scale.play();
+        });
+
+        // Mouse Press
+        button.setOnMousePressed(e -> {
+
+            ScaleTransition scale =
+                    new ScaleTransition(
+                            Duration.millis(80),
+                            button
+                    );
+
+            scale.setToX(0.94);
+            scale.setToY(0.94);
+            scale.play();
+        });
+
+        // Mouse Release
+        button.setOnMouseReleased(e -> {
+
+            ScaleTransition scale =
+                    new ScaleTransition(
+                            Duration.millis(100),
+                            button
+                    );
+
+            scale.setToX(1.07);
+            scale.setToY(1.07);
+            scale.play();
+        });
     }
 
     // =========================================================
@@ -457,6 +630,8 @@ public class Document {
                 "-fx-cursor:hand;"
         );
 
+        addButtonAnimation(chooseButton);
+
         // =====================================================
         // PREVIEW BUTTON
         // =====================================================
@@ -484,6 +659,8 @@ public class Document {
                 "-fx-cursor:hand;"
         );
 
+        addButtonAnimation(previewButton);
+
         // =====================================================
         // SAVE BUTTON
         // =====================================================
@@ -509,6 +686,8 @@ public class Document {
                 "-fx-cursor:hand;"
         );
 
+        addButtonAnimation(saveButton);
+
         // =====================================================
         // REMOVE BUTTON
         // =====================================================
@@ -533,6 +712,8 @@ public class Document {
                 "-fx-background-radius:7;" +
                 "-fx-cursor:hand;"
         );
+
+        addButtonAnimation(removeButton);
 
         // =====================================================
         // CHOOSE FILE ACTION
@@ -564,14 +745,10 @@ public class Document {
                 return;
             }
 
-            // Store temporarily
-
             setSelectedFile(
                     documentKey,
                     selectedFile
             );
-
-            // Update UI
 
             fileName.setText(
                     selectedFile.getName()
@@ -803,8 +980,6 @@ public class Document {
                     .orElse(ButtonType.CANCEL)
                     == ButtonType.OK) {
 
-                // Remove temporarily
-
                 setSelectedFile(
                         documentKey,
                         null
@@ -979,19 +1154,11 @@ public class Document {
             Firestore db =
                     FirebaseConfig.getFirestore();
 
-            // =================================================
-            // documents
-            //      |
-            //      |-- resident email
-            //      |
-            //      |-- documentKey
-            // =================================================
-
             DocumentReference documentReference =
                     db.collection("documents")
-                      .document(email)
-                      .collection("documents")
-                      .document(documentKey);
+                            .document(email)
+                            .collection("documents")
+                            .document(documentKey);
 
             Map<String, Object> data =
                     new HashMap<>();
@@ -1088,11 +1255,11 @@ public class Document {
 
                 DocumentSnapshot snapshot =
                         db.collection("documents")
-                          .document(email)
-                          .collection("documents")
-                          .document(documentKey)
-                          .get()
-                          .get();
+                                .document(email)
+                                .collection("documents")
+                                .document(documentKey)
+                                .get()
+                                .get();
 
                 if (snapshot.exists()) {
 
@@ -1105,7 +1272,7 @@ public class Document {
                             "Cloudinary URL: "
                             + snapshot.getString(
                                     "cloudinaryUrl"
-                                               )
+                            )
                     );
 
                 } else {
@@ -1154,3 +1321,4 @@ public class Document {
         alert.showAndWait();
     }
 }
+

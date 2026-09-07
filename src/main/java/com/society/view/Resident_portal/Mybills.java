@@ -12,6 +12,12 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -74,6 +80,35 @@ public class Mybills {
         BorderPane root =
                 new BorderPane();
 
+
+                Image backgroundImage = new Image(
+        getClass()
+                .getResource("/background-Dashboard5.jpeg")
+                .toExternalForm()
+        );
+
+        BackgroundSize backgroundSize = new BackgroundSize(
+                100,
+                100,
+                true,
+                true,
+                false,
+                true
+        );
+
+        BackgroundImage bgImage = new BackgroundImage(
+                backgroundImage,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundPosition.CENTER,
+                backgroundSize
+        );
+
+        root.setBackground(
+                new Background(bgImage)
+        );
+                
+
         root.setLeft(
                 panelobj.getSidebar()
         );
@@ -89,7 +124,8 @@ public class Mybills {
         );
 
         mainContent.setStyle(
-                "-fx-background-color: #e8ddd5;"
+                "-fx-background-color: transparent;"
+
         );
 
         // =====================================================
@@ -122,12 +158,9 @@ public class Mybills {
 
         subtitle.setTextFill(Color.WHITE);
 
-        VBox heading =
-                new VBox(5);
+        VBox heading =new VBox(3);
 
-        heading.setPadding(
-                new Insets(15, 20, 15, 20)
-        );
+heading.setPadding(new Insets(15, 20, 15, 20));
 
         heading.getChildren().addAll(
                 title,
@@ -185,7 +218,7 @@ public class Mybills {
                 )
         );
 
-        billTitle.setTextFill(Color.WHITE);
+        billTitle.setTextFill(Color.web(" #4e342e"));
 
         // =====================================================
         // REFRESH BUTTON
@@ -1127,6 +1160,10 @@ if (maintenanceBills != null
         // =====================================================
         BorderPane mainarea =
                 new BorderPane();
+
+                mainarea.setStyle(
+                 "-fx-background-color: transparent;"
+);
 
         mainarea.setCenter(
                 mainContent

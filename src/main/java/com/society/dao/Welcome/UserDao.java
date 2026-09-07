@@ -703,11 +703,31 @@ public class UserDao {
             for (String collection :
                     collections) {
 
+                // First try the email as the document ID.
                 DocumentSnapshot document =
                         db.collection(collection)
                                 .document(cleanEmail)
                                 .get()
                                 .get();
+
+                // If the document ID is different,
+                // fall back to the email field.
+                if (!document.exists()) {
+                    QuerySnapshot querySnapshot =
+                            db.collection(collection)
+                                    .whereEqualTo(
+                                            "email",
+                                            cleanEmail)
+                                    .limit(1)
+                                    .get()
+                                    .get();
+
+                    if (!querySnapshot.isEmpty()) {
+                        document =
+                                querySnapshot.getDocuments()
+                                        .get(0);
+                    }
+                }
 
                 if (document.exists()) {
 
@@ -898,16 +918,30 @@ public class UserDao {
             // -------------------------------------------------
             // RESIDENT / TENANT
             // -------------------------------------------------
-            // Tenant records created from AddTenant are stored as:
-            // Residents/{email}
-            // and use residentType = "Tenant".
-            // -------------------------------------------------
-
             DocumentSnapshot residentDocument =
                     db.collection("Residents")
                             .document(cleanEmail)
                             .get()
                             .get();
+
+            // Support resident documents whose document ID
+            // is not the email but whose email field is correct.
+            if (!residentDocument.exists()) {
+                QuerySnapshot residentQuery =
+                        db.collection("Residents")
+                                .whereEqualTo(
+                                        "email",
+                                        cleanEmail)
+                                .limit(1)
+                                .get()
+                                .get();
+
+                if (!residentQuery.isEmpty()) {
+                    residentDocument =
+                            residentQuery.getDocuments()
+                                    .get(0);
+                }
+            }
 
             if (residentDocument.exists()) {
 
@@ -941,7 +975,6 @@ public class UserDao {
             // -------------------------------------------------
             // OTHER USER TYPES
             // -------------------------------------------------
-
             String[] collections = {
                     "Owners",
                     "Secretaries",
@@ -955,6 +988,23 @@ public class UserDao {
                                 .document(cleanEmail)
                                 .get()
                                 .get();
+
+                if (!document.exists()) {
+                    QuerySnapshot querySnapshot =
+                            db.collection(collection)
+                                    .whereEqualTo(
+                                            "email",
+                                            cleanEmail)
+                                    .limit(1)
+                                    .get()
+                                    .get();
+
+                    if (!querySnapshot.isEmpty()) {
+                        document =
+                                querySnapshot.getDocuments()
+                                        .get(0);
+                    }
+                }
 
                 if (document.exists()) {
 

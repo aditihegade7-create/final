@@ -1,3 +1,4 @@
+
 package com.society.dao.Secretary_dao;
 
 import java.util.List;
@@ -7,7 +8,7 @@ import com.society.model.Secretary_model.Resident;
 public interface ResidentDao {
 
     // =========================================================
-    // ADD / UPDATE RESIDENT
+    // ADD / SAVE RESIDENT
     // =========================================================
 
     boolean addResident(Resident resident);
@@ -30,3 +31,4 @@ public interface ResidentDao {
 
     List<Resident> getResidentsBySociety(String society);
 }
+

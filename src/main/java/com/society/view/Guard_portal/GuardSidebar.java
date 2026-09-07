@@ -2,19 +2,20 @@ package com.society.view.Guard_portal;
 
 import com.society.view.Welcome.LogInPage;
 
+import javafx.animation.ScaleTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 public class GuardSidebar {
 
     private Stage stage;
     private VBox sidebar;
     private String society;
-    
 
     // Logged-in Guard email
     private String guardEmail;
@@ -29,7 +30,7 @@ public class GuardSidebar {
             String activePage,
             String guardEmail,
             String society
-        ) {
+    ) {
 
         this.stage = stage;
         this.guardEmail = guardEmail;
@@ -43,12 +44,14 @@ public class GuardSidebar {
     // CREATE SIDEBAR
     // =========================================================
 
-    private void createSidebar(
-            String activePage) {
+    private void createSidebar(String activePage) {
 
         sidebar = new VBox();
 
         sidebar.setPrefWidth(280);
+        sidebar.setMinWidth(280);
+        sidebar.setMaxWidth(280);
+
         sidebar.setPrefHeight(750);
 
         sidebar.setPadding(
@@ -81,7 +84,7 @@ public class GuardSidebar {
 
         logo.setStyle(
                 "-fx-text-fill: white;" +
-                "-fx-font-family: 'Bodoni MT';" +
+                "-fx-font-family:'Bodoni MT';" +
                 "-fx-font-size: 24px;" +
                 "-fx-font-weight: bold;"
         );
@@ -128,7 +131,6 @@ public class GuardSidebar {
                 createButton("Profile");
 
 
-
         // =====================================================
         // ACTIVE BUTTON
         // =====================================================
@@ -164,19 +166,16 @@ public class GuardSidebar {
         // VISITOR LOG
         // =====================================================
 
-        
-
         visitorLogButton.setOnAction(e -> {
 
-    stage.setScene(
-            VisitorLog.createScene(
-                    stage,
-                    guardEmail
-                    
-            )
-    );
+            stage.setScene(
+                    VisitorLog.createScene(
+                            stage,
+                            guardEmail
+                    )
+            );
 
-});
+        });
 
 
         // =====================================================
@@ -188,7 +187,8 @@ public class GuardSidebar {
             stage.setScene(
                     Parking.createScene(
                             stage,
-                            guardEmail, society
+                            guardEmail,
+                            society
                     )
             );
         });
@@ -200,60 +200,48 @@ public class GuardSidebar {
 
         manualEntryButton.setOnAction(e -> {
 
-    stage.setScene(
-            ManualVisitorEntry.createScene(
-                    stage,
-                    guardEmail
-            )
-    );
+            stage.setScene(
+                    ManualVisitorEntry.createScene(
+                            stage,
+                            guardEmail
+                    )
+            );
 
-});     
+        });
+
 
         // =====================================================
         // EMERGENCY SOS
         // =====================================================
 
         sosButton.setOnAction(e -> {
-    stage.setScene(
-            EmergencySOS.createScene(
-                    stage,
-                    guardEmail
-            )
-    );
-});
+
+            stage.setScene(
+                    EmergencySOS.createScene(
+                            stage,
+                            guardEmail
+                    )
+            );
+
+        });
 
 
         // =====================================================
         // DAILY REPORTS
         // =====================================================
 
-       // =====================================================
-// GENERATE REPORTS
-// =====================================================
+        reportsButton.setOnAction(e -> {
 
-Button reportsBtn =
-        new Button("Generate Reports");
+            stage.setScene(
+                    new GuardGenerateReports()
+                            .createScene(
+                                    stage,
+                                    guardEmail
+                            )
+            );
 
-reportsBtn.setStyle(
-        "-fx-background-color:#434141;" +
-        "-fx-font-weight:bold;" +
-        "-fx-text-fill:white;" +
-        "-fx-font-size:14px;" +
-        "-fx-alignment:CENTER-LEFT;" +
-        "-fx-pref-width:240px;" +
-        "-fx-pref-height:40px;"
-);
+        });
 
-reportsButton.setOnAction(e -> {
-
-    stage.setScene(
-            new GuardGenerateReports()
-                    .createScene(
-                            stage,
-                            guardEmail
-                    )
-    );
-});
 
         // =====================================================
         // PROFILE
@@ -268,7 +256,6 @@ reportsButton.setOnAction(e -> {
                     )
             );
         });
-
 
 
         // =====================================================
@@ -293,13 +280,14 @@ reportsButton.setOnAction(e -> {
     // CREATE BUTTON
     // =========================================================
 
-    private Button createButton(
-            String text) {
+    private Button createButton(String text) {
 
         Button button =
                 new Button(text);
 
         button.setPrefWidth(240);
+        button.setMinWidth(240);
+        button.setMaxWidth(240);
 
         button.setPrefHeight(40);
 
@@ -309,8 +297,66 @@ reportsButton.setOnAction(e -> {
                 "-fx-font-weight: bold;" +
                 "-fx-text-fill: white;" +
                 "-fx-font-size: 14px;" +
-                "-fx-alignment: CENTER_LEFT;"
+                "-fx-alignment: CENTER_LEFT;" +
+                "-fx-background-radius: 6;"
         );
+
+
+        // =====================================================
+        // HOVER ANIMATION
+        // =====================================================
+
+        ScaleTransition scaleUp =
+                new ScaleTransition(
+                        Duration.millis(120),
+                        button
+                );
+
+        scaleUp.setToX(1.04);
+        scaleUp.setToY(1.04);
+
+
+        ScaleTransition scaleDown =
+                new ScaleTransition(
+                        Duration.millis(120),
+                        button
+                );
+
+        scaleDown.setToX(1.0);
+        scaleDown.setToY(1.0);
+
+
+        button.setOnMouseEntered(e -> {
+
+            button.setStyle(
+                    "-fx-background-color: #e7c3bb;" +
+                    "-fx-font-weight: bold;" +
+                    "-fx-text-fill: #3e2723;" +
+                    "-fx-font-size: 14px;" +
+                    "-fx-alignment: CENTER_LEFT;" +
+                    "-fx-background-radius: 6;"
+            );
+
+            scaleDown.stop();
+            scaleUp.playFromStart();
+        });
+
+
+        button.setOnMouseExited(e -> {
+
+            button.setStyle(
+                    "-fx-background-color: #4e342e;" +
+                    "-fx-font-weight: bold;" +
+                    "-fx-text-fill: white;" +
+                    "-fx-font-size: 14px;" +
+                    "-fx-alignment: CENTER_LEFT;" +
+                    "-fx-background-radius: 6;"
+            );
+
+            scaleUp.stop();
+            scaleDown.playFromStart();
+        });
+
 
         return button;
     }
@@ -328,7 +374,8 @@ reportsButton.setOnAction(e -> {
             Button manualEntry,
             Button sos,
             Button reports,
-            Button profile) {
+            Button profile
+    ) {
 
         Button activeButton = null;
 

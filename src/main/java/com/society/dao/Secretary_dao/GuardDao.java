@@ -1,3 +1,4 @@
+
 package com.society.dao.Secretary_dao;
 
 import java.util.List;
@@ -6,16 +7,28 @@ import com.society.model.Secretary_model.Guard;
 
 public interface GuardDao {
 
-    // Add Guard
+    // ============================================================
+    // ADD GUARD
+    // ============================================================
+
     boolean addGuard(Guard guard);
 
-    // All Guards
+    // ============================================================
+    // GET ALL GUARDS
+    // ============================================================
+
     List<Guard> getAllGuards();
 
-    // Guards of specific Society
+    // ============================================================
+    // GET GUARDS BY SOCIETY
+    // ============================================================
+
     List<Guard> getGuardsBySociety(String society);
 
-    // Update Guard
+    // ============================================================
+    // UPDATE GUARD
+    // ============================================================
+
     boolean updateGuard(
             String id,
             String shift,
@@ -23,6 +36,10 @@ public interface GuardDao {
             String assignedGate
     );
 
-    // Guard by Email
+    // ============================================================
+    // GET GUARD BY EMAIL
+    // ============================================================
+
     Guard getGuardByEmail(String email);
 }
+

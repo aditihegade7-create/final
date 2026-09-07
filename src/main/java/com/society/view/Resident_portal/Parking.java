@@ -2,13 +2,16 @@ package com.society.view.Resident_portal;
 
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import com.society.view.ScreenSize;
 
+import javafx.animation.FadeTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 
 public class Parking {
@@ -16,7 +19,32 @@ public class Parking {
     // Your assigned parking slot
     private final String myParkingSlot = "P-03";
 
-    public Scene getParkingScene(Stage stage) {
+    public Scene getParkingScene(Stage stage, String loginEmail) {
+
+        BorderPane borderPane = new BorderPane();
+
+        Image bgImage = new Image(
+        getClass().getResource("/background-Dashboard5.jpeg").toExternalForm()
+        );
+
+        BackgroundImage backgroundImage = new BackgroundImage(
+                bgImage,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundPosition.CENTER,
+                new BackgroundSize(
+                        100,
+                        100,
+                        true,
+                        true,
+                        false,
+                        true
+                )
+        );
+
+        borderPane.setBackground(
+                new Background(backgroundImage)
+        );
 
         // ==================================================
         // SIDEBAR
@@ -24,6 +52,9 @@ public class Parking {
 
         panel panelObj = new panel(stage, myParkingSlot);
 
+
+        
+         
 
         // ==================================================
         // HEADER
@@ -58,7 +89,7 @@ public class Parking {
        // header.setPadding(new Insets(20));
 
         header.setStyle(
-                "-fx-background-color: #b3adad;"
+                "-fx-background-color: #4e342e;"
         );
 
 
@@ -72,10 +103,22 @@ public class Parking {
                 new Insets(25)
         );
 
+        
         mainContent.setStyle(
-                "-fx-background-color: #e8ddd5;"
+                 "-fx-background-color: transparent;"
+        );
+        FadeTransition pageFade = new FadeTransition(
+        Duration.millis(700),
+        mainContent
         );
 
+        pageFade.setFromValue(0.0);
+        pageFade.setToValue(1.0);
+        pageFade.setCycleCount(1);
+
+        pageFade.play();
+
+       
 
         // ==================================================
         // MY PARKING CARD
@@ -87,7 +130,7 @@ public class Parking {
         myParkingTitle.setStyle(
                 "-fx-font-size: 20px;" +
                 "-fx-font-weight: bold;" +
-                "-fx-text-fill: #263238;"
+                "-fx-text-fill: #4e342e;"
         );
 
 
@@ -144,7 +187,7 @@ public class Parking {
         availabilityTitle.setStyle(
                 "-fx-font-size: 20px;" +
                 "-fx-font-weight: bold;" +
-                "-fx-text-fill: #263238;"
+                "-fx-text-fill: #4e342e;"
         );
 
 
@@ -240,7 +283,7 @@ public class Parking {
                 new Button("🚗  Simulate Car Parking");
 
         simulateButton.setStyle(
-                "-fx-background-color: #789098;" +
+                "-fx-background-color: #4e342e;" +
                 "-fx-text-fill: white;" +
                 "-fx-font-weight: bold;" +
                 "-fx-font-size: 14px;" +
@@ -347,13 +390,13 @@ public class Parking {
         );
 
         scrollPane.setStyle(
-                "-fx-background-color: #b3adad;" +
-                "-fx-control-inner-background: #b3adad;"
+                 "-fx-background: transparent;" +
+        "-fx-background-color: transparent;"
         );
 
 
-        // ==================================================
-        // CENTER AREA
+// ==================================================
+                // CENTER AREA
         // HEADER + CONTENT
         // ==================================================
 
@@ -376,8 +419,8 @@ header.setStyle("-fx-background-color: #b3adad");
         // MAIN BORDERPANE
         // ==================================================
 
-        BorderPane borderPane =
-                new BorderPane();
+       // BorderPane borderPane =
+        //        new BorderPane();
 
         // Sidebar
 
@@ -395,9 +438,9 @@ header.setStyle("-fx-background-color: #b3adad");
 
         // Entire background
 
-        borderPane.setStyle(
-                "-fx-background-color: #b3adad;"
-        );
+       // borderPane.setStyle(
+       //         "-fx-background-color: #b3adad;"
+        //);
 
 
         // ==================================================

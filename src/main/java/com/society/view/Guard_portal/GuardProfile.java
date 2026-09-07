@@ -940,7 +940,6 @@ public class GuardProfile {
                         email
                 );
 
-        // Email is the authenticated guard identifier and must not be edited.
         emailField.setEditable(false);
 
         Label guardIdValue =
@@ -1399,6 +1398,7 @@ public class GuardProfile {
 
         // =====================================================
         // PAGE ENTRANCE ANIMATION
+        // HEADER FIXED
         // =====================================================
 
         playPageAnimation(
@@ -1423,6 +1423,7 @@ public class GuardProfile {
 
     // =========================================================
     // PAGE ENTRANCE ANIMATION
+    // HEADER FIXED - NO HEADER ANIMATION
     // =========================================================
 
     private static void playPageAnimation(
@@ -1431,64 +1432,24 @@ public class GuardProfile {
             VBox informationCard) {
 
         // =====================================================
-        // INITIAL STATE
+        // HEADER FIXED
         // =====================================================
 
         header.setOpacity(
-                0
-        );
-
-        profileCard.setOpacity(
-                0
-        );
-
-        informationCard.setOpacity(
-                0
-        );
-
-        // =====================================================
-        // HEADER FADE
-        // =====================================================
-
-        FadeTransition headerFade =
-                new FadeTransition(
-                        Duration.millis(600),
-                        header
-                );
-
-        headerFade.setFromValue(
-                0
-        );
-
-        headerFade.setToValue(
                 1
         );
 
-        // =====================================================
-        // HEADER SLIDE
-        // =====================================================
-
-        TranslateTransition headerSlide =
-                new TranslateTransition(
-                        Duration.millis(600),
-                        header
-                );
-
-        headerSlide.setFromY(
-                -25
-        );
-
-        headerSlide.setToY(
+        header.setTranslateY(
                 0
         );
-
-        headerFade.play();
-
-        headerSlide.play();
 
         // =====================================================
         // PROFILE CARD
         // =====================================================
+
+        profileCard.setOpacity(
+                0
+        );
 
         FadeTransition profileFade =
                 new FadeTransition(
@@ -1533,6 +1494,10 @@ public class GuardProfile {
         // =====================================================
         // INFORMATION CARD
         // =====================================================
+
+        informationCard.setOpacity(
+                0
+        );
 
         FadeTransition informationFade =
                 new FadeTransition(

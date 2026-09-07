@@ -1,4 +1,3 @@
-
 package com.society.view.Secretary_portal;
 
 import com.society.controller.welcome.UserController;
@@ -11,55 +10,45 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class SecretarySidebar {
 
-    // ============================================================
-    // LOGGED-IN USER
-    // ============================================================
-
     private User loggedInUser;
 
     // ============================================================
-    // CONSTRUCTOR 1
+    // CONSTRUCTOR WITH USER
     // ============================================================
 
     public SecretarySidebar(User loggedInUser) {
-
         this.loggedInUser = loggedInUser;
-
         printUserInfo();
     }
 
     // ============================================================
-    // CONSTRUCTOR 2
+    // DEFAULT CONSTRUCTOR
     // ============================================================
 
     public SecretarySidebar() {
 
         try {
 
-            String email =
-                    UserDao.getLoggedInEmail();
+            String email = UserDao.getLoggedInEmail();
 
-            if (email != null
-                    && !email.trim().isEmpty()) {
+            if (email != null && !email.trim().isEmpty()) {
 
-                UserController controller =
-                        new UserController();
+                UserController controller = new UserController();
 
-                loggedInUser =
-                        controller.getUserByEmail(
-                                email.trim().toLowerCase());
+                loggedInUser = controller.getUserByEmail(
+                        email.trim().toLowerCase()
+                );
             }
 
         } catch (Exception e) {
 
-            System.out.println(
-                    "Error loading logged-in user:");
-
+            System.out.println("Error loading logged-in user:");
             e.printStackTrace();
 
             loggedInUser = null;
@@ -74,22 +63,11 @@ public class SecretarySidebar {
 
     private void printUserInfo() {
 
-        System.out.println(
-                "================================================");
-
-        System.out.println(
-                "SecretarySidebar created");
-
-        System.out.println(
-                "Logged-in Email: "
-                        + getUserEmail());
-
-        System.out.println(
-                "Logged-in Role: "
-                        + getUserRole());
-
-        System.out.println(
-                "================================================");
+        System.out.println("================================================");
+        System.out.println("SecretarySidebar created");
+        System.out.println("Logged-in Email: " + getUserEmail());
+        System.out.println("Logged-in Role: " + getUserRole());
+        System.out.println("================================================");
     }
 
     // ============================================================
@@ -127,338 +105,417 @@ public class SecretarySidebar {
     }
 
     // ============================================================
-    // GET LOGGED-IN USER
+    // GET LOGGED IN USER
     // ============================================================
 
     public User getLoggedInUser() {
-
         return loggedInUser;
     }
 
     // ============================================================
-    // CREATE SIDEBAR
+    // NORMAL SIDEBAR
+    //
+    // IMPORTANT:
+    // Return type MUST remain VBox.
+    //
+    // Existing files can continue:
+    //
+    // VBox sidebar = sidebarObj.createSidebar(stage);
+    //
     // ============================================================
 
     public VBox createSidebar(Stage stage) {
 
-        VBox sidebar =
-                new VBox();
+        return buildSidebar(stage);
+    }
+
+    // ============================================================
+    // SCROLLABLE SIDEBAR
+    //
+    // Scrollbar is hidden.
+    // Only this sidebar can scroll.
+    // Main page does NOT become scrollable.
+    //
+    // ============================================================
+
+    public ScrollPane createScrollableSidebar(Stage stage) {
+
+        VBox sidebar = buildSidebar(stage);
+
+        ScrollPane scrollPane = new ScrollPane();
+
+        scrollPane.setContent(sidebar);
+
+        // ========================================================
+        // WIDTH
+        // ========================================================
+
+        scrollPane.setPrefWidth(280);
+        scrollPane.setMinWidth(280);
+        scrollPane.setMaxWidth(280);
+
+        // ========================================================
+        // FIT WIDTH
+        // ========================================================
+
+        scrollPane.setFitToWidth(true);
+
+        // Height should be controlled by parent
+        scrollPane.setFitToHeight(false);
+
+        // ========================================================
+        // HIDE SCROLLBARS
+        // ========================================================
+
+        scrollPane.setHbarPolicy(
+                ScrollPane.ScrollBarPolicy.NEVER
+        );
+
+        scrollPane.setVbarPolicy(
+                ScrollPane.ScrollBarPolicy.NEVER
+        );
+
+        // ========================================================
+        // MOUSE WHEEL / PANNING
+        // ========================================================
+
+        scrollPane.setPannable(true);
+
+        // ========================================================
+        // BACKGROUND
+        // ========================================================
+
+        scrollPane.setStyle(
+                "-fx-background-color: #4e342e;"
+                        + "-fx-background: #4e342e;"
+                        + "-fx-border-color:transparent;"
+        );
+
+        return scrollPane;
+    }
+
+    // ============================================================
+    // BUILD SIDEBAR
+    // ============================================================
+
+    private VBox buildSidebar(Stage stage) {
+
+        VBox sidebar = new VBox();
 
         sidebar.setPrefWidth(280);
         sidebar.setMinWidth(280);
+        sidebar.setMaxWidth(280);
+
         sidebar.setPrefHeight(750);
 
         sidebar.setSpacing(10);
 
         sidebar.setPadding(
-                new Insets(20));
+                new Insets(20)
+        );
+
+        sidebar.setAlignment(
+                Pos.TOP_LEFT
+        );
 
         sidebar.setStyle(
-                "-fx-background-color:#4e4b4b;");
+                "-fx-background-color:#4e342e;"
+        );
 
         // ========================================================
         // LOGO
         // ========================================================
 
-        Label logo =
-                new Label("Society360");
-
-        logo.setAlignment(
-                Pos.CENTER_LEFT);
+        Label logo = new Label("Society360");
 
         logo.setStyle(
                 "-fx-text-fill:white;"
-                        + "-fx-font-size:24px;"
-                        + "-fx-font-weight:bold;");
+                        + "-fx-font-size:28px;"
+                        + "-fx-font-weight:bold;"
+        );
+
+        logo.setPadding(
+                new Insets(0, 0, 15, 5)
+        );
 
         // ========================================================
         // PANEL
         // ========================================================
 
-        Label panel =
-                new Label("Secretary Panel");
+        Label panel = new Label("SECRETARY PANEL");
 
         panel.setStyle(
-                "-fx-text-fill:lightgray;"
-                        + "-fx-font-size:14px;"
-                        + "-fx-padding:5px;");
+                "-fx-text-fill:#d9d9d9;"
+                        + "-fx-font-size:13px;"
+                        + "-fx-font-weight:bold;"
+        );
+
+        panel.setPadding(
+                new Insets(0, 0, 5, 5)
+        );
 
         // ========================================================
         // DASHBOARD
         // ========================================================
 
         Button dashboardBtn =
-                createMenuButton("Dashboard");
+                createMenuButton("🏠Dashboard");
 
         dashboardBtn.setOnAction(e -> {
 
-            System.out.println(
-                    "Dashboard clicked. Email: "
-                            + getUserEmail());
+            try {
 
-            SecretaryDashboard dashboard =
-                    new SecretaryDashboard(
-                            loggedInUser);
+                SecretaryDashboard dashboard =
+                        new SecretaryDashboard(loggedInUser);
 
-            stage.setScene(
-                    dashboard.createScene(stage));
+                stage.setScene(
+                        dashboard.createScene(stage)
+                );
+
+            } catch (Exception ex) {
+
+                ex.printStackTrace();
+            }
         });
 
         // ========================================================
-        // MANAGE RESIDENTS
+        // RESIDENTS
         // ========================================================
 
         Button residentsBtn =
-                createMenuButton(
-                        "Manage Residents");
+                createMenuButton("Residents");
 
         residentsBtn.setOnAction(e -> {
 
-            System.out.println(
-                    "Manage Residents clicked. Email: "
-                            + getUserEmail());
+            try {
 
-            ManageResidents residents =
-                    new ManageResidents();
+                ManageResidents residents =
+                        new ManageResidents();
 
-            stage.setScene(
-                    residents.createScene(stage));
+                stage.setScene(
+                        residents.createScene(stage)
+                );
+
+            } catch (Exception ex) {
+
+                ex.printStackTrace();
+            }
         });
 
         // ========================================================
-        // MANAGE OWNERS
+        // OWNERS
         // ========================================================
 
         Button ownersBtn =
-                createMenuButton(
-                        "Manage Owners");
+                createMenuButton("Owners");
 
         ownersBtn.setOnAction(e -> {
 
-            System.out.println(
-                    "Manage Owners clicked. Email: "
-                            + getUserEmail());
+            try {
 
-            ManageOwner owners =
-                    new ManageOwner();
+                ManageOwner owner =
+                        new ManageOwner();
 
-            stage.setScene(
-                    owners.createScene(stage));
+                stage.setScene(
+                        owner.createScene(stage)
+                );
+
+            } catch (Exception ex) {
+
+                ex.printStackTrace();
+            }
         });
 
         // ========================================================
-        // MANAGE GUARDS
+        // GUARDS
         // ========================================================
 
         Button guardsBtn =
-                createMenuButton(
-                        "Manage Guards");
+                createMenuButton("Guards");
 
         guardsBtn.setOnAction(e -> {
 
-            System.out.println(
-                    "Manage Guards clicked. Email: "
-                            + getUserEmail());
+            try {
 
-            ManageGuard guards =
-                    new ManageGuard();
+                ManageGuard guard =
+                        new ManageGuard();
 
-            stage.setScene(
-                    guards.createScene(stage));
+                stage.setScene(
+                        guard.createScene(stage)
+                );
+
+            } catch (Exception ex) {
+
+                ex.printStackTrace();
+            }
         });
 
         // ========================================================
-        // MANAGE NOTICES
+        // NOTICES
         // ========================================================
 
         Button noticesBtn =
-                createMenuButton(
-                        "Manage Notices");
+                createMenuButton("Notices");
 
         noticesBtn.setOnAction(e -> {
 
-            System.out.println(
-                    "Manage Notices clicked. Email: "
-                            + getUserEmail());
+            try {
 
-            if (loggedInUser == null) {
+                ManageNotices notices =
+                        new ManageNotices(loggedInUser);
 
-                System.out.println(
-                        "ERROR: Logged-in user is NULL.");
+                stage.setScene(
+                        notices.createScene(stage)
+                );
 
-                return;
+            } catch (Exception ex) {
+
+                ex.printStackTrace();
             }
-
-            ManageNotices notices =
-                    new ManageNotices(
-                            loggedInUser);
-
-            stage.setScene(
-                    notices.createScene(stage));
         });
 
         // ========================================================
-        // MANAGE COMPLAINTS
+        // COMPLAINTS
         // ========================================================
 
         Button complaintsBtn =
-                createMenuButton(
-                        "Manage Complaints");
+                createMenuButton("Complaints");
 
         complaintsBtn.setOnAction(e -> {
 
-            System.out.println(
-                    "Manage Complaints clicked. Email: "
-                            + getUserEmail());
+            try {
 
-            ManageComplaints complaints =
-                    new ManageComplaints();
+                ManageComplaints complaints =
+                        new ManageComplaints();
 
-            stage.setScene(
-                    complaints.createScene(stage));
+                stage.setScene(
+                        complaints.createScene(stage)
+                );
+
+            } catch (Exception ex) {
+
+                ex.printStackTrace();
+            }
         });
 
         // ========================================================
-        // MANAGE MAINTENANCE
+        // MAINTENANCE
         // ========================================================
 
         Button maintenanceBtn =
-                createMenuButton(
-                        "Manage Maintenance");
+                createMenuButton("Maintenance");
 
         maintenanceBtn.setOnAction(e -> {
 
-            System.out.println(
-                    "Manage Maintenance clicked. Email: "
-                            + getUserEmail());
+            try {
 
-            ManageMaintenance maintenance =
-                    new ManageMaintenance();
+                ManageMaintenance maintenance =
+                        new ManageMaintenance();
 
-            stage.setScene(
-                    maintenance.createScene(stage));
+                stage.setScene(
+                        maintenance.createScene(stage)
+                );
+
+            } catch (Exception ex) {
+
+                ex.printStackTrace();
+            }
         });
 
         // ========================================================
-        // MANAGE PAYMENTS
+        // PAYMENTS
         // ========================================================
 
         Button paymentsBtn =
-                createMenuButton(
-                        "Manage Payments");
+                createMenuButton("Payments");
 
         paymentsBtn.setOnAction(e -> {
 
-            System.out.println(
-                    "Manage Payments clicked. Email: "
-                            + getUserEmail());
+            try {
 
-            ManagePayment payment =
-                    new ManagePayment();
+                ManagePayment payment =
+                        new ManagePayment();
 
-            stage.setScene(
-                    payment.createScene(stage));
+                stage.setScene(
+                        payment.createScene(stage)
+                );
+
+            } catch (Exception ex) {
+
+                ex.printStackTrace();
+            }
         });
 
         // ========================================================
-        // VIEW SOS
+        // EMERGENCY SOS
         // ========================================================
 
         Button sosBtn =
-                createMenuButton(
-                        "View SOS Alerts");
+                createMenuButton("Emergency SOS");
 
         sosBtn.setOnAction(e -> {
 
-            System.out.println(
-                    "View SOS clicked. Email: "
-                            + getUserEmail());
+            try {
 
-            ViewSos sos =
-                    new ViewSos();
+                ViewSos sos =
+                        new ViewSos();
 
-            stage.setScene(
-                    sos.createScene(stage));
+                stage.setScene(
+                        sos.createScene(stage)
+                );
+
+            } catch (Exception ex) {
+
+                ex.printStackTrace();
+            }
         });
 
         // ========================================================
-        // MANAGE EVENTS
+        // EVENTS
         // ========================================================
 
         Button eventsBtn =
-                createMenuButton(
-                        "Manage Events");
+                createMenuButton("Events");
 
         eventsBtn.setOnAction(e -> {
 
-            System.out.println(
-                    "Manage Events clicked. Email: "
-                            + getUserEmail());
+            try {
 
-            ManageEvents events =
-                    new ManageEvents();
+                ManageEvents events =
+                        new ManageEvents();
 
-            stage.setScene(
-                    events.createScene(stage));
+                stage.setScene(
+                        events.createScene(stage)
+                );
+
+            } catch (Exception ex) {
+
+                ex.printStackTrace();
+            }
         });
 
         // ========================================================
-        // Daily Reports REPORTS
+        // DAILY REPORTS
         // ========================================================
 
         Button reportsBtn =
-                createMenuButton(
-                        "Daily Reports");
+                createMenuButton("Daily Reports");
 
         reportsBtn.setOnAction(e -> {
 
-            System.out.println(
-                    "Daily Reports clicked. Email: "
-                            + getUserEmail());
+            try {
 
-            GenerateReports report =
-                    new GenerateReports();
+                GenerateReports reports =
+                        new GenerateReports();
 
-            stage.setScene(
-                    report.createScene(stage));
-        });
+                stage.setScene(
+                        reports.createScene(stage)
+                );
 
-        // ========================================================
-        // PROFILE
-        // ========================================================
+            } catch (Exception ex) {
 
-        Button profileBtn =
-                createMenuButton(
-                        "Profile");
-
-        profileBtn.setOnAction(e -> {
-
-            System.out.println(
-                    "================================================");
-
-            System.out.println(
-                    "Profile clicked");
-
-            System.out.println(
-                    "Profile Email: "
-                            + getUserEmail());
-
-            System.out.println(
-                    "================================================");
-
-            if (loggedInUser == null) {
-
-                System.out.println(
-                        "ERROR: Cannot open Profile.");
-
-                return;
+                ex.printStackTrace();
             }
-
-            Profile profile =
-                    new Profile();
-
-            stage.setScene(
-                    profile.createScene(stage));
         });
 
         // ========================================================
@@ -466,65 +523,99 @@ public class SecretarySidebar {
         // ========================================================
 
         Button pollsBtn =
-                createMenuButton(
-                        "Polls and Surveys");
+                createMenuButton("Polls and Surveys");
 
         pollsBtn.setOnAction(e -> {
 
-            System.out.println(
-                    "================================================");
+            try {
 
-            System.out.println(
-                    "Polls and Surveys clicked");
+                PollsandSurveys polls =
+                        new PollsandSurveys();
 
-            System.out.println(
-                    "Logged-in Email: "
-                            + getUserEmail());
+                stage.setScene(
+                        polls.createScene(stage)
+                );
 
-            System.out.println(
-                    "================================================");
+            } catch (Exception ex) {
 
-            PollsandSurveys pollsAndSurveys =
-                    new PollsandSurveys();
-
-            stage.setScene(
-                    pollsAndSurveys.createScene(stage));
+                ex.printStackTrace();
+            }
         });
 
         // ========================================================
-        // ADD ALL COMPONENTS
+        // PARKING
+        // ========================================================
+
+        Button parkingBtn =
+                createMenuButton("Parking");
+
+        parkingBtn.setOnAction(e -> {
+
+            try {
+
+                System.out.println(
+                        "Parking button clicked."
+                );
+
+                SecretaryParking parking =
+                        new SecretaryParking();
+
+                stage.setScene(
+                        parking.getParkingScene(stage)
+                );
+
+            } catch (Exception ex) {
+
+                ex.printStackTrace();
+            }
+        });
+
+        // ========================================================
+        // PROFILE
+        // ========================================================
+
+        Button profileBtn =
+                createMenuButton("Profile");
+
+        profileBtn.setOnAction(e -> {
+
+            try {
+
+                Profile profile =
+                        new Profile();
+
+                stage.setScene(
+                        profile.createScene(stage)
+                );
+
+            } catch (Exception ex) {
+
+                ex.printStackTrace();
+            }
+        });
+
+        // ========================================================
+        // ADD ALL BUTTONS
         // ========================================================
 
         sidebar.getChildren().addAll(
 
                 logo,
-
                 panel,
 
                 dashboardBtn,
-
                 residentsBtn,
-
                 ownersBtn,
-
                 guardsBtn,
-
                 noticesBtn,
-
                 complaintsBtn,
-
                 maintenanceBtn,
-
                 paymentsBtn,
-
                 sosBtn,
-
                 eventsBtn,
-
                 reportsBtn,
-
                 pollsBtn,
-
+                parkingBtn,
                 profileBtn
         );
 
@@ -535,70 +626,78 @@ public class SecretarySidebar {
     // CREATE MENU BUTTON
     // ============================================================
 
-    private Button createMenuButton(
-            String text) {
+    private Button createMenuButton(String text) {
 
         Button button =
                 new Button(text);
 
         button.setMaxWidth(
-                Double.MAX_VALUE);
+                Double.MAX_VALUE
+        );
 
-        button.setPrefHeight(40);
+        button.setPrefHeight(45);
 
         button.setAlignment(
-                Pos.CENTER_LEFT);
+                Pos.CENTER_LEFT
+        );
 
-        // ========================================================
-        // NORMAL STYLE
-        // ========================================================
+        button.setPadding(
+                new Insets(
+                        0,
+                        15,
+                        0,
+                        20
+                )
+        );
 
         button.setStyle(
-                "-fx-background-color:#434141;"
-                        + "-fx-font-weight:bold;"
+                "-fx-background-color:transparent;"
                         + "-fx-text-fill:white;"
-                        + "-fx-font-size:14px;"
-                        + "-fx-alignment:CENTER-LEFT;"
-                        + "-fx-padding:0 15 0 15;"
-                        + "-fx-cursor:hand;");
+                        + "-fx-font-size:15px;"
+                        + "-fx-font-weight:bold;"
+                        + "-fx-background-radius:8;"
+                        + "-fx-cursor:hand;"
+        );
 
         // ========================================================
-        // MOUSE ENTER
+        // HOVER
         // ========================================================
 
         button.setOnMouseEntered(e -> {
 
             button.setStyle(
-                    "-fx-background-color:#5a5757;"
-                            + "-fx-font-weight:bold;"
+                    "-fx-background-color: #e7c3bb;"
                             + "-fx-text-fill:white;"
-                            + "-fx-font-size:14px;"
-                            + "-fx-alignment:CENTER-LEFT;"
-                            + "-fx-padding:0 15 0 15;"
-                            + "-fx-cursor:hand;");
+                            + "-fx-font-size:15px;"
+                            + "-fx-font-weight:bold;"
+                            + "-fx-background-radius:8;"
+                            + "-fx-cursor:hand;"
+            );
         });
-
-        // ========================================================
-        // MOUSE EXIT
-        // ========================================================
 
         button.setOnMouseExited(e -> {
 
             button.setStyle(
-                    "-fx-background-color:#434141;"
-                            + "-fx-font-weight:bold;"
+                    "-fx-background-color:transparent;"
                             + "-fx-text-fill:white;"
-                            + "-fx-font-size:14px;"
-                            + "-fx-alignment:CENTER-LEFT;"
-                            + "-fx-padding:0 15 0 15;"
-                            + "-fx-cursor:hand;");
+                            + "-fx-font-size:15px;"
+                            + "-fx-font-weight:bold;"
+                            + "-fx-background-radius:8;"
+                            + "-fx-cursor:hand;"
+            );
         });
 
         return button;
     }
 
+    // ============================================================
+    // OLD GET SIDEBAR METHOD
+    // ============================================================
+
     public Node getSidebar() {
-        
-        throw new UnsupportedOperationException("Unimplemented method 'getSidebar'");
+
+        throw new UnsupportedOperationException(
+                "Unimplemented method 'getSidebar'"
+        );
     }
 }

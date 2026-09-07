@@ -1,5 +1,9 @@
 package com.society.view.Guard_portal;
 
+import javafx.animation.FadeTransition;
+import javafx.animation.ParallelTransition;
+import javafx.animation.ScaleTransition;
+import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 
 import javafx.geometry.Insets;
@@ -24,7 +28,9 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
 import javafx.scene.paint.Color;
+
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -71,8 +77,7 @@ public class Parking {
     // CREATE FRESH PARKING SPOTS
     // =====================================================
 
-    private static ArrayList<ParkingSpot>
-    createParkingSpots() {
+    private static ArrayList<ParkingSpot> createParkingSpots() {
 
         ArrayList<ParkingSpot> spots =
                 new ArrayList<>();
@@ -81,65 +86,44 @@ public class Parking {
         // ZONE A
         // -----------------------------
 
-        spots.add(
-                new ParkingSpot("A-01")
-        );
-
-        spots.add(
-                new ParkingSpot("A-02")
-        );
-
-        spots.add(
-                new ParkingSpot("A-03")
-        );
-
-        spots.add(
-                new ParkingSpot("A-04")
-        );
+        spots.add(new ParkingSpot("A-01"));
+        spots.add(new ParkingSpot("A-02"));
+        spots.add(new ParkingSpot("A-03"));
+        spots.add(new ParkingSpot("A-04"));
 
         // -----------------------------
         // ZONE B
         // -----------------------------
 
-        spots.add(
-                new ParkingSpot("B-01")
-        );
-
-        spots.add(
-                new ParkingSpot("B-02")
-        );
-
-        spots.add(
-                new ParkingSpot("B-03")
-        );
-
-        spots.add(
-                new ParkingSpot("B-04")
-        );
+        spots.add(new ParkingSpot("B-01"));
+        spots.add(new ParkingSpot("B-02"));
+        spots.add(new ParkingSpot("B-03"));
+        spots.add(new ParkingSpot("B-04"));
 
         // -----------------------------
         // ZONE C
         // -----------------------------
 
-        spots.add(
-                new ParkingSpot("C-01")
-        );
-
-        spots.add(
-                new ParkingSpot("C-02")
-        );
-
-        spots.add(
-                new ParkingSpot("C-03")
-        );
-
-        spots.add(
-                new ParkingSpot("C-04")
-        );
+        spots.add(new ParkingSpot("C-01"));
+        spots.add(new ParkingSpot("C-02"));
+        spots.add(new ParkingSpot("C-03"));
+        spots.add(new ParkingSpot("C-04"));
 
         return spots;
     }
 
+    // =====================================================
+    // CREATE SCENE - BACKWARD COMPATIBILITY
+    // =====================================================
+
+    public static Scene createScene(Stage stage) {
+
+        return createScene(
+                stage,
+                null,
+                null
+        );
+    }
 
     // =====================================================
     // MAIN SCENE
@@ -195,7 +179,6 @@ public class Parking {
 
         // =================================================
         // SIDEBAR
-        // KEEP EXISTING SIDEBAR
         // =================================================
 
         GuardSidebar sidebar =
@@ -224,6 +207,13 @@ public class Parking {
         HBox header =
                 createHeader();
 
+        // Keep header fixed
+        header.setTranslateX(0);
+        header.setTranslateY(0);
+        header.setOpacity(1);
+        header.setScaleX(1);
+        header.setScaleY(1);
+
         mainArea.setTop(
                 header
         );
@@ -237,10 +227,10 @@ public class Parking {
 
         content.setPadding(
                 new Insets(
-                        24,
-                        32,
-                        28,
-                        32
+                        25,
+                        40,
+                        25,
+                        40
                 )
         );
 
@@ -326,8 +316,6 @@ public class Parking {
 
         // =================================================
         // HIDE SCROLLBAR VISUALLY
-        //
-        // Scrolling still works with mouse wheel / trackpad.
         // =================================================
 
         Platform.runLater(() -> {
@@ -364,6 +352,20 @@ public class Parking {
                         ScreenSize.getHeight()
                 );
 
+        stage.setTitle(
+                "Society360 - Parking"
+        );
+
+        // =================================================
+        // PAGE ANIMATION
+        // =================================================
+
+        animatePage(
+                summary,
+                parkingCard,
+                entryCard
+        );
+
         return scene;
     }
 
@@ -376,17 +378,22 @@ public class Parking {
         HBox header =
                 new HBox();
 
+        header.setPrefHeight(80);
+        header.setMinHeight(80);
+        header.setMaxHeight(80);
+
         header.setPadding(
                 new Insets(
-                        22,
-                        32,
-                        22,
-                        32
+                        20,
+                        25,
+                        20,
+                        25
                 )
         );
 
-        header.setMinHeight(100);
-        header.setPrefHeight(100);
+        header.setAlignment(
+                Pos.CENTER_LEFT
+        );
 
         header.setStyle(
                 "-fx-background-color:#4E342E;"
@@ -397,7 +404,7 @@ public class Parking {
         // =================================================
 
         VBox titleBox =
-                new VBox(4);
+                new VBox(3);
 
         Label title =
                 new Label(
@@ -405,15 +412,15 @@ public class Parking {
                 );
 
         title.setStyle(
-                "-fx-font-size:25px;" +
-                "-fx-font-family: 'Bodoni MT';" +
+                "-fx-font-size:24px;" +
+                "-fx-font-family:'Bodoni MT';" +
                 "-fx-font-weight:bold;" +
                 "-fx-text-fill:white;"
         );
 
         Label description =
                 new Label(
-                        "Manage parking availability and vehicle entry."
+                        "Check parking availability and allot a space to vehicles."
                 );
 
         description.setStyle(
@@ -472,15 +479,16 @@ public class Parking {
         );
 
         day.setStyle(
-                "-fx-font-size:14px;"
+                "-fx-font-size:14px;" +
+                "-fx-font-weight:bold;"
         );
 
         date.setStyle(
-                "-fx-font-size:14px;"
+                "-fx-font-size:12px;"
         );
 
         VBox dateBox =
-                new VBox(4);
+                new VBox(3);
 
         dateBox.setAlignment(
                 Pos.CENTER_RIGHT
@@ -514,7 +522,7 @@ public class Parking {
             String guardEmail) {
 
         VBox card =
-                new VBox(16);
+                new VBox(15);
 
         card.setPadding(
                 new Insets(20)
@@ -526,7 +534,7 @@ public class Parking {
 
         card.setStyle(
                 "-fx-background-color:#E8F0E8;" +
-                "-fx-background-radius:14;"
+                "-fx-background-radius:12;"
         );
 
         // =================================================
@@ -541,7 +549,7 @@ public class Parking {
         title.setStyle(
                 "-fx-font-size:18px;" +
                 "-fx-font-weight:bold;" +
-                "-fx-text-fill:#111111;"
+                "-fx-text-fill:#0c0c0c;"
         );
 
         Label description =
@@ -551,7 +559,7 @@ public class Parking {
 
         description.setStyle(
                 "-fx-font-size:12px;" +
-                "-fx-text-fill:#59636E;"
+                "-fx-text-fill:#080808;"
         );
 
         // =================================================
@@ -629,7 +637,7 @@ public class Parking {
     }
 
     // =====================================================
-    // LEGEND
+    // LEGEND ITEM
     // =====================================================
 
     private static HBox createLegendItem(
@@ -695,7 +703,9 @@ public class Parking {
                 new VBox(7);
 
         Label zoneLabel =
-                new Label(zoneName);
+                new Label(
+                        zoneName
+                );
 
         zoneLabel.setStyle(
                 "-fx-font-size:11px;" +
@@ -704,14 +714,18 @@ public class Parking {
         );
 
         // =================================================
-        // FOUR SPOTS IN ONE ROW
+        // GRID
         // =================================================
 
         GridPane grid =
                 new GridPane();
 
-        grid.setHgap(10);
-        grid.setVgap(8);
+        grid.setHgap(12);
+        grid.setVgap(12);
+
+        grid.setAlignment(
+                Pos.CENTER_LEFT
+        );
 
         for (int i = start; i < end; i++) {
 
@@ -752,10 +766,6 @@ public class Parking {
         Button button =
                 new Button();
 
-        // =================================================
-        // PROPORTIONAL SIZE
-        // =================================================
-
         button.setPrefWidth(155);
         button.setMinWidth(135);
 
@@ -770,14 +780,46 @@ public class Parking {
         );
 
         // =================================================
-        // ACTION
+        // HOVER ANIMATION
+        // =================================================
+
+        button.setOnMouseEntered(e -> {
+
+            ScaleTransition scale =
+                    new ScaleTransition(
+                            Duration.millis(120),
+                            button
+                    );
+
+            scale.setToX(1.08);
+            scale.setToY(1.08);
+
+            scale.play();
+        });
+
+        button.setOnMouseExited(e -> {
+
+            ScaleTransition scale =
+                    new ScaleTransition(
+                            Duration.millis(120),
+                            button
+                    );
+
+            scale.setToX(1.0);
+            scale.setToY(1.0);
+
+            scale.play();
+        });
+
+        // =================================================
+        // CLICK ACTION
         // =================================================
 
         button.setOnAction(e -> {
 
-            // =================================================
+            // =============================================
             // AVAILABLE
-            // =================================================
+            // =============================================
 
             if (!spot.occupied) {
 
@@ -791,9 +833,9 @@ public class Parking {
                 return;
             }
 
-            // =================================================
+            // =============================================
             // OCCUPIED
-            // =================================================
+            // =============================================
 
             Alert alert =
                     new Alert(
@@ -839,9 +881,9 @@ public class Parking {
             Optional<ButtonType> result =
                     alert.showAndWait();
 
-            // =================================================
-            // RELEASE
-            // =================================================
+            // =============================================
+            // RELEASE PARKING
+            // =============================================
 
             if (result.isPresent()
                     && result.get() == releaseButton) {
@@ -879,9 +921,9 @@ public class Parking {
                         return;
                     }
 
-                    // =================================================
+                    // =====================================
                     // LOCAL STATE
-                    // =================================================
+                    // =====================================
 
                     spot.occupied = false;
 
@@ -980,7 +1022,7 @@ public class Parking {
             String society) {
 
         VBox card =
-                new VBox(14);
+                new VBox(15);
 
         card.setPadding(
                 new Insets(20)
@@ -988,7 +1030,7 @@ public class Parking {
 
         card.setStyle(
                 "-fx-background-color:#E8F0E8;" +
-                "-fx-background-radius:14;"
+                "-fx-background-radius:12;"
         );
 
         // =================================================
@@ -1003,11 +1045,11 @@ public class Parking {
         title.setStyle(
                 "-fx-font-size:18px;" +
                 "-fx-font-weight:bold;" +
-                "-fx-text-fill:#111111;"
+                "-fx-text-fill:#0a0a0a;"
         );
 
         // =================================================
-        // FIELDS
+        // VEHICLE NUMBER
         // =================================================
 
         Label vehicleLabel =
@@ -1026,6 +1068,10 @@ public class Parking {
                 vehicleField
         );
 
+        // =================================================
+        // OWNER
+        // =================================================
+
         Label ownerLabel =
                 createLabel(
                         "Owner / Resident Name *"
@@ -1041,6 +1087,10 @@ public class Parking {
         styleField(
                 ownerField
         );
+
+        // =================================================
+        // VEHICLE TYPE
+        // =================================================
 
         Label typeLabel =
                 createLabel(
@@ -1065,6 +1115,10 @@ public class Parking {
                 vehicleTypeBox
         );
 
+        // =================================================
+        // SELECTED SPOT
+        // =================================================
+
         Label selectedLabel =
                 createLabel(
                         "Assigned Parking Spot"
@@ -1078,39 +1132,39 @@ public class Parking {
         selectedSpot.setStyle(
                 "-fx-font-size:14px;" +
                 "-fx-font-weight:bold;" +
-                "-fx-text-fill:#5D4037;"
+                "-fx-text-fill:#080808;"
         );
 
         // =================================================
-        // FIELD GRID
+        // ENTRY GRID
         // =================================================
 
         GridPane grid =
                 new GridPane();
 
-        grid.setHgap(22);
-        grid.setVgap(8);
+        grid.setHgap(25);
+        grid.setVgap(12);
 
-        ColumnConstraints c1 =
+        ColumnConstraints column1 =
                 new ColumnConstraints();
 
-        ColumnConstraints c2 =
+        ColumnConstraints column2 =
                 new ColumnConstraints();
 
-        c1.setPercentWidth(50);
-        c2.setPercentWidth(50);
+        column1.setPercentWidth(50);
+        column2.setPercentWidth(50);
 
-        c1.setHgrow(
+        column1.setHgrow(
                 Priority.ALWAYS
         );
 
-        c2.setHgrow(
+        column2.setHgrow(
                 Priority.ALWAYS
         );
 
         grid.getColumnConstraints().addAll(
-                c1,
-                c2
+                column1,
+                column2
         );
 
         grid.add(
@@ -1162,7 +1216,7 @@ public class Parking {
         );
 
         // =================================================
-        // BUTTONS
+        // FIND BUTTON
         // =================================================
 
         Button findSpotButton =
@@ -1171,19 +1225,23 @@ public class Parking {
                 );
 
         findSpotButton.setPrefWidth(
-                175
+                180
         );
 
         findSpotButton.setPrefHeight(
-                39
+                40
         );
 
         findSpotButton.setStyle(
-                "-fx-background-color:#4E342E;" +
+                "-fx-background-color:#4e342e;" +
                 "-fx-text-fill:white;" +
                 "-fx-font-weight:bold;" +
-                "-fx-background-radius:7;"
+                "-fx-background-radius:6;"
         );
+
+        // =================================================
+        // PARK BUTTON
+        // =================================================
 
         Button parkButton =
                 new Button(
@@ -1191,19 +1249,23 @@ public class Parking {
                 );
 
         parkButton.setPrefWidth(
-                145
+                150
         );
 
         parkButton.setPrefHeight(
-                39
+                40
         );
 
         parkButton.setStyle(
-                "-fx-background-color:#4E342E;" +
+                "-fx-background-color:#4e342e;" +
                 "-fx-text-fill:white;" +
                 "-fx-font-weight:bold;" +
-                "-fx-background-radius:7;"
+                "-fx-background-radius:6;"
         );
+
+        // =================================================
+        // CLEAR BUTTON
+        // =================================================
 
         Button clearButton =
                 new Button(
@@ -1211,25 +1273,51 @@ public class Parking {
                 );
 
         clearButton.setPrefWidth(
-                90
+                100
         );
 
         clearButton.setPrefHeight(
-                39
+                40
         );
 
         clearButton.setStyle(
                 "-fx-background-color:white;" +
-                "-fx-text-fill:#4E342E;" +
+                "-fx-text-fill:#0e0f0f;" +
                 "-fx-font-weight:bold;" +
-                "-fx-background-radius:7;" +
+                "-fx-background-radius:6;" +
                 "-fx-border-color:#D4C7BF;" +
-                "-fx-border-radius:7;"
+                "-fx-border-radius:6;"
         );
+
+        // =================================================
+        // BUTTON ANIMATIONS
+        // =================================================
+
+        animateActionButton(
+                findSpotButton,
+                "#4e342e",
+                "#6D4C41"
+        );
+
+        animateActionButton(
+                parkButton,
+                "#4e342e",
+                "#6D4C41"
+        );
+
+        animateActionButton(
+                clearButton,
+                "white",
+                "#E8DDD5"
+        );
+
+        // =================================================
+        // BUTTON BOX
+        // =================================================
 
         HBox buttons =
                 new HBox(
-                        10,
+                        12,
                         findSpotButton,
                         parkButton,
                         clearButton
@@ -1240,7 +1328,7 @@ public class Parking {
         );
 
         // =================================================
-        // FIND SPOT
+        // FIND AVAILABLE SPOT
         // =================================================
 
         findSpotButton.setOnAction(e -> {
@@ -1267,6 +1355,24 @@ public class Parking {
             selectedSpot.setText(
                     availableSpot.spotNumber
             );
+
+            // =============================================
+            // SELECTED SPOT ANIMATION
+            // =============================================
+
+            ScaleTransition scale =
+                    new ScaleTransition(
+                            Duration.millis(180),
+                            selectedSpot
+                    );
+
+            scale.setFromX(0.8);
+            scale.setFromY(0.8);
+
+            scale.setToX(1.0);
+            scale.setToY(1.0);
+
+            scale.play();
         });
 
         // =================================================
@@ -1275,9 +1381,9 @@ public class Parking {
 
         parkButton.setOnAction(e -> {
 
-            // =================================================
+            // =============================================
             // VALIDATION
-            // =================================================
+            // =============================================
 
             if (vehicleField.getText()
                     .trim()
@@ -1297,9 +1403,9 @@ public class Parking {
                 return;
             }
 
-            // =================================================
+            // =============================================
             // FIND SELECTED SPOT
-            // =================================================
+            // =============================================
 
             ParkingSpot spot =
                     findSpotByNumber(
@@ -1317,9 +1423,9 @@ public class Parking {
                 return;
             }
 
-            // =================================================
-            // CHECK OCCUPANCY
-            // =================================================
+            // =============================================
+            // OCCUPANCY CHECK
+            // =============================================
 
             if (spot.occupied) {
 
@@ -1335,12 +1441,12 @@ public class Parking {
                 return;
             }
 
-            // =================================================
+            // =============================================
             // SOCIETY VALIDATION
-            // =================================================
+            // =============================================
 
-            if (society == null ||
-                    society.trim().isEmpty()) {
+            if (society == null
+                    || society.trim().isEmpty()) {
 
                 showMessage(
                         "Society Information Missing",
@@ -1350,12 +1456,12 @@ public class Parking {
                 return;
             }
 
-            // =================================================
+            // =============================================
             // EMAIL VALIDATION
-            // =================================================
+            // =============================================
 
-            if (guardEmail == null ||
-                    guardEmail.trim().isEmpty()) {
+            if (guardEmail == null
+                    || guardEmail.trim().isEmpty()) {
 
                 showMessage(
                         "Guard Information Missing",
@@ -1365,9 +1471,9 @@ public class Parking {
                 return;
             }
 
-            // =================================================
+            // =============================================
             // VEHICLE DATA
-            // =================================================
+            // =============================================
 
             String vehicleNumber =
                     vehicleField.getText()
@@ -1381,9 +1487,9 @@ public class Parking {
             String vehicleType =
                     vehicleTypeBox.getValue();
 
-            // =================================================
+            // =============================================
             // SAVE TO FIRESTORE
-            // =================================================
+            // =============================================
 
             boolean saved =
                     parkingController.saveParking(
@@ -1405,9 +1511,9 @@ public class Parking {
                 return;
             }
 
-            // =================================================
+            // =============================================
             // LOCAL UPDATE
-            // =================================================
+            // =============================================
 
             spot.occupied = true;
 
@@ -1420,9 +1526,9 @@ public class Parking {
             spot.vehicleType =
                     vehicleType;
 
-            // =================================================
+            // =============================================
             // SUCCESS
-            // =================================================
+            // =============================================
 
             showMessage(
                     "Parking Allotted",
@@ -1431,25 +1537,9 @@ public class Parking {
                             + "."
             );
 
-            // =================================================
-            // CLEAR FORM
-            // =================================================
-
-            vehicleField.clear();
-
-            ownerField.clear();
-
-            vehicleTypeBox.setValue(
-                    null
-            );
-
-            selectedSpot.setText(
-                    "Not assigned"
-            );
-
-            // =================================================
-            // REFRESH
-            // =================================================
+            // =============================================
+            // REFRESH FROM FIRESTORE
+            // =============================================
 
             stage.setScene(
                     createScene(
@@ -1458,6 +1548,8 @@ public class Parking {
                             society
                     )
             );
+
+            stage.show();
         });
 
         // =================================================
@@ -1479,6 +1571,10 @@ public class Parking {
             );
         });
 
+        // =================================================
+        // CARD CONTENT
+        // =================================================
+
         card.getChildren().addAll(
                 title,
                 grid,
@@ -1489,7 +1585,7 @@ public class Parking {
     }
 
     // =====================================================
-    // LOAD PARKING
+    // LOAD PARKING FROM FIRESTORE
     // =====================================================
 
     private static void loadParkingFromFirestore(
@@ -1499,8 +1595,8 @@ public class Parking {
 
         try {
 
-            if (guardEmail == null ||
-                    guardEmail.trim().isEmpty()) {
+            if (guardEmail == null
+                    || guardEmail.trim().isEmpty()) {
 
                 return;
             }
@@ -1586,8 +1682,8 @@ public class Parking {
             ArrayList<ParkingSpot> parkingSpots,
             String spotNumber) {
 
-        if (spotNumber == null ||
-                spotNumber.trim().isEmpty()) {
+        if (spotNumber == null
+                || spotNumber.trim().isEmpty()) {
 
             return null;
         }
@@ -1631,7 +1727,7 @@ public class Parking {
                 total - occupied;
 
         HBox summary =
-                new HBox(14);
+                new HBox(15);
 
         summary.setAlignment(
                 Pos.CENTER_LEFT
@@ -1670,7 +1766,7 @@ public class Parking {
                 new VBox(3);
 
         card.setPrefWidth(
-                170
+                180
         );
 
         card.setPrefHeight(
@@ -1696,7 +1792,9 @@ public class Parking {
         );
 
         Label titleLabel =
-                new Label(title);
+                new Label(
+                        title
+                );
 
         titleLabel.setStyle(
                 "-fx-font-size:10px;" +
@@ -1705,7 +1803,9 @@ public class Parking {
         );
 
         Label valueLabel =
-                new Label(value);
+                new Label(
+                        value
+                );
 
         valueLabel.setStyle(
                 "-fx-font-size:21px;" +
@@ -1729,12 +1829,14 @@ public class Parking {
             String text) {
 
         Label label =
-                new Label(text);
+                new Label(
+                        text
+                );
 
         label.setStyle(
-                "-fx-font-size:11px;" +
+                "-fx-font-size:12px;" +
                 "-fx-font-weight:bold;" +
-                "-fx-text-fill:#333333;"
+                "-fx-text-fill:#090a0a;"
         );
 
         return label;
@@ -1752,14 +1854,14 @@ public class Parking {
         );
 
         field.setPrefHeight(
-                39
+                40
         );
 
         field.setStyle(
                 "-fx-background-color:#F4F7F4;" +
                 "-fx-background-radius:7;" +
-                "-fx-text-fill:#111111;" +
-                "-fx-prompt-text-fill:#6B7280;" +
+                "-fx-text-fill:#050505;" +
+                "-fx-prompt-text-fill:#52606D;" +
                 "-fx-border-color:#D5DDD5;" +
                 "-fx-border-radius:7;"
         );
@@ -1777,16 +1879,223 @@ public class Parking {
         );
 
         box.setPrefHeight(
-                39
+                40
         );
 
         box.setStyle(
                 "-fx-background-color:#F4F7F4;" +
                 "-fx-background-radius:7;" +
-                "-fx-text-fill:#111111;" +
+                "-fx-text-fill:#090909;" +
                 "-fx-border-color:#D5DDD5;" +
                 "-fx-border-radius:7;"
         );
+    }
+
+    // =====================================================
+    // ACTION BUTTON ANIMATION
+    // =====================================================
+
+    private static void animateActionButton(
+            Button button,
+            String normalColor,
+            String hoverColor) {
+
+        button.setOnMouseEntered(e -> {
+
+            ScaleTransition scale =
+                    new ScaleTransition(
+                            Duration.millis(120),
+                            button
+                    );
+
+            scale.setToX(1.05);
+            scale.setToY(1.05);
+
+            scale.play();
+
+            if (normalColor.equals("white")) {
+
+                button.setStyle(
+                        "-fx-background-color:"
+                                + hoverColor
+                                + ";" +
+                        "-fx-text-fill:#4E342E;" +
+                        "-fx-font-weight:bold;" +
+                        "-fx-background-radius:7;" +
+                        "-fx-border-color:#D4C7BF;" +
+                        "-fx-border-radius:7;"
+                );
+
+            } else {
+
+                button.setStyle(
+                        "-fx-background-color:"
+                                + hoverColor
+                                + ";" +
+                        "-fx-text-fill:white;" +
+                        "-fx-font-weight:bold;" +
+                        "-fx-background-radius:7;"
+                );
+            }
+        });
+
+        button.setOnMouseExited(e -> {
+
+            ScaleTransition scale =
+                    new ScaleTransition(
+                            Duration.millis(120),
+                            button
+                    );
+
+            scale.setToX(1.0);
+            scale.setToY(1.0);
+
+            scale.play();
+
+            if (normalColor.equals("white")) {
+
+                button.setStyle(
+                        "-fx-background-color:white;" +
+                        "-fx-text-fill:#0e0f0f;" +
+                        "-fx-font-weight:bold;" +
+                        "-fx-background-radius:7;" +
+                        "-fx-border-color:#D4C7BF;" +
+                        "-fx-border-radius:7;"
+                );
+
+            } else {
+
+                button.setStyle(
+                        "-fx-background-color:"
+                                + normalColor
+                                + ";" +
+                        "-fx-text-fill:white;" +
+                        "-fx-font-weight:bold;" +
+                        "-fx-background-radius:7;"
+                );
+            }
+        });
+    }
+
+    // =====================================================
+    // PAGE ENTRY ANIMATION
+    // =====================================================
+
+    private static void animatePage(
+            HBox summary,
+            VBox parkingCard,
+            VBox entryCard) {
+
+        // =================================================
+        // SUMMARY
+        // =================================================
+
+        summary.setOpacity(0);
+        summary.setTranslateY(25);
+
+        FadeTransition summaryFade =
+                new FadeTransition(
+                        Duration.millis(300),
+                        summary
+                );
+
+        summaryFade.setFromValue(0);
+        summaryFade.setToValue(1);
+
+        TranslateTransition summaryMove =
+                new TranslateTransition(
+                        Duration.millis(300),
+                        summary
+                );
+
+        summaryMove.setFromY(25);
+        summaryMove.setToY(0);
+
+        ParallelTransition summaryAnimation =
+                new ParallelTransition(
+                        summaryFade,
+                        summaryMove
+                );
+
+        summaryAnimation.setDelay(
+                Duration.millis(150)
+        );
+
+        summaryAnimation.play();
+
+        // =================================================
+        // PARKING CARD
+        // =================================================
+
+        parkingCard.setOpacity(0);
+        parkingCard.setTranslateY(30);
+
+        FadeTransition parkingFade =
+                new FadeTransition(
+                        Duration.millis(350),
+                        parkingCard
+                );
+
+        parkingFade.setFromValue(0);
+        parkingFade.setToValue(1);
+
+        TranslateTransition parkingMove =
+                new TranslateTransition(
+                        Duration.millis(350),
+                        parkingCard
+                );
+
+        parkingMove.setFromY(30);
+        parkingMove.setToY(0);
+
+        ParallelTransition parkingAnimation =
+                new ParallelTransition(
+                        parkingFade,
+                        parkingMove
+                );
+
+        parkingAnimation.setDelay(
+                Duration.millis(300)
+        );
+
+        parkingAnimation.play();
+
+        // =================================================
+        // ENTRY CARD
+        // =================================================
+
+        entryCard.setOpacity(0);
+        entryCard.setTranslateY(35);
+
+        FadeTransition entryFade =
+                new FadeTransition(
+                        Duration.millis(350),
+                        entryCard
+                );
+
+        entryFade.setFromValue(0);
+        entryFade.setToValue(1);
+
+        TranslateTransition entryMove =
+                new TranslateTransition(
+                        Duration.millis(350),
+                        entryCard
+                );
+
+        entryMove.setFromY(35);
+        entryMove.setToY(0);
+
+        ParallelTransition entryAnimation =
+                new ParallelTransition(
+                        entryFade,
+                        entryMove
+                );
+
+        entryAnimation.setDelay(
+                Duration.millis(450)
+        );
+
+        entryAnimation.play();
     }
 
     // =====================================================
@@ -1802,11 +2111,17 @@ public class Parking {
                         Alert.AlertType.INFORMATION
                 );
 
-        alert.setTitle(title);
+        alert.setTitle(
+                title
+        );
 
-        alert.setHeaderText(null);
+        alert.setHeaderText(
+                null
+        );
 
-        alert.setContentText(message);
+        alert.setContentText(
+                message
+        );
 
         alert.showAndWait();
     }

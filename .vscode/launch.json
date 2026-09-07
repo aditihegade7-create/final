@@ -4,6 +4,7 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+<<<<<<< HEAD
         {
             "type": "java",
             "name": "Society360AboutUs",
@@ -11,6 +12,13 @@
             "mainClass": "com.society.view.Resident_portal.Society360AboutUs",
             "projectName": "project"
         },
+=======
+    
+<<<<<<< HEAD
+
+=======
+>>>>>>> c763484bfa90201a0630cbe819e9abfd2dd9e970
+>>>>>>> cec421d9aa34b73e6592334b30f8138b8c15a794
         {
             "type": "java",
             "name": "Main",

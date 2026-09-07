@@ -11,93 +11,61 @@ import com.society.controller.ImageUploadController;
 import com.society.controller.Owner_Controller.OwnerDocumentController;
 import com.society.view.ScreenSize;
 
+import javafx.animation.FadeTransition;
+import javafx.animation.ScaleTransition;
+import javafx.animation.TranslateTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-
+import javafx.scene.image.Image;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
-
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
-
-/**
- * =========================================================
- * OWNER DOCUMENTS
- * =========================================================
- *
- * Handles:
- *
- * 1. Select PDF documents
- * 2. Upload PDFs to Cloudinary
- * 3. Save Cloudinary URLs in Firestore
- * 4. Load previously uploaded documents
- *
- * Firestore:
- *
- * OwnerDocuments
- *      └── ownerEmail
- *             ├── email
- *             ├── aadhaarUrl
- *             ├── panUrl
- *             ├── ownershipProofUrl
- *             └── addressProofUrl
- *
- */
 public class OwnerDocuments {
-
 
     // =========================================================
     // CONTROLLERS
     // =========================================================
 
-    private static final OwnerDocumentController
-            documentController =
-                    new OwnerDocumentController();
+    private static final OwnerDocumentController documentController =
+            new OwnerDocumentController();
 
-
-    private static final ImageUploadController
-            imageUploadController =
-                    new ImageUploadController();
-
+    private static final ImageUploadController imageUploadController =
+            new ImageUploadController();
 
     // =========================================================
     // SELECTED FILES
     // =========================================================
 
     private static File aadhaarFile;
-
     private static File panFile;
-
     private static File ownershipFile;
-
     private static File addressFile;
-
 
     // =========================================================
     // CREATE SCENE
     // =========================================================
 
-    public static Scene createScene(
-            Stage stage,
-            String ownerEmail) {
-
+    public static Scene createScene(Stage stage, String ownerEmail) {
 
         final String finalOwnerEmail =
                 ownerEmail == null
                         ? ""
-                        : ownerEmail
-                                .trim()
-                                .toLowerCase();
-
+                        : ownerEmail.trim().toLowerCase();
 
         // =====================================================
         // RESET SELECTED FILES
@@ -108,90 +76,54 @@ public class OwnerDocuments {
         ownershipFile = null;
         addressFile = null;
 
-
         // =====================================================
         // ROOT
         // =====================================================
 
-        BorderPane root =
-                new BorderPane();
-
+        BorderPane root = new BorderPane();
 
         // =====================================================
         // SIDEBAR
         // =====================================================
 
         OwnerSidebar sidebar =
-                new OwnerSidebar(
-                        stage,
-                        finalOwnerEmail
-                );
+                new OwnerSidebar(stage, finalOwnerEmail);
 
-        root.setLeft(
-                sidebar.getSidebar()
-        );
-
+        root.setLeft(sidebar.getSidebar());
 
         // =====================================================
-        // MAIN CONTENT
+        // MAIN AREA
         // =====================================================
 
-        VBox mainContent =
-                new VBox(20);
-
-        mainContent.setPadding(
-                new Insets(
-                        0,
-                        40,
-                        30,
-                        40
-                )
-        );
-
-        mainContent.setStyle(
-                "-fx-background-color:#e8ddd5;"
-        );
-
+        BorderPane mainArea = new BorderPane();
 
         // =====================================================
         // HEADER
         // =====================================================
 
-        HBox header =
-                new HBox();
+        HBox header = new HBox();
 
-        header.setPrefHeight(
-                100
-        );
-
+        header.setPrefHeight(80);
         header.setPadding(
-                new Insets(20)
+                new Insets(15, 25, 15, 25)
         );
-
-        header.setAlignment(
-                Pos.CENTER_LEFT
-        );
+        header.setAlignment(Pos.CENTER_LEFT);
 
         header.setStyle(
                 "-fx-background-color:#4e342e;"
         );
 
-
-        VBox headerText =
-                new VBox(4);
-
+        VBox headerText = new VBox(4);
 
         Label greeting =
-                new Label(
-                        "Owner Documents"
-                );
+                new Label("Owner Documents");
 
         greeting.setStyle(
+                "-fx-font-family:'Bodoni MT';" +
                 "-fx-font-size:24px;" +
                 "-fx-font-weight:bold;" +
                 "-fx-text-fill:white;"
         );
-
 
         Label description =
                 new Label(
@@ -199,45 +131,36 @@ public class OwnerDocuments {
                 );
 
         description.setStyle(
-                "-fx-font-size:12px;" +
+                "-fx-font-size:14px;" +
                 "-fx-text-fill:white;"
         );
-
 
         headerText.getChildren().addAll(
                 greeting,
                 description
         );
 
-
-        Region headerSpacer =
-                new Region();
+        Region headerSpacer = new Region();
 
         HBox.setHgrow(
                 headerSpacer,
                 Priority.ALWAYS
         );
 
+        // =====================================================
+        // DATE
+        // =====================================================
 
-        Label day =
-                new Label();
+        Label day = new Label();
+        Label date = new Label();
 
-        Label date =
-                new Label();
-
-
-        LocalDate today =
-                LocalDate.now();
-
+        LocalDate today = LocalDate.now();
 
         day.setText(
                 today.format(
-                        DateTimeFormatter.ofPattern(
-                                "EEEE"
-                        )
+                        DateTimeFormatter.ofPattern("EEEE")
                 )
         );
-
 
         date.setText(
                 today.format(
@@ -247,18 +170,17 @@ public class OwnerDocuments {
                 )
         );
 
-
         day.setStyle(
-                "-fx-text-fill:white;"
+                "-fx-text-fill:white;" +
+                "-fx-font-size:13px;"
         );
 
         date.setStyle(
-                "-fx-text-fill:white;"
+                "-fx-text-fill:white;" +
+                "-fx-font-size:12px;"
         );
 
-
-        VBox dateBox =
-                new VBox(3);
+        VBox dateBox = new VBox(3);
 
         dateBox.setAlignment(
                 Pos.CENTER_RIGHT
@@ -269,32 +191,89 @@ public class OwnerDocuments {
                 date
         );
 
-
         header.getChildren().addAll(
                 headerText,
                 headerSpacer,
                 dateBox
         );
 
+        // =====================================================
+        // MAIN CONTENT
+        // =====================================================
+
+        VBox mainContent = new VBox(20);
+
+        mainContent.setPadding(
+                new Insets(
+                        30,
+                        40,
+                        30,
+                        40
+                )
+        );
+
+        // =====================================================
+        // BACKGROUND IMAGE
+        // =====================================================
+
+        try {
+
+            Image image =
+                    new Image(
+                            OwnerDocuments.class
+                                    .getResource(
+                                            "/background-Dashboard5.jpeg"
+                                    )
+                                    .toExternalForm()
+                    );
+
+            BackgroundImage backgroundImage =
+                    new BackgroundImage(
+                            image,
+                            BackgroundRepeat.NO_REPEAT,
+                            BackgroundRepeat.NO_REPEAT,
+                            BackgroundPosition.CENTER,
+                            new BackgroundSize(
+                                    100,
+                                    100,
+                                    true,
+                                    true,
+                                    false,
+                                    true
+                            )
+                    );
+
+            mainContent.setBackground(
+                    new Background(backgroundImage)
+            );
+
+        } catch (Exception ex) {
+
+            mainContent.setStyle(
+                    "-fx-background-color:#e8ddd5;"
+            );
+        }
 
         // =====================================================
         // DOCUMENT CARD
         // =====================================================
 
-        VBox documentCard =
-                new VBox(18);
+        VBox documentCard = new VBox(18);
 
         documentCard.setPadding(
                 new Insets(25)
         );
 
         documentCard.setStyle(
-                "-fx-background-color:white;" +
+                "-fx-background-color:#efeff3;" +
                 "-fx-background-radius:15;" +
                 "-fx-border-color:#E5E7EB;" +
                 "-fx-border-radius:15;"
         );
 
+        // =====================================================
+        // CARD HEADING
+        // =====================================================
 
         Label cardTitle =
                 new Label(
@@ -307,7 +286,6 @@ public class OwnerDocuments {
                 "-fx-text-fill:#333333;"
         );
 
-
         Label cardDescription =
                 new Label(
                         "Upload documents in PDF format"
@@ -318,7 +296,6 @@ public class OwnerDocuments {
                 "-fx-text-fill:#888888;"
         );
 
-
         VBox cardHeading =
                 new VBox(4);
 
@@ -327,17 +304,14 @@ public class OwnerDocuments {
                 cardDescription
         );
 
-
         // =====================================================
         // EXISTING DOCUMENTS
         // =====================================================
 
         Map<String, String> existingDocuments =
-                documentController
-                        .getOwnerDocuments(
-                                finalOwnerEmail
-                        );
-
+                documentController.getOwnerDocuments(
+                        finalOwnerEmail
+                );
 
         // =====================================================
         // DOCUMENT ROWS
@@ -354,7 +328,6 @@ public class OwnerDocuments {
                         "aadhaar"
                 );
 
-
         HBox pan =
                 createDocumentRow(
                         stage,
@@ -365,7 +338,6 @@ public class OwnerDocuments {
                         ),
                         "pan"
                 );
-
 
         HBox ownership =
                 createDocumentRow(
@@ -378,7 +350,6 @@ public class OwnerDocuments {
                         "ownership"
                 );
 
-
         HBox address =
                 createDocumentRow(
                         stage,
@@ -390,7 +361,6 @@ public class OwnerDocuments {
                         "address"
                 );
 
-
         documentCard.getChildren().addAll(
                 cardHeading,
                 aadhaar,
@@ -399,31 +369,23 @@ public class OwnerDocuments {
                 address
         );
 
-
         // =====================================================
-        // SAVE BUTTON
+        // SAVE BUTTON BOX
         // =====================================================
 
-        HBox buttonBox =
-                new HBox();
+        HBox buttonBox = new HBox();
 
         buttonBox.setAlignment(
                 Pos.CENTER_RIGHT
         );
-
 
         Button saveButton =
                 new Button(
                         "Save Documents"
                 );
 
-        saveButton.setPrefWidth(
-                170
-        );
-
-        saveButton.setPrefHeight(
-                42
-        );
+        saveButton.setPrefWidth(170);
+        saveButton.setPrefHeight(42);
 
         saveButton.setStyle(
                 "-fx-background-color:#4e342e;" +
@@ -434,6 +396,9 @@ public class OwnerDocuments {
                 "-fx-cursor:hand;"
         );
 
+        buttonBox.getChildren().add(
+                saveButton
+        );
 
         // =====================================================
         // SAVE ACTION
@@ -451,9 +416,8 @@ public class OwnerDocuments {
                 return;
             }
 
-
             // =================================================
-            // CHECK WHETHER ANY FILE WAS SELECTED
+            // CHECK FILE SELECTION
             // =================================================
 
             if (aadhaarFile == null &&
@@ -469,9 +433,8 @@ public class OwnerDocuments {
                 return;
             }
 
-
             // =================================================
-            // UPLOAD FILES
+            // EXISTING URLS
             // =================================================
 
             String aadhaarUrl =
@@ -493,7 +456,6 @@ public class OwnerDocuments {
                     existingDocuments.get(
                             "addressProofUrl"
                     );
-
 
             // =================================================
             // AADHAAR
@@ -517,7 +479,6 @@ public class OwnerDocuments {
                 }
             }
 
-
             // =================================================
             // PAN
             // =================================================
@@ -539,7 +500,6 @@ public class OwnerDocuments {
                     return;
                 }
             }
-
 
             // =================================================
             // OWNERSHIP
@@ -563,7 +523,6 @@ public class OwnerDocuments {
                 }
             }
 
-
             // =================================================
             // ADDRESS
             // =================================================
@@ -586,21 +545,18 @@ public class OwnerDocuments {
                 }
             }
 
-
             // =================================================
-            // SAVE URLS TO FIRESTORE
+            // SAVE TO FIRESTORE
             // =================================================
 
             boolean saved =
-                    documentController
-                            .saveOwnerDocuments(
-                                    finalOwnerEmail,
-                                    aadhaarUrl,
-                                    panUrl,
-                                    ownershipUrl,
-                                    addressUrl
-                            );
-
+                    documentController.saveOwnerDocuments(
+                            finalOwnerEmail,
+                            aadhaarUrl,
+                            panUrl,
+                            ownershipUrl,
+                            addressUrl
+                    );
 
             if (!saved) {
 
@@ -612,7 +568,6 @@ public class OwnerDocuments {
                 return;
             }
 
-
             // =================================================
             // SUCCESS
             // =================================================
@@ -622,43 +577,61 @@ public class OwnerDocuments {
                     "Your documents have been saved successfully."
             );
 
-
             // =================================================
             // RELOAD PAGE
             // =================================================
 
-            OwnerDocuments.createScene(
-        stage,
-        ownerEmail
-);
+            stage.setScene(
+                    OwnerDocuments.createScene(
+                            stage,
+                            finalOwnerEmail
+                    )
+            );
 
             stage.show();
         });
-
-
-        buttonBox.getChildren().add(
-                saveButton
-        );
-
 
         // =====================================================
         // MAIN CONTENT
         // =====================================================
 
         mainContent.getChildren().addAll(
-                header,
                 documentCard,
                 buttonBox
         );
 
+        // =====================================================
+        // MAIN AREA
+        // =====================================================
 
-        root.setCenter(
-                mainContent
-        );
+        mainArea.setTop(header);
+        mainArea.setCenter(mainContent);
 
+        root.setCenter(mainArea);
 
         // =====================================================
-        // RETURN SCENE
+        // ANIMATIONS
+        // =====================================================
+
+       // animateHeader(header);
+
+        animateDocumentCard(
+                documentCard
+        );
+
+        animateDocumentRows(
+                aadhaar,
+                pan,
+                ownership,
+                address
+        );
+
+        animateButton(
+                buttonBox
+        );
+
+        // =====================================================
+        // SCENE
         // =====================================================
 
         return new Scene(
@@ -667,7 +640,6 @@ public class OwnerDocuments {
                 ScreenSize.getHeight()
         );
     }
-
 
     // =========================================================
     // DOCUMENT ROW
@@ -679,7 +651,6 @@ public class OwnerDocuments {
             String documentType,
             String existingUrl,
             String documentKey) {
-
 
         HBox row =
                 new HBox(15);
@@ -699,7 +670,6 @@ public class OwnerDocuments {
                 "-fx-border-radius:10;"
         );
 
-
         // =====================================================
         // ICON
         // =====================================================
@@ -710,7 +680,6 @@ public class OwnerDocuments {
         icon.setStyle(
                 "-fx-font-size:25px;"
         );
-
 
         // =====================================================
         // DOCUMENT NAME
@@ -727,7 +696,6 @@ public class OwnerDocuments {
                 "-fx-text-fill:#333333;"
         );
 
-
         Label type =
                 new Label(
                         documentType
@@ -737,7 +705,6 @@ public class OwnerDocuments {
                 "-fx-font-size:11px;" +
                 "-fx-text-fill:#888888;"
         );
-
 
         VBox information =
                 new VBox(3);
@@ -751,13 +718,11 @@ public class OwnerDocuments {
                 type
         );
 
-
         // =====================================================
         // FILE NAME / STATUS
         // =====================================================
 
         String initialText;
-
 
         if (existingUrl != null &&
                 !existingUrl.trim().isEmpty()) {
@@ -771,12 +736,10 @@ public class OwnerDocuments {
                     "No file selected";
         }
 
-
         Label fileName =
                 new Label(
                         initialText
                 );
-
 
         if (existingUrl != null &&
                 !existingUrl.trim().isEmpty()) {
@@ -795,7 +758,6 @@ public class OwnerDocuments {
             );
         }
 
-
         // =====================================================
         // SPACER
         // =====================================================
@@ -807,7 +769,6 @@ public class OwnerDocuments {
                 spacer,
                 Priority.ALWAYS
         );
-
 
         // =====================================================
         // PREVIEW BUTTON
@@ -899,9 +860,8 @@ public class OwnerDocuments {
                 "-fx-cursor:hand;"
         );
 
-
         // =====================================================
-        // CHOOSE FILE ACTION
+        // CHOOSE BUTTON ACTION
         // =====================================================
 
         chooseButton.setOnAction(e -> {
@@ -909,11 +869,9 @@ public class OwnerDocuments {
             FileChooser fileChooser =
                     new FileChooser();
 
-
             fileChooser.setTitle(
                     "Select " + documentName
             );
-
 
             fileChooser
                     .getExtensionFilters()
@@ -924,17 +882,14 @@ public class OwnerDocuments {
                             )
                     );
 
-
             File file =
                     fileChooser.showOpenDialog(
                             stage
                     );
 
-
             if (file == null) {
                 return;
             }
-
 
             // =================================================
             // STORE SELECTED FILE
@@ -944,36 +899,24 @@ public class OwnerDocuments {
 
                 case "aadhaar":
 
-                    aadhaarFile =
-                            file;
-
+                    aadhaarFile = file;
                     break;
-
 
                 case "pan":
 
-                    panFile =
-                            file;
-
+                    panFile = file;
                     break;
-
 
                 case "ownership":
 
-                    ownershipFile =
-                            file;
-
+                    ownershipFile = file;
                     break;
-
 
                 case "address":
 
-                    addressFile =
-                            file;
-
+                    addressFile = file;
                     break;
             }
-
 
             // =================================================
             // UPDATE UI
@@ -990,6 +933,69 @@ public class OwnerDocuments {
             );
         });
 
+        // =====================================================
+        // CHOOSE BUTTON HOVER ANIMATION
+        // =====================================================
+
+        chooseButton.setOnMouseEntered(e -> {
+
+            ScaleTransition scale =
+                    new ScaleTransition(
+                            Duration.millis(120),
+                            chooseButton
+                    );
+
+            scale.setToX(1.05);
+            scale.setToY(1.05);
+
+            scale.play();
+        });
+
+        chooseButton.setOnMouseExited(e -> {
+
+            ScaleTransition scale =
+                    new ScaleTransition(
+                            Duration.millis(120),
+                            chooseButton
+                    );
+
+            scale.setToX(1.0);
+            scale.setToY(1.0);
+
+            scale.play();
+        });
+
+        chooseButton.setOnMousePressed(e -> {
+
+            ScaleTransition scale =
+                    new ScaleTransition(
+                            Duration.millis(80),
+                            chooseButton
+                    );
+
+            scale.setToX(0.96);
+            scale.setToY(0.96);
+
+            scale.play();
+        });
+
+        chooseButton.setOnMouseReleased(e -> {
+
+            ScaleTransition scale =
+                    new ScaleTransition(
+                            Duration.millis(80),
+                            chooseButton
+                    );
+
+            scale.setToX(1.05);
+            scale.setToY(1.05);
+
+            scale.play();
+        });
+
+        // =====================================================
+        // ROW CHILDREN
+        // =====================================================
 
         row.getChildren().addAll(
                 icon,
@@ -1000,10 +1006,8 @@ public class OwnerDocuments {
                 chooseButton
         );
 
-
         return row;
     }
-
 
     // =========================================================
     // DOCUMENT PREVIEW
@@ -1098,13 +1102,10 @@ public class OwnerDocuments {
                             + file.getName()
             );
 
-
             String url =
-                    imageUploadController
-                            .imageUpload(
-                                    file
-                            );
-
+                    imageUploadController.imageUpload(
+                            file
+                    );
 
             if (url == null ||
                     url.trim().isEmpty()) {
@@ -1112,11 +1113,9 @@ public class OwnerDocuments {
                 return null;
             }
 
-
             System.out.println(
                     "Document uploaded successfully."
             );
-
 
             return url;
 
@@ -1128,6 +1127,235 @@ public class OwnerDocuments {
         }
     }
 
+    // =========================================================
+    // HEADER ANIMATION
+    // =========================================================
+
+
+        
+
+    // =========================================================
+    // DOCUMENT CARD ANIMATION
+    // =========================================================
+
+    private static void animateDocumentCard(
+            VBox card) {
+
+        card.setOpacity(0);
+        card.setTranslateY(30);
+        card.setScaleX(0.97);
+        card.setScaleY(0.97);
+
+        FadeTransition fade =
+                new FadeTransition(
+                        Duration.millis(700),
+                        card
+                );
+
+        fade.setFromValue(0);
+        fade.setToValue(1);
+
+        TranslateTransition slide =
+                new TranslateTransition(
+                        Duration.millis(700),
+                        card
+                );
+
+        slide.setFromY(30);
+        slide.setToY(0);
+
+        ScaleTransition scale =
+                new ScaleTransition(
+                        Duration.millis(700),
+                        card
+                );
+
+        scale.setFromX(0.97);
+        scale.setFromY(0.97);
+        scale.setToX(1);
+        scale.setToY(1);
+
+        fade.play();
+        slide.play();
+        scale.play();
+    }
+
+    // =========================================================
+    // DOCUMENT ROW ANIMATION
+    // =========================================================
+
+    private static void animateDocumentRows(
+            HBox aadhaar,
+            HBox pan,
+            HBox ownership,
+            HBox address) {
+
+        animateRow(
+                aadhaar,
+                200
+        );
+
+        animateRow(
+                pan,
+                300
+        );
+
+        animateRow(
+                ownership,
+                400
+        );
+
+        animateRow(
+                address,
+                500
+        );
+    }
+
+    private static void animateRow(
+            HBox row,
+            int delay) {
+
+        row.setOpacity(0);
+        row.setTranslateX(-25);
+
+        FadeTransition fade =
+                new FadeTransition(
+                        Duration.millis(500),
+                        row
+                );
+
+        fade.setFromValue(0);
+        fade.setToValue(1);
+
+        fade.setDelay(
+                Duration.millis(delay)
+        );
+
+        TranslateTransition slide =
+                new TranslateTransition(
+                        Duration.millis(500),
+                        row
+                );
+
+        slide.setFromX(-25);
+        slide.setToX(0);
+
+        slide.setDelay(
+                Duration.millis(delay)
+        );
+
+        fade.play();
+        slide.play();
+    }
+
+    // =========================================================
+    // SAVE BUTTON ANIMATION
+    // =========================================================
+
+    private static void animateButton(
+            HBox buttonBox) {
+
+        buttonBox.setOpacity(0);
+        buttonBox.setTranslateY(20);
+
+        FadeTransition fade =
+                new FadeTransition(
+                        Duration.millis(600),
+                        buttonBox
+                );
+
+        fade.setFromValue(0);
+        fade.setToValue(1);
+
+        fade.setDelay(
+                Duration.millis(600)
+        );
+
+        TranslateTransition slide =
+                new TranslateTransition(
+                        Duration.millis(600),
+                        buttonBox
+                );
+
+        slide.setFromY(20);
+        slide.setToY(0);
+
+        slide.setDelay(
+                Duration.millis(600)
+        );
+
+        fade.play();
+        slide.play();
+
+        Button button =
+                (Button) buttonBox
+                        .getChildren()
+                        .get(0);
+
+        // =====================================================
+        // HOVER
+        // =====================================================
+
+        button.setOnMouseEntered(e -> {
+
+            ScaleTransition scale =
+                    new ScaleTransition(
+                            Duration.millis(120),
+                            button
+                    );
+
+            scale.setToX(1.05);
+            scale.setToY(1.05);
+
+            scale.play();
+        });
+
+        button.setOnMouseExited(e -> {
+
+            ScaleTransition scale =
+                    new ScaleTransition(
+                            Duration.millis(120),
+                            button
+                    );
+
+            scale.setToX(1.0);
+            scale.setToY(1.0);
+
+            scale.play();
+        });
+
+        // =====================================================
+        // PRESS
+        // =====================================================
+
+        button.setOnMousePressed(e -> {
+
+            ScaleTransition scale =
+                    new ScaleTransition(
+                            Duration.millis(80),
+                            button
+                    );
+
+            scale.setToX(0.96);
+            scale.setToY(0.96);
+
+            scale.play();
+        });
+
+        button.setOnMouseReleased(e -> {
+
+            ScaleTransition scale =
+                    new ScaleTransition(
+                            Duration.millis(80),
+                            button
+                    );
+
+            scale.setToX(1.05);
+            scale.setToY(1.05);
+
+            scale.play();
+        });
+    }
 
     // =========================================================
     // INFORMATION ALERT
@@ -1142,21 +1370,12 @@ public class OwnerDocuments {
                         Alert.AlertType.INFORMATION
                 );
 
-        alert.setTitle(
-                title
-        );
-
-        alert.setHeaderText(
-                null
-        );
-
-        alert.setContentText(
-                message
-        );
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
 
         alert.showAndWait();
     }
-
 
     // =========================================================
     // WARNING ALERT
@@ -1171,21 +1390,12 @@ public class OwnerDocuments {
                         Alert.AlertType.WARNING
                 );
 
-        alert.setTitle(
-                title
-        );
-
-        alert.setHeaderText(
-                null
-        );
-
-        alert.setContentText(
-                message
-        );
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
 
         alert.showAndWait();
     }
-
 
     // =========================================================
     // ERROR ALERT
@@ -1200,17 +1410,9 @@ public class OwnerDocuments {
                         Alert.AlertType.ERROR
                 );
 
-        alert.setTitle(
-                title
-        );
-
-        alert.setHeaderText(
-                null
-        );
-
-        alert.setContentText(
-                message
-        );
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
 
         alert.showAndWait();
     }

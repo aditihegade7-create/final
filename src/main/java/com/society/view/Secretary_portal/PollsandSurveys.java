@@ -21,6 +21,12 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
@@ -61,13 +67,29 @@ public class PollsandSurveys {
             DateTimeFormatter.ofPattern("dd MMM yyyy");
 
     // =========================================================
+    // COLORS
+    // =========================================================
+
+    private static final String PAGE_BG = "#F7F7F7";
+    private static final String HEADER_BG = "#4e342e";
+    private static final String PRIMARY = "#4e342e";
+    private static final String TEXT = "#292525";
+    private static final String SECONDARY_TEXT = "#666666";
+    private static final String BORDER = "#E1E1E1";
+
+    // =========================================================
+    // BACKGROUND IMAGE
+    // =========================================================
+
+    private static final String BACKGROUND_IMAGE = "/background-Dashboard5.jpeg";
+
+    // =========================================================
     // CREATE SCENE
     // =========================================================
 
     public Scene createScene(Stage stage) {
 
-        pollController =
-                new PollController();
+        pollController = new PollController();
 
         // =====================================================
         // SIDEBAR
@@ -88,24 +110,20 @@ public class PollsandSurveys {
         // =====================================================
 
         VBox main =
-                new VBox(15);
-
-        main.setPadding(
-                new Insets(
-                        22,
-                        25,
-                        20,
-                        25
-                )
-        );
-
-        main.setStyle(
-                "-fx-background-color:#E8DDD3;"
-        );
+                new VBox();
 
         main.setMaxSize(
                 Double.MAX_VALUE,
                 Double.MAX_VALUE
+        );
+
+        main.setStyle(
+                "-fx-background-color:" + PAGE_BG + ";"
+        );
+
+        HBox.setHgrow(
+                main,
+                Priority.ALWAYS
         );
 
         // =====================================================
@@ -113,14 +131,12 @@ public class PollsandSurveys {
         // =====================================================
 
         Label heading =
-                new Label(
-                        "Polls & Surveys"
-                );
+                new Label("Polls & Surveys");
 
         heading.setStyle(
-                "-fx-font-size:26px;" +
+                "-fx-font-size:24px;" +
                 "-fx-font-weight:bold;" +
-                "-fx-text-fill:#24456D;"
+                "-fx-text-fill:white;"
         );
 
         Label subtitle =
@@ -129,12 +145,16 @@ public class PollsandSurveys {
                 );
 
         subtitle.setStyle(
-                "-fx-font-size:14px;" +
-                "-fx-text-fill:#666666;"
+                "-fx-font-size:13px;" +
+                "-fx-text-fill:white;"
         );
 
         VBox headingBox =
-                new VBox(4);
+                new VBox(3);
+
+        headingBox.setAlignment(
+                Pos.CENTER_LEFT
+        );
 
         headingBox.getChildren().addAll(
                 heading,
@@ -146,38 +166,61 @@ public class PollsandSurveys {
         // =====================================================
 
         Button createButton =
-                new Button(
-                        "+ Create New Poll"
-                );
+                new Button("+ Create New Poll");
 
         createButton.setPrefWidth(165);
+        createButton.setMinWidth(165);
+        createButton.setMaxWidth(165);
+
         createButton.setPrefHeight(40);
+        createButton.setMinHeight(40);
+        createButton.setMaxHeight(40);
 
         createButton.setStyle(
-                "-fx-background-color:#56342B;" +
-                "-fx-text-fill:white;" +
+                "-fx-background-color:white;" +
+                "-fx-text-fill:" + HEADER_BG + ";" +
                 "-fx-font-weight:bold;" +
                 "-fx-font-size:14px;" +
                 "-fx-background-radius:7;" +
                 "-fx-cursor:hand;"
         );
 
-        /*
-         * IMPORTANT:
-         *
-         * This opens an overlay inside the current Scene.
-         * No new Stage is created.
-         */
-
         createButton.setOnAction(
                 e -> openCreatePollPopup()
         );
+
+        // =====================================================
+        // HEADER BOX
+        // =====================================================
 
         HBox header =
                 new HBox();
 
         header.setAlignment(
                 Pos.CENTER_LEFT
+        );
+
+        header.setPadding(
+                new Insets(
+                        15,
+                        25,
+                        15,
+                        25
+                )
+        );
+
+        header.setSpacing(20);
+
+        header.setPrefHeight(80);
+        header.setMinHeight(80);
+        header.setMaxHeight(80);
+
+        header.setMaxWidth(
+                Double.MAX_VALUE
+        );
+
+        header.setStyle(
+                "-fx-background-color:" + HEADER_BG + ";"
         );
 
         HBox.setHgrow(
@@ -189,6 +232,97 @@ public class PollsandSurveys {
                 headingBox,
                 createButton
         );
+
+        // =====================================================
+        // CONTENT
+        // =====================================================
+
+        VBox content =
+                new VBox(15);
+
+        content.setPadding(
+                new Insets(
+                        20,
+                        25,
+                        20,
+                        25
+                )
+        );
+
+        content.setMaxSize(
+                Double.MAX_VALUE,
+                Double.MAX_VALUE
+        );
+
+        VBox.setVgrow(
+                content,
+                Priority.ALWAYS
+        );
+
+        // =====================================================
+        // BACKGROUND IMAGE
+        // =====================================================
+
+        try {
+
+            if (getClass().getResource(
+                    BACKGROUND_IMAGE
+            ) != null) {
+
+                Image backgroundImage =
+                        new Image(
+                                getClass()
+                                        .getResource(
+                                                BACKGROUND_IMAGE
+                                        )
+                                        .toExternalForm()
+                        );
+
+                BackgroundImage bgImage =
+                        new BackgroundImage(
+                                backgroundImage,
+                                BackgroundRepeat.NO_REPEAT,
+                                BackgroundRepeat.NO_REPEAT,
+                                BackgroundPosition.CENTER,
+                                new BackgroundSize(
+                                        100,
+                                        100,
+                                        true,
+                                        true,
+                                        false,
+                                        true
+                                )
+                        );
+
+                content.setBackground(
+                        new Background(
+                                bgImage
+                        )
+                );
+
+            } else {
+
+                System.err.println(
+                        "Background image not found: "
+                                + BACKGROUND_IMAGE
+                );
+
+                content.setStyle(
+                        "-fx-background-color:" + PAGE_BG + ";"
+                );
+            }
+
+        } catch (Exception e) {
+
+            System.err.println(
+                    "Background image could not be loaded: "
+                            + e.getMessage()
+            );
+
+            content.setStyle(
+                    "-fx-background-color:" + PAGE_BG + ";"
+            );
+        }
 
         // =====================================================
         // STATISTICS
@@ -235,14 +369,12 @@ public class PollsandSurveys {
         // =====================================================
 
         Label listTitle =
-                new Label(
-                        "Polls & Surveys"
-                );
+                new Label("Polls & Surveys");
 
         listTitle.setStyle(
                 "-fx-font-size:20px;" +
                 "-fx-font-weight:bold;" +
-                "-fx-text-fill:#333333;"
+                "-fx-text-fill:" + TEXT + ";"
         );
 
         filterCombo =
@@ -255,28 +387,44 @@ public class PollsandSurveys {
                 "Closed"
         );
 
-        filterCombo.setValue(
-                "All"
-        );
+        filterCombo.setValue("All");
 
         filterCombo.setPrefWidth(120);
         filterCombo.setPrefHeight(35);
+
+        filterCombo.setStyle(
+                "-fx-background-color:white;" +
+                "-fx-border-color:" + BORDER + ";" +
+                "-fx-border-radius:6;" +
+                "-fx-background-radius:6;"
+        );
 
         filterCombo.setOnAction(
                 e -> loadPolls()
         );
 
+        // =====================================================
+        // REFRESH BUTTON
+        // =====================================================
+
         Button refreshButton =
-                new Button("⟳ Refresh");
+                new Button("↻ Refresh");
 
         refreshButton.setPrefWidth(110);
+        refreshButton.setMinWidth(110);
+        refreshButton.setMaxWidth(110);
+
         refreshButton.setPrefHeight(35);
+        refreshButton.setMinHeight(35);
+        refreshButton.setMaxHeight(35);
 
         refreshButton.setStyle(
-                "-fx-background-color:#56342B;" +
-                "-fx-text-fill:white;" +
+                "-fx-background-color:white;" +
+                "-fx-text-fill:" + HEADER_BG + ";" +
                 "-fx-font-weight:bold;" +
                 "-fx-background-radius:7;" +
+                "-fx-border-color:" + BORDER + ";" +
+                "-fx-border-radius:7;" +
                 "-fx-cursor:hand;"
         );
 
@@ -292,6 +440,10 @@ public class PollsandSurveys {
                     );
                 }
         );
+
+        // =====================================================
+        // LIST HEADER
+        // =====================================================
 
         HBox listHeader =
                 new HBox(10);
@@ -318,6 +470,10 @@ public class PollsandSurveys {
         Separator separator =
                 new Separator();
 
+        separator.setStyle(
+                "-fx-background-color:" + BORDER + ";"
+        );
+
         // =====================================================
         // POLL LIST
         // =====================================================
@@ -329,10 +485,16 @@ public class PollsandSurveys {
                 new Insets(5)
         );
 
-        pollList.setFillWidth(true);
+        pollList.setFillWidth(
+                true
+        );
 
         pollList.setMaxWidth(
                 Double.MAX_VALUE
+        );
+
+        pollList.setStyle(
+                "-fx-background-color:transparent;"
         );
 
         // =====================================================
@@ -348,21 +510,41 @@ public class PollsandSurveys {
 
         scrollPane.setFitToWidth(true);
 
+        scrollPane.setFitToHeight(false);
+
+        // =====================================================
+        // INVISIBLE SCROLLBARS
+        // =====================================================
+
         scrollPane.setHbarPolicy(
                 ScrollPane.ScrollBarPolicy.NEVER
         );
 
         scrollPane.setVbarPolicy(
-                ScrollPane.ScrollBarPolicy.AS_NEEDED
+                ScrollPane.ScrollBarPolicy.NEVER
+        );
+
+        // =====================================================
+        // TRANSPARENT SCROLLPANE
+        // =====================================================
+
+        scrollPane.setStyle(
+                "-fx-background-color:transparent;" +
+                "-fx-background:transparent;" +
+                "-fx-border-color:transparent;" +
+                "-fx-padding:0;"
+        );
+
+        // =====================================================
+        // SCROLLING ENABLED
+        // =====================================================
+
+        scrollPane.setPannable(
+                true
         );
 
         scrollPane.setMaxHeight(
                 Double.MAX_VALUE
-        );
-
-        scrollPane.setStyle(
-                "-fx-background-color:transparent;" +
-                "-fx-border-color:transparent;"
         );
 
         VBox.setVgrow(
@@ -391,6 +573,10 @@ public class PollsandSurveys {
                 Pos.CENTER
         );
 
+        footerBox.setMaxWidth(
+                Double.MAX_VALUE
+        );
+
         footerBox.getChildren().add(
                 footer
         );
@@ -399,13 +585,26 @@ public class PollsandSurveys {
         // MAIN CONTENT
         // =====================================================
 
-        main.getChildren().addAll(
-                header,
+        content.getChildren().addAll(
                 statistics,
                 listHeader,
                 separator,
                 scrollPane,
                 footerBox
+        );
+
+        // =====================================================
+        // MAIN
+        // =====================================================
+
+        main.getChildren().addAll(
+                header,
+                content
+        );
+
+        VBox.setVgrow(
+                content,
+                Priority.ALWAYS
         );
 
         // =====================================================
@@ -430,8 +629,17 @@ public class PollsandSurveys {
                 Priority.ALWAYS
         );
 
+        // =====================================================
+        // STACK ROOT
+        // =====================================================
+
         StackPane root =
                 new StackPane();
+
+        root.setMaxSize(
+                Double.MAX_VALUE,
+                Double.MAX_VALUE
+        );
 
         root.getChildren().add(
                 mainRoot
@@ -482,9 +690,9 @@ public class PollsandSurveys {
         card.setPrefHeight(80);
 
         card.setStyle(
-                "-fx-background-color:white;" +
+                "-fx-background-color:rgba(255,255,255,0.96);" +
                 "-fx-background-radius:10;" +
-                "-fx-border-color:#DDDDDD;" +
+                "-fx-border-color:" + BORDER + ";" +
                 "-fx-border-radius:10;"
         );
 
@@ -499,7 +707,7 @@ public class PollsandSurveys {
         value.setStyle(
                 "-fx-font-size:24px;" +
                 "-fx-font-weight:bold;" +
-                "-fx-text-fill:#24456D;"
+                "-fx-text-fill:" + PRIMARY + ";"
         );
 
         card.getChildren().addAll(
@@ -670,9 +878,9 @@ public class PollsandSurveys {
         );
 
         card.setStyle(
-                "-fx-background-color:white;" +
+                "-fx-background-color:rgba(255,255,255,0.96);" +
                 "-fx-background-radius:10;" +
-                "-fx-border-color:#DDDDDD;" +
+                "-fx-border-color:" + BORDER + ";" +
                 "-fx-border-radius:10;"
         );
 
@@ -685,12 +893,14 @@ public class PollsandSurveys {
                         safe(poll.getQuestion())
                 );
 
-        question.setWrapText(true);
+        question.setWrapText(
+                true
+        );
 
         question.setStyle(
                 "-fx-font-size:17px;" +
                 "-fx-font-weight:bold;" +
-                "-fx-text-fill:#18385E;"
+                "-fx-text-fill:" + PRIMARY + ";"
         );
 
         Label type =
@@ -699,8 +909,8 @@ public class PollsandSurveys {
                 );
 
         type.setStyle(
-                "-fx-background-color:#E8EEF7;" +
-                "-fx-text-fill:#24456D;" +
+                "-fx-background-color:#EEEAE7;" +
+                "-fx-text-fill:" + PRIMARY + ";" +
                 "-fx-font-weight:bold;" +
                 "-fx-padding:5px 10px;" +
                 "-fx-background-radius:12;"
@@ -760,11 +970,13 @@ public class PollsandSurveys {
                         safe(poll.getDescription())
                 );
 
-        description.setWrapText(true);
+        description.setWrapText(
+                true
+        );
 
         description.setStyle(
                 "-fx-font-size:13px;" +
-                "-fx-text-fill:#666666;"
+                "-fx-text-fill:" + SECONDARY_TEXT + ";"
         );
 
         // =====================================================
@@ -799,7 +1011,7 @@ public class PollsandSurveys {
                 new Label(
                         "Total Votes: "
                                 + poll.getTotalVotes()
-                );
+        );
 
         for (Label label :
                 List.of(
@@ -881,10 +1093,11 @@ public class PollsandSurveys {
         closeButton.setPrefHeight(32);
 
         closeButton.setStyle(
-                "-fx-background-color:#856404;" +
+                "-fx-background-color:" + PRIMARY + ";" +
                 "-fx-text-fill:white;" +
                 "-fx-font-weight:bold;" +
-                "-fx-background-radius:6;"
+                "-fx-background-radius:6;" +
+                "-fx-cursor:hand;"
         );
 
         Button deleteButton =
@@ -897,13 +1110,16 @@ public class PollsandSurveys {
                 "-fx-background-color:#DC3545;" +
                 "-fx-text-fill:white;" +
                 "-fx-font-weight:bold;" +
-                "-fx-background-radius:6;"
+                "-fx-background-radius:6;" +
+                "-fx-cursor:hand;"
         );
 
         if (!"ACTIVE".equalsIgnoreCase(
                 poll.getStatus())) {
 
-            closeButton.setDisable(true);
+            closeButton.setDisable(
+                    true
+            );
         }
 
         closeButton.setOnAction(
@@ -994,7 +1210,6 @@ public class PollsandSurveys {
     private void openCreatePollPopup() {
 
         if (pollsScene == null) {
-
             return;
         }
 
@@ -1005,7 +1220,9 @@ public class PollsandSurveys {
         StackPane overlay =
                 new StackPane();
 
-        overlay.setPickOnBounds(true);
+        overlay.setPickOnBounds(
+                true
+        );
 
         overlay.setStyle(
                 "-fx-background-color:rgba(0,0,0,0.40);"
@@ -1031,7 +1248,7 @@ public class PollsandSurveys {
         popup.setStyle(
                 "-fx-background-color:white;" +
                 "-fx-background-radius:15;" +
-                "-fx-border-color:#DDDDDD;" +
+                "-fx-border-color:" + BORDER + ";" +
                 "-fx-border-radius:15;"
         );
 
@@ -1047,7 +1264,7 @@ public class PollsandSurveys {
         title.setStyle(
                 "-fx-font-size:22px;" +
                 "-fx-font-weight:bold;" +
-                "-fx-text-fill:#24456D;"
+                "-fx-text-fill:" + PRIMARY + ";"
         );
 
         Label subtitle =
@@ -1085,7 +1302,9 @@ public class PollsandSurveys {
                 Double.MAX_VALUE
         );
 
-        typeCombo.setPrefHeight(35);
+        typeCombo.setPrefHeight(
+                35
+        );
 
         // =====================================================
         // QUESTION
@@ -1103,7 +1322,9 @@ public class PollsandSurveys {
                 "Enter your question"
         );
 
-        questionField.setPrefHeight(35);
+        questionField.setPrefHeight(
+                35
+        );
 
         // =====================================================
         // DESCRIPTION
@@ -1121,9 +1342,13 @@ public class PollsandSurveys {
                 "Enter description"
         );
 
-        descriptionArea.setPrefRowCount(2);
+        descriptionArea.setPrefRowCount(
+                2
+        );
 
-        descriptionArea.setWrapText(true);
+        descriptionArea.setWrapText(
+                true
+        );
 
         // =====================================================
         // OPTION 1
@@ -1141,7 +1366,9 @@ public class PollsandSurveys {
                 "Example: Yes"
         );
 
-        option1Field.setPrefHeight(35);
+        option1Field.setPrefHeight(
+                35
+        );
 
         // =====================================================
         // OPTION 2
@@ -1159,7 +1386,9 @@ public class PollsandSurveys {
                 "Example: No"
         );
 
-        option2Field.setPrefHeight(35);
+        option2Field.setPrefHeight(
+                35
+        );
 
         // =====================================================
         // OPTION 3
@@ -1177,7 +1406,9 @@ public class PollsandSurveys {
                 "Optional"
         );
 
-        option3Field.setPrefHeight(35);
+        option3Field.setPrefHeight(
+                35
+        );
 
         // =====================================================
         // OPTION 4
@@ -1195,7 +1426,9 @@ public class PollsandSurveys {
                 "Optional"
         );
 
-        option4Field.setPrefHeight(35);
+        option4Field.setPrefHeight(
+                35
+        );
 
         // =====================================================
         // END DATE
@@ -1213,7 +1446,9 @@ public class PollsandSurveys {
                 LocalDate.now().plusDays(7)
         );
 
-        endDatePicker.setPrefHeight(35);
+        endDatePicker.setPrefHeight(
+                35
+        );
 
         endDatePicker.setMaxWidth(
                 Double.MAX_VALUE
@@ -1242,7 +1477,9 @@ public class PollsandSurveys {
                 "All Residents"
         );
 
-        audienceCombo.setPrefHeight(35);
+        audienceCombo.setPrefHeight(
+                35
+        );
 
         audienceCombo.setMaxWidth(
                 Double.MAX_VALUE
@@ -1253,10 +1490,17 @@ public class PollsandSurveys {
         // =====================================================
 
         Button cancelButton =
-                new Button("Cancel");
+                new Button(
+                        "Cancel"
+                );
 
-        cancelButton.setPrefWidth(100);
-        cancelButton.setPrefHeight(38);
+        cancelButton.setPrefWidth(
+                100
+        );
+
+        cancelButton.setPrefHeight(
+                38
+        );
 
         cancelButton.setStyle(
                 "-fx-background-color:#E5E7EB;" +
@@ -1267,13 +1511,20 @@ public class PollsandSurveys {
         );
 
         Button createButton =
-                new Button("Create Poll");
+                new Button(
+                        "Create Poll"
+                );
 
-        createButton.setPrefWidth(120);
-        createButton.setPrefHeight(38);
+        createButton.setPrefWidth(
+                120
+        );
+
+        createButton.setPrefHeight(
+                38
+        );
 
         createButton.setStyle(
-                "-fx-background-color:#56342B;" +
+                "-fx-background-color:" + PRIMARY + ";" +
                 "-fx-text-fill:white;" +
                 "-fx-font-weight:bold;" +
                 "-fx-background-radius:8;" +
@@ -1343,17 +1594,44 @@ public class PollsandSurveys {
                 popup
         );
 
-        popupScroll.setFitToWidth(true);
+        popupScroll.setFitToWidth(
+                true
+        );
 
-        popupScroll.setPrefWidth(520);
-        popupScroll.setPrefHeight(680);
+        popupScroll.setPrefWidth(
+                520
+        );
 
-        popupScroll.setMaxWidth(520);
-        popupScroll.setMaxHeight(680);
+        popupScroll.setPrefHeight(
+                680
+        );
+
+        popupScroll.setMaxWidth(
+                520
+        );
+
+        popupScroll.setMaxHeight(
+                680
+        );
+
+        // Invisible popup scrollbars too
+        popupScroll.setHbarPolicy(
+                ScrollPane.ScrollBarPolicy.NEVER
+        );
+
+        popupScroll.setVbarPolicy(
+                ScrollPane.ScrollBarPolicy.NEVER
+        );
+
+        popupScroll.setPannable(
+                true
+        );
 
         popupScroll.setStyle(
-                "-fx-background-color:white;" +
-                "-fx-border-color:transparent;"
+                "-fx-background-color:transparent;" +
+                "-fx-background:transparent;" +
+                "-fx-border-color:transparent;" +
+                "-fx-padding:0;"
         );
 
         // =====================================================
@@ -1390,134 +1668,136 @@ public class PollsandSurveys {
         // CREATE
         // =====================================================
 
-        createButton.setOnAction(e -> {
+        createButton.setOnAction(
+                e -> {
 
-            String type =
-                    typeCombo.getValue();
+                    String type =
+                            typeCombo.getValue();
 
-            String question =
-                    questionField
-                            .getText()
-                            .trim();
+                    String question =
+                            questionField
+                                    .getText()
+                                    .trim();
 
-            String description =
-                    descriptionArea
-                            .getText()
-                            .trim();
+                    String description =
+                            descriptionArea
+                                    .getText()
+                                    .trim();
 
-            String option1 =
-                    option1Field
-                            .getText()
-                            .trim();
+                    String option1 =
+                            option1Field
+                                    .getText()
+                                    .trim();
 
-            String option2 =
-                    option2Field
-                            .getText()
-                            .trim();
+                    String option2 =
+                            option2Field
+                                    .getText()
+                                    .trim();
 
-            String option3 =
-                    option3Field
-                            .getText()
-                            .trim();
+                    String option3 =
+                            option3Field
+                                    .getText()
+                                    .trim();
 
-            String option4 =
-                    option4Field
-                            .getText()
-                            .trim();
+                    String option4 =
+                            option4Field
+                                    .getText()
+                                    .trim();
 
-            LocalDate endDate =
-                    endDatePicker.getValue();
+                    LocalDate endDate =
+                            endDatePicker.getValue();
 
-            String audience =
-                    audienceCombo.getValue();
+                    String audience =
+                            audienceCombo.getValue();
 
-            // =================================================
-            // VALIDATION
-            // =================================================
+                    // =================================================
+                    // VALIDATION
+                    // =================================================
 
-            if (type == null
-                    || question.isEmpty()
-                    || option1.isEmpty()
-                    || option2.isEmpty()
-                    || endDate == null
-                    || audience == null) {
+                    if (type == null
+                            || question.isEmpty()
+                            || option1.isEmpty()
+                            || option2.isEmpty()
+                            || endDate == null
+                            || audience == null) {
 
-                showAlert(
-                        Alert.AlertType.WARNING,
-                        "Missing Information",
-                        "Please fill all required fields."
-                );
+                        showAlert(
+                                Alert.AlertType.WARNING,
+                                "Missing Information",
+                                "Please fill all required fields."
+                        );
 
-                return;
-            }
+                        return;
+                    }
 
-            if (endDate.isBefore(
-                    LocalDate.now())) {
+                    if (endDate.isBefore(
+                            LocalDate.now())) {
 
-                showAlert(
-                        Alert.AlertType.WARNING,
-                        "Invalid Date",
-                        "End date cannot be before today."
-                );
+                        showAlert(
+                                Alert.AlertType.WARNING,
+                                "Invalid Date",
+                                "End date cannot be before today."
+                        );
 
-                return;
-            }
+                        return;
+                    }
 
-            List<String> options =
-                    new ArrayList<>();
+                    List<String> options =
+                            new ArrayList<>();
 
-            options.add(option1);
-            options.add(option2);
+                    options.add(option1);
+                    options.add(option2);
 
-            if (!option3.isEmpty()) {
+                    if (!option3.isEmpty()) {
 
-                options.add(option3);
-            }
+                        options.add(option3);
+                    }
 
-            if (!option4.isEmpty()) {
+                    if (!option4.isEmpty()) {
 
-                options.add(option4);
-            }
+                        options.add(option4);
+                    }
 
-            // =================================================
-            // SAVE
-            // =================================================
+                    // =================================================
+                    // SAVE
+                    // =================================================
 
-            boolean saved =
-                    pollController.createPoll(
-                            question,
-                            type,
-                            description,
-                            endDate.toString(),
-                            audience,
-                            options
-                    );
+                    boolean saved =
+                            pollController.createPoll(
+                                    question,
+                                    type,
+                                    description,
+                                    endDate.toString(),
+                                    audience,
+                                    options
+                            );
 
-            if (saved) {
+                    if (saved) {
 
-                showAlert(
-                        Alert.AlertType.INFORMATION,
-                        "Success",
-                        "Poll created and saved to Firestore successfully."
-                );
+                        showAlert(
+                                Alert.AlertType.INFORMATION,
+                                "Success",
+                                "Poll created and saved to Firestore successfully."
+                        );
 
-                // CLOSE POPUP
-                root.getChildren().remove(
-                        overlay
-                );
+                        // CLOSE POPUP
+                        root.getChildren().remove(
+                                overlay
+                        );
 
-                // REFRESH UI FROM FIRESTORE
-                loadPolls();
+                        // REFRESH UI FROM FIRESTORE
+                        loadPolls();
 
-            } else {
+                    } else {
 
-                showAlert(
-                        Alert.AlertType.ERROR,
-                        "Save Failed",
-                        "Unable to save poll. Please check logged-in email and Firestore connection."
-                );
-            }
-        });
+                        showAlert(
+                                Alert.AlertType.ERROR,
+                                "Save Failed",
+                                "Unable to save poll. Please check logged-in email and Firestore connection."
+                        );
+                    }
+                }
+        );
     }
 
     // =========================================================
@@ -1528,12 +1808,14 @@ public class PollsandSurveys {
             String text) {
 
         Label label =
-                new Label(text);
+                new Label(
+                        text
+                );
 
         label.setStyle(
                 "-fx-font-size:13px;" +
                 "-fx-font-weight:bold;" +
-                "-fx-text-fill:#333333;"
+                "-fx-text-fill:" + TEXT + ";"
         );
 
         return label;
@@ -1547,7 +1829,9 @@ public class PollsandSurveys {
             String message) {
 
         Label label =
-                new Label(message);
+                new Label(
+                        message
+                );
 
         label.setStyle(
                 "-fx-font-size:15px;" +
@@ -1578,7 +1862,9 @@ public class PollsandSurveys {
 
             return LocalDate
                     .parse(date)
-                    .format(dateFormatter);
+                    .format(
+                            dateFormatter
+                    );
 
         } catch (Exception e) {
 
@@ -1610,9 +1896,17 @@ public class PollsandSurveys {
         Alert alert =
                 new Alert(type);
 
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
+        alert.setTitle(
+                title
+        );
+
+        alert.setHeaderText(
+                null
+        );
+
+        alert.setContentText(
+                message
+        );
 
         alert.showAndWait();
     }

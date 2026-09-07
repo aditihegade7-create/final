@@ -8,6 +8,7 @@ import com.society.model.Resident_model.PollModel;
 import com.society.model.Welcome.User;
 import com.society.view.ScreenSize;
 
+import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -15,6 +16,12 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.image.Image;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -25,7 +32,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
+import java.net.URL;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -117,6 +126,55 @@ public class ResidentDashboard {
         BorderPane root =
                 new BorderPane();
 
+        // =====================================================
+        // FULL ROOT BACKGROUND IMAGE
+        // =====================================================
+
+        URL imageURL =
+                getClass().getResource(
+                        "/background-Dashboard5.jpeg"
+                );
+
+        if (imageURL != null) {
+
+            Image backgroundImage =
+                    new Image(
+                            imageURL.toExternalForm()
+                    );
+
+            BackgroundImage background =
+                    new BackgroundImage(
+                            backgroundImage,
+
+                            BackgroundRepeat.NO_REPEAT,
+
+                            BackgroundRepeat.NO_REPEAT,
+
+                            BackgroundPosition.CENTER,
+
+                            new BackgroundSize(
+                                    100,
+                                    100,
+                                    true,
+                                    true,
+                                    false,
+                                    true
+                            )
+                    );
+
+            root.setBackground(
+                    new Background(background)
+            );
+
+        } else {
+
+            System.out.println(
+                    "❌ Background image NOT FOUND: "
+                            + "/background-Dashboard5.jpeg"
+            );
+        }
+
+        // Sidebar remains SOLID
         root.setLeft(
                 panelobj.getSidebar()
         );
@@ -137,9 +195,31 @@ public class ResidentDashboard {
                 )
         );
 
+        /*
+         * IMPORTANT:
+         * Transparent so root background image
+         * can be visible.
+         */
         mainContent.setStyle(
-                "-fx-background-color: #e8ddd5;"
+                "-fx-background-color: transparent;"
         );
+
+        // =========================================================
+        // MAIN PAGE FADE-IN ANIMATION
+        // Sidebar and Header are NOT animated
+        // Only main page content is animated
+        // =========================================================
+
+        FadeTransition pageFade =
+                new FadeTransition(
+                        Duration.millis(700),
+                        mainContent
+                );
+
+        pageFade.setFromValue(0.0);
+        pageFade.setToValue(1.0);
+        pageFade.setCycleCount(1);
+        pageFade.play();
 
         // =====================================================
         // HEADER
@@ -152,6 +232,9 @@ public class ResidentDashboard {
                 Pos.CENTER_LEFT
         );
 
+        /*
+         * HEADER REMAINS SOLID
+         */
         header.setStyle(
                 "-fx-background-color: #4e342e;"
         );
@@ -220,7 +303,9 @@ public class ResidentDashboard {
         );
 
         LocalDate today =
-                LocalDate.now(INDIA_ZONE);
+                LocalDate.now(
+                        INDIA_ZONE
+                );
 
         Label date =
                 new Label(
@@ -295,26 +380,38 @@ public class ResidentDashboard {
                 );
 
         totalBillsLabel =
-                getAmountLabel(totalBills);
+                getAmountLabel(
+                        totalBills
+                );
 
         maintenanceBillsLabel =
-                getAmountLabel(maintenanceBills);
+                getAmountLabel(
+                        maintenanceBills
+                );
 
         maintenanceBottomLabel =
-                getBottomLabel(maintenanceBills);
+                getBottomLabel(
+                        maintenanceBills
+                );
 
         complaintCountLabel =
-                getAmountLabel(complaints);
+                getAmountLabel(
+                        complaints
+                );
 
         visitorCountLabel =
-                getAmountLabel(visitors);
+                getAmountLabel(
+                        visitors
+                );
 
         // =====================================================
         // SUMMARY CARD ACTIONS
         // =====================================================
 
         Button totalDetails =
-                getBottomButton(totalBills);
+                getBottomButton(
+                        totalBills
+                );
 
         if (totalDetails != null) {
 
@@ -324,7 +421,9 @@ public class ResidentDashboard {
         }
 
         Button maintenanceDetails =
-                getBottomButton(maintenanceBills);
+                getBottomButton(
+                        maintenanceBills
+                );
 
         if (maintenanceDetails != null) {
 
@@ -334,7 +433,9 @@ public class ResidentDashboard {
         }
 
         Button complaintDetails =
-                getBottomButton(complaints);
+                getBottomButton(
+                        complaints
+                );
 
         if (complaintDetails != null) {
 
@@ -344,7 +445,9 @@ public class ResidentDashboard {
         }
 
         Button visitorDetails =
-                getBottomButton(visitors);
+                getBottomButton(
+                        visitors
+                );
 
         if (visitorDetails != null) {
 
@@ -685,11 +788,26 @@ public class ResidentDashboard {
                 bottomSection
         );
 
+        // =====================================================
+        // MAIN AREA
+        // =====================================================
+
         BorderPane mainArea =
                 new BorderPane();
 
         mainArea.setTop(header);
         mainArea.setCenter(mainContent);
+
+        /*
+         * IMPORTANT:
+         * MainArea transparent so background image
+         * from root can be seen.
+         *
+         * Header is NOT transparent.
+         */
+        mainArea.setStyle(
+                "-fx-background-color: transparent;"
+        );
 
         root.setCenter(mainArea);
 
@@ -765,8 +883,8 @@ public class ResidentDashboard {
                                         email
                                 );
 
-                        Platform.runLater(() ->
-                                updateDashboard(data)
+                        Platform.runLater(
+                                () -> updateDashboard(data)
                         );
 
                     } catch (Exception e) {
@@ -831,6 +949,7 @@ public class ResidentDashboard {
         }
 
         // Complaints
+
         setAmount(
                 complaintCountLabel,
                 String.valueOf(
@@ -839,6 +958,7 @@ public class ResidentDashboard {
         );
 
         // Visitors
+
         setAmount(
                 visitorCountLabel,
                 String.valueOf(
@@ -847,6 +967,7 @@ public class ResidentDashboard {
         );
 
         // Bills
+
         setAmount(
                 totalBillsLabel,
                 formatMoney(
@@ -877,7 +998,9 @@ public class ResidentDashboard {
             setBottom(
                     maintenanceBottomLabel,
                     "Due: "
-                            + formatDisplayDate(dueDate)
+                            + formatDisplayDate(
+                            dueDate
+                    )
             );
         }
 
@@ -899,34 +1022,78 @@ public class ResidentDashboard {
     // =========================================================
 
     private void updateUpcoming(
-        List<Map<String, Object>> maintenanceList) {
+            List<Map<String, Object>> maintenanceList) {
 
-    upcomingBox.getChildren().clear();
+        upcomingBox.getChildren().clear();
 
-    Label title =
-            new Label("Upcoming / Due");
+        Label title =
+                new Label(
+                        "Upcoming / Due"
+                );
 
-    title.setFont(
-            Font.font(
-                    "System",
-                    FontWeight.BOLD,
-                    17
-            )
-    );
-
-    title.setTextFill(
-            Color.web("#263238")
-    );
-
-    upcomingBox.getChildren().add(title);
-
-    if (maintenanceList == null
-            || maintenanceList.isEmpty()) {
-
-        addDueRow(
-                "Maintenance Due",
-                "No outstanding due"
+        title.setFont(
+                Font.font(
+                        "System",
+                        FontWeight.BOLD,
+                        17
+                )
         );
+
+        title.setTextFill(
+                Color.web("#263238")
+        );
+
+        upcomingBox.getChildren().add(
+                title
+        );
+
+        if (maintenanceList == null
+                || maintenanceList.isEmpty()) {
+
+            addDueRow(
+                    "Maintenance Due",
+                    "No outstanding due"
+            );
+
+            addDueRow(
+                    "Water Bill",
+                    "Not configured"
+            );
+
+            addDueRow(
+                    "Electricity Bill",
+                    "Not configured"
+            );
+
+            return;
+        }
+
+        Map<String, Object> next =
+                findNextOutstandingMaintenance(
+                        maintenanceList
+                );
+
+        if (next != null) {
+
+            String date =
+                    safe(
+                            next.get("date") == null
+                                    ? ""
+                                    : next.get("date").toString()
+                    );
+
+            addDueRow(
+                    "Maintenance Due",
+                    formatDisplayDate(date)
+            );
+
+        } else {
+
+            addDueRow(
+                    "Maintenance Due",
+                    "No outstanding due"
+            );
+        }
 
         addDueRow(
                 "Water Bill",
@@ -937,145 +1104,89 @@ public class ResidentDashboard {
                 "Electricity Bill",
                 "Not configured"
         );
-
-        return;
     }
 
-    Map<String, Object> next =
-            findNextOutstandingMaintenance(
-                    maintenanceList
-            );
-
-    if (next != null) {
-
-        String date =
-                safe(
-                        next.get("date")
-                                == null
-                                ? ""
-                                : next.get("date").toString()
-                );
-
-        addDueRow(
-                "Maintenance Due",
-                formatDisplayDate(date)
-        );
-
-    } else {
-
-        addDueRow(
-                "Maintenance Due",
-                "No outstanding due"
-        );
-    }
-
-    addDueRow(
-            "Water Bill",
-            "Not configured"
-    );
-
-    addDueRow(
-            "Electricity Bill",
-            "Not configured"
-    );
-}
     // =========================================================
     // FIND NEXT OUTSTANDING MAINTENANCE
     // =========================================================
 
     private Map<String, Object> findNextOutstandingMaintenance(
-        List<Map<String, Object>> maintenanceList) {
+            List<Map<String, Object>> maintenanceList) {
 
-    Map<String, Object> selected = null;
+        Map<String, Object> selected = null;
 
-    LocalDate selectedDate =
-            LocalDate.MAX;
+        LocalDate selectedDate =
+                LocalDate.MAX;
 
-    for (Map<String, Object> maintenance
-            : maintenanceList) {
+        for (Map<String, Object> maintenance
+                : maintenanceList) {
 
-        if (maintenance == null) {
-            continue;
-        }
-
-        // -------------------------------------------------
-        // GET STATUS FROM MAP
-        // -------------------------------------------------
-
-        Object statusObject =
-                maintenance.get("status");
-
-        String status =
-                statusObject == null
-                        ? ""
-                        : statusObject.toString().trim()
-                                .toLowerCase();
-
-        // -------------------------------------------------
-        // OUTSTANDING STATUS
-        // -------------------------------------------------
-
-        boolean outstanding =
-                status.isEmpty()
-                        || "pending".equals(status)
-                        || "overdue".equals(status)
-                        || "unpaid".equals(status)
-                        || "open".equals(status);
-
-        if (!outstanding) {
-            continue;
-        }
-
-        // -------------------------------------------------
-        // GET DATE FROM MAP
-        // -------------------------------------------------
-
-        Object dateObject =
-                maintenance.get("date");
-
-        String date =
-                dateObject == null
-                        ? ""
-                        : dateObject.toString().trim();
-
-        // -------------------------------------------------
-        // NO DATE
-        // -------------------------------------------------
-
-        if (date.isEmpty()) {
-
-            if (selected == null) {
-                selected = maintenance;
+            if (maintenance == null) {
+                continue;
             }
 
-            continue;
-        }
+            Object statusObject =
+                    maintenance.get("status");
 
-        // -------------------------------------------------
-        // PARSE DATE
-        // -------------------------------------------------
+            String status =
+                    statusObject == null
+                            ? ""
+                            : statusObject.toString()
+                            .trim()
+                            .toLowerCase();
 
-        try {
+            boolean outstanding =
+                    status.isEmpty()
+                            || "pending".equals(status)
+                            || "overdue".equals(status)
+                            || "unpaid".equals(status)
+                            || "open".equals(status);
 
-            LocalDate parsed =
-                    LocalDate.parse(date);
-
-            if (parsed.isBefore(selectedDate)) {
-
-                selectedDate = parsed;
-                selected = maintenance;
+            if (!outstanding) {
+                continue;
             }
 
-        } catch (Exception ignored) {
+            Object dateObject =
+                    maintenance.get("date");
 
-            if (selected == null) {
-                selected = maintenance;
+            String date =
+                    dateObject == null
+                            ? ""
+                            : dateObject.toString()
+                            .trim();
+
+            if (date.isEmpty()) {
+
+                if (selected == null) {
+                    selected = maintenance;
+                }
+
+                continue;
+            }
+
+            try {
+
+                LocalDate parsed =
+                        LocalDate.parse(date);
+
+                if (parsed.isBefore(
+                        selectedDate
+                )) {
+
+                    selectedDate = parsed;
+                    selected = maintenance;
+                }
+
+            } catch (Exception ignored) {
+
+                if (selected == null) {
+                    selected = maintenance;
+                }
             }
         }
+
+        return selected;
     }
-
-    return selected;
-}
 
     // =========================================================
     // GET STRING FROM MAINTENANCE MAP
@@ -1085,7 +1196,9 @@ public class ResidentDashboard {
             Map<String, Object> map,
             String key) {
 
-        if (map == null || key == null) {
+        if (map == null
+                || key == null) {
+
             return "";
         }
 
@@ -1153,6 +1266,7 @@ public class ResidentDashboard {
                     );
 
             if (titleText.isEmpty()) {
+
                 titleText =
                         "Society Notice";
             }
@@ -1413,7 +1527,9 @@ public class ResidentDashboard {
         );
 
         openPoll.setOnAction(
-                e -> openPolls(stageForPoll())
+                e -> openPolls(
+                        stageForPoll()
+                )
         );
 
         pollContent.getChildren().add(
@@ -1440,7 +1556,8 @@ public class ResidentDashboard {
     // OPEN POLLS
     // =========================================================
 
-    private void openPolls(Stage stage) {
+    private void openPolls(
+            Stage stage) {
 
         if (stage == null) {
             return;
@@ -1471,6 +1588,7 @@ public class ResidentDashboard {
 
         if (stage == null
                 || this.LognEmail.isEmpty()) {
+
             return;
         }
 
@@ -1528,8 +1646,6 @@ public class ResidentDashboard {
                         stage
                 );
 
-        // Visitor shows its own login/session alert when it cannot build a
-        // scene. Do not replace the dashboard with a null scene.
         if (visitorScene == null) {
             return;
         }
@@ -2165,7 +2281,8 @@ public class ResidentDashboard {
     // SAFE STRING
     // =========================================================
 
-    private String safe(String value) {
+    private String safe(
+            String value) {
 
         return value == null
                 ? ""

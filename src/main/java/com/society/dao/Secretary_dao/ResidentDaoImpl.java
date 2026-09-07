@@ -5,35 +5,25 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.cloud.firestore.DocumentReference;
+import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
-
+import com.google.cloud.firestore.QuerySnapshot;
 import com.society.config.FirebaseConfig;
 import com.society.model.Secretary_model.Resident;
 
 public class ResidentDaoImpl implements ResidentDao {
 
-    // =========================================================
-    // FIRESTORE
-    // =========================================================
-
     private final Firestore firestore;
 
-    // =========================================================
-    // COLLECTION
-    // =========================================================
-
-    private static final String COLLECTION =
-            "Residents";
+    private static final String COLLECTION = "Residents";
 
     // =========================================================
     // CONSTRUCTOR
     // =========================================================
 
     public ResidentDaoImpl() {
-
         firestore = FirebaseConfig.getFirestore();
     }
 
@@ -44,165 +34,197 @@ public class ResidentDaoImpl implements ResidentDao {
     @Override
     public boolean addResident(Resident resident) {
 
+        if (resident == null) {
+            System.out.println("ResidentDaoImpl: Resident is null.");
+            return false;
+        }
+
+        String email = clean(resident.getEmail());
+
+        if (email.isEmpty()) {
+            System.out.println("ResidentDaoImpl: Email is empty.");
+            return false;
+        }
+
         try {
 
-            if (resident == null) {
-
-                System.out.println(
-                        "Resident is null."
-                );
-
-                return false;
-            }
-
             // -------------------------------------------------
-            // EMAIL
+            // EMAIL IS USED AS DOCUMENT ID
             // -------------------------------------------------
 
-            String email =
-                    cleanEmail(resident.getEmail());
+            DocumentSnapshot existingDoc = firestore
+                    .collection(COLLECTION)
+                    .document(email)
+                    .get()
+                    .get();
 
-            if (email.isEmpty()) {
-
-                System.out.println(
-                        "Resident email is required."
-                );
-
-                return false;
-            }
+            Map<String, Object> data = new HashMap<>();
 
             // -------------------------------------------------
-            // SOCIETY
-            // -------------------------------------------------
-
-            String society =
-                    clean(resident.getSociety());
-
-            if (society.isEmpty()) {
-
-                System.out.println(
-                        "Resident society is required."
-                );
-
-                return false;
-            }
-
-            // -------------------------------------------------
-            // DOCUMENT
+            // EXISTING DATA
             //
-            // Residents/{email}
+            // If document already exists, first load its data.
+            // This prevents blank values from deleting old data.
             // -------------------------------------------------
 
-            DocumentReference document =
-                    firestore
-                            .collection(COLLECTION)
-                            .document(email);
+            if (existingDoc.exists() && existingDoc.getData() != null) {
+
+                data.putAll(existingDoc.getData());
+
+                System.out.println(
+                        "Existing resident found: " + email
+                );
+            }
 
             // -------------------------------------------------
-            // DATA
+            // BASIC DETAILS
             // -------------------------------------------------
 
-            Map<String, Object> data =
-                    new HashMap<>();
-
-            data.put(
+            putIfNotEmpty(
+                    data,
                     "name",
-                    clean(resident.getName())
+                    resident.getName()
             );
+
+            putIfNotEmpty(
+                    data,
+                    "email",
+                    email
+            );
+
+            putIfNotEmpty(
+                    data,
+                    "phone",
+                    resident.getPhone()
+            );
+
+            putIfNotEmpty(
+                    data,
+                    "flatNo",
+                    resident.getFlatNo()
+            );
+
+            putIfNotEmpty(
+                    data,
+                    "status",
+                    resident.getStatus()
+            );
+
+            // -------------------------------------------------
+            // COMPLETE RESIDENT DETAILS
+            // -------------------------------------------------
+
+            putIfNotEmpty(
+                    data,
+                    "aadhar",
+                    resident.getAadhar()
+            );
+
+            putIfNotEmpty(
+                    data,
+                    "address",
+                    resident.getAddress()
+            );
+
+            putIfNotEmpty(
+                    data,
+                    "dob",
+                    resident.getDob()
+            );
+
+            putIfNotEmpty(
+                    data,
+                    "gender",
+                    resident.getGender()
+            );
+
+            putIfNotEmpty(
+                    data,
+                    "joiningDate",
+                    resident.getJoiningDate()
+            );
+
+            putIfNotEmpty(
+                    data,
+                    "memberSince",
+                    resident.getMemberSince()
+            );
+
+            putIfNotEmpty(
+                    data,
+                    "ownerName",
+                    resident.getOwnerName()
+            );
+
+            putIfNotEmpty(
+                    data,
+                    "society",
+                    resident.getSociety()
+            );
+
+            putIfNotEmpty(
+                    data,
+                    "role",
+                    resident.getRole()
+            );
+
+            // -------------------------------------------------
+            // DEFAULT ROLE
+            // -------------------------------------------------
+
+            if (!data.containsKey("role")
+                    || clean(
+                            String.valueOf(
+                                    data.get("role")
+                            )
+                    ).isEmpty()) {
+
+                data.put(
+                        "role",
+                        "Resident"
+                );
+            }
+
+            // -------------------------------------------------
+            // DEFAULT EMAIL
+            // -------------------------------------------------
 
             data.put(
                     "email",
                     email
             );
 
-            data.put(
-                    "phone",
-                    clean(resident.getPhone())
-            );
-
-            data.put(
-                    "flatNo",
-                    clean(resident.getFlatNo())
-            );
-
-            data.put(
-                    "status",
-                    clean(resident.getStatus())
-            );
-
-            data.put(
-                    "aadhar",
-                    clean(resident.getAadhar())
-            );
-
-            data.put(
-                    "address",
-                    clean(resident.getAddress())
-            );
-
-            data.put(
-                    "dob",
-                    clean(resident.getDob())
-            );
-
-            data.put(
-                    "gender",
-                    clean(resident.getGender())
-            );
-
-            data.put(
-                    "joiningDate",
-                    clean(resident.getJoiningDate())
-            );
-
-            data.put(
-                    "memberSince",
-                    clean(resident.getMemberSince())
-            );
-
-            data.put(
-                    "ownerName",
-                    clean(resident.getOwnerName())
-            );
-
-            // IMPORTANT
-            // Society stored in Firestore
-            data.put(
-                    "society",
-                    society
-            );
-
-            data.put(
-                    "role",
-                    clean(resident.getRole())
-            );
-
             // -------------------------------------------------
             // SAVE
             // -------------------------------------------------
 
-            document
+            firestore
+                    .collection(COLLECTION)
+                    .document(email)
                     .set(data)
                     .get();
 
             System.out.println(
-                    "=========================================="
+                    "Resident saved successfully."
             );
 
             System.out.println(
-                    "RESIDENT SAVED"
+                    "Resident Email : " + email
             );
 
             System.out.println(
-                    "Email   : " + email
+                    "Resident Society : "
+                            + data.get("society")
             );
 
             System.out.println(
-                    "Society : " + society
+                    "Resident Phone : "
+                            + data.get("phone")
             );
 
             System.out.println(
-                    "=========================================="
+                    "Resident Flat : "
+                            + data.get("flatNo")
             );
 
             return true;
@@ -210,8 +232,7 @@ public class ResidentDaoImpl implements ResidentDao {
         } catch (Exception e) {
 
             System.out.println(
-                    "addResident ERROR: "
-                            + e.getMessage()
+                    "ResidentDaoImpl: Error saving resident."
             );
 
             e.printStackTrace();
@@ -232,15 +253,14 @@ public class ResidentDaoImpl implements ResidentDao {
 
         try {
 
-            List<QueryDocumentSnapshot> documents =
-                    firestore
-                            .collection(COLLECTION)
-                            .get()
-                            .get()
-                            .getDocuments();
+            CollectionReference collection =
+                    firestore.collection(COLLECTION);
+
+            QuerySnapshot snapshot =
+                    collection.get().get();
 
             for (QueryDocumentSnapshot document
-                    : documents) {
+                    : snapshot.getDocuments()) {
 
                 Resident resident =
                         documentToResident(document);
@@ -251,16 +271,10 @@ public class ResidentDaoImpl implements ResidentDao {
                 }
             }
 
-            System.out.println(
-                    "ALL RESIDENTS = "
-                            + residents.size()
-            );
-
         } catch (Exception e) {
 
             System.out.println(
-                    "getAllResidents ERROR: "
-                            + e.getMessage()
+                    "ResidentDaoImpl: Error fetching all residents."
             );
 
             e.printStackTrace();
@@ -271,47 +285,109 @@ public class ResidentDaoImpl implements ResidentDao {
 
     // =========================================================
     // GET RESIDENT BY EMAIL
+    //
+    // IMPORTANT:
+    // Email is the Firestore DOCUMENT ID.
+    // So we directly use:
+    //
+    // Residents/{email}
     // =========================================================
 
     @Override
-    public Resident getResidentByEmail(
-            String email
-    ) {
+    public Resident getResidentByEmail(String email) {
+
+        email = cleanEmail(email);
+
+        if (email.isEmpty()) {
+
+            System.out.println(
+                    "getResidentByEmail: Email is empty."
+            );
+
+            return null;
+        }
 
         try {
 
-            String cleanEmail =
-                    cleanEmail(email);
-
-            if (cleanEmail.isEmpty()) {
-
-                return null;
-            }
+            System.out.println(
+                    "Searching resident document: "
+                            + COLLECTION
+                            + "/"
+                            + email
+            );
 
             DocumentSnapshot document =
                     firestore
                             .collection(COLLECTION)
-                            .document(cleanEmail)
+                            .document(email)
                             .get()
                             .get();
+
+            // -------------------------------------------------
+            // DOCUMENT NOT FOUND
+            // -------------------------------------------------
 
             if (!document.exists()) {
 
                 System.out.println(
-                        "Resident not found: "
-                                + cleanEmail
+                        "Resident document NOT FOUND: "
+                                + email
                 );
 
                 return null;
             }
 
-            return documentToResident(document);
+            System.out.println(
+                    "Resident document FOUND: "
+                            + email
+            );
+
+            Resident resident =
+                    documentToResident(document);
+
+            // -------------------------------------------------
+            // DEBUG
+            // -------------------------------------------------
+
+            if (resident != null) {
+
+                System.out.println(
+                        "Name       : "
+                                + resident.getName()
+                );
+
+                System.out.println(
+                        "Email      : "
+                                + resident.getEmail()
+                );
+
+                System.out.println(
+                        "Phone      : "
+                                + resident.getPhone()
+                );
+
+                System.out.println(
+                        "Flat       : "
+                                + resident.getFlatNo()
+                );
+
+                System.out.println(
+                        "Society    : "
+                                + resident.getSociety()
+                );
+
+                System.out.println(
+                        "Role       : "
+                                + resident.getRole()
+                );
+            }
+
+            return resident;
 
         } catch (Exception e) {
 
             System.out.println(
-                    "getResidentByEmail ERROR: "
-                            + e.getMessage()
+                    "ResidentDaoImpl: Error fetching resident by email."
             );
 
             e.printStackTrace();
@@ -332,41 +408,31 @@ public class ResidentDaoImpl implements ResidentDao {
         List<Resident> residents =
                 new ArrayList<>();
 
+        society = clean(society);
+
+        if (society.isEmpty()) {
+
+            System.out.println(
+                    "getResidentsBySociety: Society is empty."
+            );
+
+            return residents;
+        }
+
         try {
 
-            String cleanSociety =
-                    clean(society);
-
-            if (cleanSociety.isEmpty()) {
-
-                System.out.println(
-                        "Society is empty."
-                );
-
-                return residents;
-            }
-
-            // =================================================
-            // FIRESTORE SOCIETY FILTER
-            // =================================================
-
-            List<QueryDocumentSnapshot> documents =
+            QuerySnapshot snapshot =
                     firestore
                             .collection(COLLECTION)
                             .whereEqualTo(
                                     "society",
-                                    cleanSociety
+                                    society
                             )
                             .get()
-                            .get()
-                            .getDocuments();
-
-            // =================================================
-            // CONVERT
-            // =================================================
+                            .get();
 
             for (QueryDocumentSnapshot document
-                    : documents) {
+                    : snapshot.getDocuments()) {
 
                 Resident resident =
                         documentToResident(document);
@@ -378,33 +444,16 @@ public class ResidentDaoImpl implements ResidentDao {
             }
 
             System.out.println(
-                    "=========================================="
-            );
-
-            System.out.println(
-                    "DAO SOCIETY FILTER"
-            );
-
-            System.out.println(
-                    "Society = ["
-                            + cleanSociety
-                            + "]"
-            );
-
-            System.out.println(
-                    "Residents = "
+                    "Residents found for society ["
+                            + society
+                            + "] = "
                             + residents.size()
-            );
-
-            System.out.println(
-                    "=========================================="
             );
 
         } catch (Exception e) {
 
             System.out.println(
-                    "getResidentsBySociety ERROR: "
-                            + e.getMessage()
+                    "ResidentDaoImpl: Error fetching residents by society."
             );
 
             e.printStackTrace();
@@ -421,186 +470,199 @@ public class ResidentDaoImpl implements ResidentDao {
             DocumentSnapshot document
     ) {
 
-        if (document == null ||
-                !document.exists()) {
+        if (document == null
+                || !document.exists()) {
 
             return null;
         }
 
-        Resident resident =
-                new Resident();
+        try {
 
-        // -----------------------------------------------------
-        // NAME
-        // -----------------------------------------------------
+            Resident resident =
+                    new Resident();
 
-        resident.setName(
-                getString(
-                        document,
-                        "name"
-                )
-        );
+            // -------------------------------------------------
+            // NAME
+            // -------------------------------------------------
 
-        // -----------------------------------------------------
-        // EMAIL
-        // -----------------------------------------------------
+            resident.setName(
+                    getString(
+                            document,
+                            "name"
+                    )
+            );
 
-        String email =
-                getString(
-                        document,
-                        "email"
-                );
+            // -------------------------------------------------
+            // EMAIL
+            // -------------------------------------------------
 
-        // If email field is missing,
-        // use document ID.
+            String email =
+                    getString(
+                            document,
+                            "email"
+                    );
 
-        if (email.isEmpty()) {
+            // If email field is missing,
+            // use document ID.
 
-            email =
-                    document.getId();
+            if (email.isEmpty()) {
+
+                email =
+                        document.getId();
+            }
+
+            resident.setEmail(
+                    email
+            );
+
+            // -------------------------------------------------
+            // PHONE
+            // -------------------------------------------------
+
+            resident.setPhone(
+                    getString(
+                            document,
+                            "phone"
+                    )
+            );
+
+            // -------------------------------------------------
+            // FLAT
+            // -------------------------------------------------
+
+            resident.setFlatNo(
+                    getString(
+                            document,
+                            "flatNo"
+                    )
+            );
+
+            // -------------------------------------------------
+            // STATUS
+            // -------------------------------------------------
+
+            resident.setStatus(
+                    getString(
+                            document,
+                            "status"
+                    )
+            );
+
+            // -------------------------------------------------
+            // AADHAR
+            // -------------------------------------------------
+
+            resident.setAadhar(
+                    getString(
+                            document,
+                            "aadhar"
+                    )
+            );
+
+            // -------------------------------------------------
+            // ADDRESS
+            // -------------------------------------------------
+
+            resident.setAddress(
+                    getString(
+                            document,
+                            "address"
+                    )
+            );
+
+            // -------------------------------------------------
+            // DOB
+            // -------------------------------------------------
+
+            resident.setDob(
+                    getString(
+                            document,
+                            "dob"
+                    )
+            );
+
+            // -------------------------------------------------
+            // GENDER
+            // -------------------------------------------------
+
+            resident.setGender(
+                    getString(
+                            document,
+                            "gender"
+                    )
+            );
+
+            // -------------------------------------------------
+            // JOINING DATE
+            // -------------------------------------------------
+
+            resident.setJoiningDate(
+                    getString(
+                            document,
+                            "joiningDate"
+                    )
+            );
+
+            // -------------------------------------------------
+            // MEMBER SINCE
+            // -------------------------------------------------
+
+            resident.setMemberSince(
+                    getString(
+                            document,
+                            "memberSince"
+                    )
+            );
+
+            // -------------------------------------------------
+            // OWNER NAME
+            // -------------------------------------------------
+
+            resident.setOwnerName(
+                    getString(
+                            document,
+                            "ownerName"
+                    )
+            );
+
+            // -------------------------------------------------
+            // SOCIETY
+            // -------------------------------------------------
+
+            resident.setSociety(
+                    getString(
+                            document,
+                            "society"
+                    )
+            );
+
+            // -------------------------------------------------
+            // ROLE
+            // -------------------------------------------------
+
+            resident.setRole(
+                    getString(
+                            document,
+                            "role"
+                    )
+            );
+
+            return resident;
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "ResidentDaoImpl: Error converting document."
+            );
+
+            e.printStackTrace();
+
+            return null;
         }
-
-        resident.setEmail(
-                cleanEmail(email)
-        );
-
-        // -----------------------------------------------------
-        // PHONE
-        // -----------------------------------------------------
-
-        resident.setPhone(
-                getString(
-                        document,
-                        "phone"
-                )
-        );
-
-        // -----------------------------------------------------
-        // FLAT
-        // -----------------------------------------------------
-
-        resident.setFlatNo(
-                getString(
-                        document,
-                        "flatNo"
-                )
-        );
-
-        // -----------------------------------------------------
-        // STATUS
-        // -----------------------------------------------------
-
-        resident.setStatus(
-                getString(
-                        document,
-                        "status"
-                )
-        );
-
-        // -----------------------------------------------------
-        // AADHAR
-        // -----------------------------------------------------
-
-        resident.setAadhar(
-                getString(
-                        document,
-                        "aadhar"
-                )
-        );
-
-        // -----------------------------------------------------
-        // ADDRESS
-        // -----------------------------------------------------
-
-        resident.setAddress(
-                getString(
-                        document,
-                        "address"
-                )
-        );
-
-        // -----------------------------------------------------
-        // DOB
-        // -----------------------------------------------------
-
-        resident.setDob(
-                getString(
-                        document,
-                        "dob"
-                )
-        );
-
-        // -----------------------------------------------------
-        // GENDER
-        // -----------------------------------------------------
-
-        resident.setGender(
-                getString(
-                        document,
-                        "gender"
-                )
-        );
-
-        // -----------------------------------------------------
-        // JOINING DATE
-        // -----------------------------------------------------
-
-        resident.setJoiningDate(
-                getString(
-                        document,
-                        "joiningDate"
-                )
-        );
-
-        // -----------------------------------------------------
-        // MEMBER SINCE
-        // -----------------------------------------------------
-
-        resident.setMemberSince(
-                getString(
-                        document,
-                        "memberSince"
-                )
-        );
-
-        // -----------------------------------------------------
-        // OWNER NAME
-        // -----------------------------------------------------
-
-        resident.setOwnerName(
-                getString(
-                        document,
-                        "ownerName"
-                )
-        );
-
-        // -----------------------------------------------------
-        // SOCIETY
-        // -----------------------------------------------------
-
-        resident.setSociety(
-                getString(
-                        document,
-                        "society"
-                )
-        );
-
-        // -----------------------------------------------------
-        // ROLE
-        // -----------------------------------------------------
-
-        resident.setRole(
-                getString(
-                        document,
-                        "role"
-                )
-        );
-
-        return resident;
     }
 
     // =========================================================
-    // GET STRING
+    // GET STRING FROM FIRESTORE
     // =========================================================
 
     private String getString(
@@ -608,21 +670,41 @@ public class ResidentDaoImpl implements ResidentDao {
             String field
     ) {
 
-        try {
+        Object value =
+                document.get(field);
 
-            String value =
-                    document.getString(field);
-
-            if (value == null) {
-
-                return "";
-            }
-
-            return value.trim();
-
-        } catch (Exception e) {
+        if (value == null) {
 
             return "";
+        }
+
+        return String.valueOf(value).trim();
+    }
+
+    // =========================================================
+    // PUT ONLY NON-EMPTY VALUE
+    //
+    // This is important.
+    //
+    // Empty UI fields will NOT overwrite existing
+    // registration data.
+    // =========================================================
+
+    private void putIfNotEmpty(
+            Map<String, Object> data,
+            String key,
+            String value
+    ) {
+
+        String cleaned =
+                clean(value);
+
+        if (!cleaned.isEmpty()) {
+
+            data.put(
+                    key,
+                    cleaned
+            );
         }
     }
 
@@ -630,7 +712,9 @@ public class ResidentDaoImpl implements ResidentDao {
     // CLEAN
     // =========================================================
 
-    private String clean(String value) {
+    private String clean(
+            String value
+    ) {
 
         if (value == null) {
 
@@ -644,7 +728,9 @@ public class ResidentDaoImpl implements ResidentDao {
     // CLEAN EMAIL
     // =========================================================
 
-    private String cleanEmail(String email) {
+    private String cleanEmail(
+            String email
+    ) {
 
         if (email == null) {
 

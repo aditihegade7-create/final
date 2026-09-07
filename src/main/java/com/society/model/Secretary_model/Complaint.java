@@ -14,23 +14,18 @@ public class Complaint {
     private String status;
     private String imageFileName;
     private Timestamp createdAt;
-
-    // =====================================================
-    // SOCIETY
-    // =====================================================
-
     private String society;
 
-    // =====================================================
+    // ============================================================
     // DEFAULT CONSTRUCTOR
-    // =====================================================
+    // ============================================================
 
     public Complaint() {
     }
 
-    // =====================================================
-    // PARAMETERIZED CONSTRUCTOR
-    // =====================================================
+    // ============================================================
+    // FULL CONSTRUCTOR
+    // ============================================================
 
     public Complaint(
             String id,
@@ -58,105 +53,141 @@ public class Complaint {
         this.society = society;
     }
 
-    // =====================================================
-    // GETTERS
-    // =====================================================
+    // ============================================================
+    // ID
+    // ============================================================
 
     public String getId() {
         return id;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getCategory() {
-        return category;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public String getFlatNumber() {
-        return flatNumber;
-    }
-
-    public String getPreferredDate() {
-        return preferredDate;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public String getImageFileName() {
-        return imageFileName;
-    }
-
-    public Timestamp getCreatedAt() {
-        return createdAt;
-    }
-
-    public String getSociety() {
-        return society;
-    }
-
-    // =====================================================
-    // SETTERS
-    // =====================================================
-
     public void setId(String id) {
         this.id = id;
+    }
+
+    // ============================================================
+    // EMAIL
+    // ============================================================
+
+    public String getEmail() {
+        return email;
     }
 
     public void setEmail(String email) {
         this.email = email;
     }
 
+    // ============================================================
+    // TITLE
+    // ============================================================
+
+    public String getTitle() {
+        return title;
+    }
+
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    // ============================================================
+    // CATEGORY
+    // ============================================================
+
+    public String getCategory() {
+        return category;
     }
 
     public void setCategory(String category) {
         this.category = category;
     }
 
+    // ============================================================
+    // DESCRIPTION
+    // ============================================================
+
+    public String getDescription() {
+        return description;
+    }
+
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    // ============================================================
+    // FLAT NUMBER
+    // ============================================================
+
+    public String getFlatNumber() {
+        return flatNumber;
     }
 
     public void setFlatNumber(String flatNumber) {
         this.flatNumber = flatNumber;
     }
 
+    // ============================================================
+    // PREFERRED DATE
+    // ============================================================
+
+    public String getPreferredDate() {
+        return preferredDate;
+    }
+
     public void setPreferredDate(String preferredDate) {
         this.preferredDate = preferredDate;
+    }
+
+    // ============================================================
+    // STATUS
+    // ============================================================
+
+    public String getStatus() {
+        return status;
     }
 
     public void setStatus(String status) {
         this.status = status;
     }
 
+    // ============================================================
+    // IMAGE FILE NAME
+    // ============================================================
+
+    public String getImageFileName() {
+        return imageFileName;
+    }
+
     public void setImageFileName(String imageFileName) {
         this.imageFileName = imageFileName;
+    }
+
+    // ============================================================
+    // CREATED AT
+    // ============================================================
+
+    public Timestamp getCreatedAt() {
+        return createdAt;
     }
 
     public void setCreatedAt(Timestamp createdAt) {
         this.createdAt = createdAt;
     }
 
+    // ============================================================
+    // SOCIETY
+    // ============================================================
+
+    public String getSociety() {
+        return society;
+    }
+
     public void setSociety(String society) {
         this.society = society;
     }
 
-    // =====================================================
-    // TOSTRING
-    // =====================================================
+    // ============================================================
+    // TO STRING
+    // ============================================================
 
     @Override
     public String toString() {

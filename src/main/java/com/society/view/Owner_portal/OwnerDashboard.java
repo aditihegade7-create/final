@@ -13,15 +13,24 @@ import com.society.controller.Owner_Controller.PaymentController;
 import com.society.controller.Owner_Controller.ResidentController;
 import com.society.model.Owner_model.PaymentModel;
 import com.society.model.Owner_model.ResidentModel;
-
 import com.society.view.ScreenSize;
 
+import javafx.animation.FadeTransition;
+import javafx.animation.ScaleTransition;
+import javafx.animation.TranslateTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.chart.PieChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -30,18 +39,18 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 public class OwnerDashboard {
 
     // ============================================================
-    // SOCIETY360 THEME
+    // THEME
     // ============================================================
 
     private static final String BUTTON_COLOR = "#4E342E";
     private static final String BACKGROUND_COLOR = "#E8DDD5";
-    private static final String SIDEBAR_COLOR = "#593A32";
-
     private static final String CARD_COLOR = "#FFFFFF";
+
     private static final String NAVY_TEXT = "#102A43";
     private static final String SECONDARY_TEXT = "#667085";
     private static final String LIGHT_TEXT = "#98A2B3";
@@ -100,36 +109,76 @@ public class OwnerDashboard {
         // HEADER
         // ========================================================
 
-        HBox header =
-                createHeader();
+        HBox header = createHeader();
 
         // ========================================================
         // CONTENT
         // ========================================================
 
-        VBox content =
-                new VBox();
+        VBox content = new VBox();
 
         content.setSpacing(18);
 
         content.setPadding(
-                new Insets(20, 28, 20, 28)
+                new Insets(25, 35, 25, 35)
         );
 
-        content.setStyle(
-                "-fx-background-color: " +
-                BACKGROUND_COLOR +
-                ";"
-        );
+        content.setAlignment(Pos.TOP_LEFT);
+
+        // ========================================================
+        // BACKGROUND IMAGE
+        // ========================================================
+
+        try {
+
+            Image image = new Image(
+                    OwnerDashboard.class
+                            .getResource(
+                                    "/background-Dashboard5.jpeg"
+                            )
+                            .toExternalForm()
+            );
+
+            BackgroundImage backgroundImage =
+                    new BackgroundImage(
+                            image,
+                            BackgroundRepeat.NO_REPEAT,
+                            BackgroundRepeat.NO_REPEAT,
+                            BackgroundPosition.CENTER,
+                            new BackgroundSize(
+                                    100,
+                                    100,
+                                    true,
+                                    true,
+                                    false,
+                                    true
+                            )
+                    );
+
+            content.setBackground(
+                    new Background(backgroundImage)
+            );
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "Background image not found."
+            );
+
+            content.setStyle(
+                    "-fx-background-color: " +
+                    BACKGROUND_COLOR +
+                    ";"
+            );
+        }
 
         // ========================================================
         // STAT CARDS
         // ========================================================
 
-        HBox cards =
-                new HBox();
+        HBox cards = new HBox();
 
-        cards.setSpacing(16);
+        cards.setSpacing(15);
 
         VBox totalTenants =
                 createStatCard(
@@ -216,15 +265,14 @@ public class OwnerDashboard {
         // INFORMATION SECTION
         // ========================================================
 
-        HBox information =
-                new HBox();
+        HBox information = new HBox();
 
-        information.setSpacing(18);
+        information.setSpacing(20);
 
         VBox incomeOverview =
                 createIncomeOverview(data);
 
-        VBox recentActivity =
+        VBox activity =
                 createRecentActivity(
                         data.recentPayments
                 );
@@ -235,35 +283,30 @@ public class OwnerDashboard {
         );
 
         HBox.setHgrow(
-                recentActivity,
+                activity,
                 Priority.ALWAYS
         );
 
         information.getChildren().addAll(
                 incomeOverview,
-                recentActivity
+                activity
         );
 
         // ========================================================
         // NOTICE
         // ========================================================
 
-        /*
-         * Notice remains unchanged for now because no NoticeDao /
-         * NoticeModel was supplied with the current Owner Portal
-         * files. We will connect this in the Notice step.
-         */
-        HBox notice =
+        HBox noticeBox =
                 createNotice();
 
         // ========================================================
-        // CONTENT
+        // ADD CONTENT
         // ========================================================
 
         content.getChildren().addAll(
                 cards,
                 information,
-                notice
+                noticeBox
         );
 
         // ========================================================
@@ -283,14 +326,58 @@ public class OwnerDashboard {
         root.setCenter(mainArea);
 
         // ========================================================
+        // ANIMATIONS
+        // ========================================================
+
+        animateCard(
+                totalTenants,
+                0
+        );
+
+        animateCard(
+                rentReceived,
+                100
+        );
+
+        animateCard(
+                pendingAmount,
+                200
+        );
+
+        animateCard(
+                upcomingDue,
+                300
+        );
+
+        animateBox(
+                incomeOverview,
+                400
+        );
+
+        animateBox(
+                activity,
+                500
+        );
+
+        animateBox(
+                noticeBox,
+                600
+        );
+
+      //  animateHeader(header);
+
+        // ========================================================
         // SCENE
         // ========================================================
 
-        return new Scene(
-                root,
-                ScreenSize.getWidth(),
-                ScreenSize.getHeight()
-        );
+        Scene scene =
+                new Scene(
+                        root,
+                        ScreenSize.getWidth(),
+                        ScreenSize.getHeight()
+                );
+
+        return scene;
     }
 
     // ============================================================
@@ -301,34 +388,29 @@ public class OwnerDashboard {
 
         HBox header = new HBox();
 
-        header.setPrefHeight(100);
-        header.setMinHeight(100);
-        header.setMaxHeight(100);
+        header.setPrefHeight(80);
+        header.setMinHeight(80);
+        header.setMaxHeight(80);
 
         header.setPadding(
-                new Insets(20, 28, 20, 28)
+                new Insets(15, 25, 15, 25)
         );
 
         header.setAlignment(
                 Pos.CENTER_LEFT
         );
 
-        /*
-         * Main Society360 header color
-         */
         header.setStyle(
                 "-fx-background-color: " +
                 BUTTON_COLOR +
                 ";"
         );
 
-        // ========================================================
+        // --------------------------------------------------------
         // LEFT SIDE
-        // ========================================================
+        // --------------------------------------------------------
 
-        VBox greetingBox = new VBox();
-
-        greetingBox.setSpacing(4);
+        VBox v1 = new VBox(4);
 
         Label greeting =
                 new Label(
@@ -336,29 +418,30 @@ public class OwnerDashboard {
                 );
 
         greeting.setStyle(
-                "-fx-font-size: 25px;" +
-                "-fx-font-weight: bold;" +
-                "-fx-text-fill: white;"
+                "-fx-font-family:'Bodoni MT';" +
+                "-fx-font-size:24px;" +
+                "-fx-font-weight:bold;" +
+                "-fx-text-fill:#ffffff;"
         );
 
         Label subtitle =
                 new Label(
-                        "Here's what's happening in your society today."
+                        "This is your dashboard"
                 );
 
         subtitle.setStyle(
-                "-fx-font-size: 13px;" +
-                "-fx-text-fill: #E9DED8;"
+                "-fx-font-size:14px;" +
+                "-fx-text-fill:#ffffff;"
         );
 
-        greetingBox.getChildren().addAll(
+        v1.getChildren().addAll(
                 greeting,
                 subtitle
         );
 
-        // ========================================================
+        // --------------------------------------------------------
         // SPACER
-        // ========================================================
+        // --------------------------------------------------------
 
         Region spacer = new Region();
 
@@ -367,112 +450,18 @@ public class OwnerDashboard {
                 Priority.ALWAYS
         );
 
-        // ========================================================
-        // NOTIFICATION
-        // ========================================================
-
-        StackPane notification =
-                createNotification();
-
-        // ========================================================
+        // --------------------------------------------------------
         // DATE
-        // ========================================================
-
-        VBox dateBox =
-                createHeaderDate();
-
-        header.getChildren().addAll(
-                greetingBox,
-                spacer,
-                notification,
-                dateBox
-        );
-
-        return header;
-    }
-
-    // ============================================================
-    // HEADER NOTIFICATION
-    // ============================================================
-
-    private static StackPane createNotification() {
-
-        StackPane box =
-                new StackPane();
-
-        box.setPrefSize(46, 46);
-        box.setMinSize(46, 46);
-        box.setMaxSize(46, 46);
-
-        box.setStyle(
-                "-fx-background-color: rgba(255,255,255,0.12);" +
-                "-fx-background-radius: 23;" +
-                "-fx-border-color: rgba(255,255,255,0.25);" +
-                "-fx-border-radius: 23;"
-        );
-
-        Label bell =
-                new Label("♧");
-
-        bell.setStyle(
-                "-fx-font-size: 20px;" +
-                "-fx-text-fill: white;"
-        );
-
-        Label count =
-                new Label("3");
-
-        count.setPrefSize(18, 18);
-        count.setMinSize(18, 18);
-        count.setMaxSize(18, 18);
-
-        count.setAlignment(
-                Pos.CENTER
-        );
-
-        count.setStyle(
-                "-fx-background-color: #D85A50;" +
-                "-fx-background-radius: 9;" +
-                "-fx-text-fill: white;" +
-                "-fx-font-size: 9px;" +
-                "-fx-font-weight: bold;"
-        );
-
-        StackPane.setAlignment(
-                count,
-                Pos.TOP_RIGHT
-        );
-
-        StackPane.setMargin(
-                count,
-                new Insets(-2, -2, 0, 0)
-        );
-
-        box.getChildren().addAll(
-                bell,
-                count
-        );
-
-        HBox.setMargin(
-                box,
-                new Insets(0, 14, 0, 0)
-        );
-
-        return box;
-    }
-
-    // ============================================================
-    // HEADER DATE
-    // ============================================================
-
-    private static VBox createHeaderDate() {
+        // --------------------------------------------------------
 
         LocalDate today =
                 LocalDate.now();
 
         String day =
                 today.format(
-                        DateTimeFormatter.ofPattern("EEEE")
+                        DateTimeFormatter.ofPattern(
+                                "EEEE"
+                        )
                 );
 
         String date =
@@ -482,55 +471,54 @@ public class OwnerDashboard {
                         )
                 );
 
-        VBox box =
-                new VBox();
+        VBox dateBox = new VBox();
 
-        box.setSpacing(2);
+        dateBox.setSpacing(2);
 
-        box.setAlignment(
+        dateBox.setAlignment(
                 Pos.CENTER_LEFT
         );
 
-        box.setPadding(
+        dateBox.setPadding(
                 new Insets(8, 15, 8, 15)
         );
 
-        box.setPrefWidth(175);
-        box.setMinWidth(175);
-        box.setMaxWidth(175);
-
-        box.setPrefHeight(58);
-
-        box.setStyle(
-                "-fx-background-color: rgba(255,255,255,0.10);" +
-                "-fx-background-radius: 10;" +
-                "-fx-border-color: rgba(255,255,255,0.20);" +
-                "-fx-border-radius: 10;"
+        dateBox.setStyle(
+                "-fx-background-color:rgba(255,255,255,0.10);" +
+                "-fx-background-radius:10;" +
+                "-fx-border-color:rgba(255,255,255,0.20);" +
+                "-fx-border-radius:10;"
         );
 
         Label dayLabel =
                 new Label(day);
 
         dayLabel.setStyle(
-                "-fx-font-size: 11px;" +
-                "-fx-font-weight: bold;" +
-                "-fx-text-fill: white;"
+                "-fx-font-size:11px;" +
+                "-fx-font-weight:bold;" +
+                "-fx-text-fill:white;"
         );
 
         Label dateLabel =
                 new Label(date);
 
         dateLabel.setStyle(
-                "-fx-font-size: 12px;" +
-                "-fx-text-fill: #E9DED8;"
+                "-fx-font-size:12px;" +
+                "-fx-text-fill:#E9DED8;"
         );
 
-        box.getChildren().addAll(
+        dateBox.getChildren().addAll(
                 dayLabel,
                 dateLabel
         );
 
-        return box;
+        header.getChildren().addAll(
+                v1,
+                spacer,
+                dateBox
+        );
+
+        return header;
     }
 
     // ============================================================
@@ -545,8 +533,7 @@ public class OwnerDashboard {
             String iconBackground,
             String iconColor) {
 
-        VBox card =
-                new VBox();
+        VBox card = new VBox();
 
         card.setSpacing(4);
 
@@ -558,19 +545,18 @@ public class OwnerDashboard {
         card.setPrefHeight(120);
 
         card.setStyle(
-                "-fx-background-color: " +
+                "-fx-background-color:" +
                 CARD_COLOR +
                 ";" +
-                "-fx-background-radius: 13;" +
-                "-fx-border-color: " +
+                "-fx-background-radius:13;" +
+                "-fx-border-color:" +
                 BORDER_COLOR +
                 ";" +
-                "-fx-border-radius: 13;" +
-                "-fx-effect: dropshadow(gaussian, rgba(80,50,40,0.08), 8, 0, 0, 2);"
+                "-fx-border-radius:13;" +
+                "-fx-effect:dropshadow(gaussian, rgba(80,50,40,0.08), 8, 0, 0, 2);"
         );
 
-        HBox row =
-                new HBox();
+        HBox row = new HBox();
 
         row.setSpacing(12);
 
@@ -585,24 +571,35 @@ public class OwnerDashboard {
         StackPane iconBox =
                 new StackPane();
 
-        iconBox.setPrefSize(50, 50);
-        iconBox.setMinSize(50, 50);
-        iconBox.setMaxSize(50, 50);
+        iconBox.setPrefSize(
+                50,
+                50
+        );
+
+        iconBox.setMinSize(
+                50,
+                50
+        );
+
+        iconBox.setMaxSize(
+                50,
+                50
+        );
 
         iconBox.setStyle(
-                "-fx-background-color: " +
+                "-fx-background-color:" +
                 iconBackground +
                 ";" +
-                "-fx-background-radius: 25;"
+                "-fx-background-radius:25;"
         );
 
         Label iconLabel =
                 new Label(icon);
 
         iconLabel.setStyle(
-                "-fx-font-size: 20px;" +
-                "-fx-font-weight: bold;" +
-                "-fx-text-fill: " +
+                "-fx-font-size:20px;" +
+                "-fx-font-weight:bold;" +
+                "-fx-text-fill:" +
                 iconColor +
                 ";"
         );
@@ -615,8 +612,7 @@ public class OwnerDashboard {
         // TEXT
         // --------------------------------------------------------
 
-        VBox text =
-                new VBox();
+        VBox text = new VBox();
 
         text.setSpacing(2);
 
@@ -624,8 +620,8 @@ public class OwnerDashboard {
                 new Label(title);
 
         titleLabel.setStyle(
-                "-fx-font-size: 12px;" +
-                "-fx-text-fill: " +
+                "-fx-font-size:12px;" +
+                "-fx-text-fill:" +
                 SECONDARY_TEXT +
                 ";"
         );
@@ -634,9 +630,9 @@ public class OwnerDashboard {
                 new Label(value);
 
         valueLabel.setStyle(
-                "-fx-font-size: 22px;" +
-                "-fx-font-weight: bold;" +
-                "-fx-text-fill: " +
+                "-fx-font-size:22px;" +
+                "-fx-font-weight:bold;" +
+                "-fx-text-fill:" +
                 NAVY_TEXT +
                 ";"
         );
@@ -645,8 +641,8 @@ public class OwnerDashboard {
                 new Label(subtitle);
 
         subtitleLabel.setStyle(
-                "-fx-font-size: 10px;" +
-                "-fx-text-fill: " +
+                "-fx-font-size:10px;" +
+                "-fx-text-fill:" +
                 LIGHT_TEXT +
                 ";"
         );
@@ -662,9 +658,36 @@ public class OwnerDashboard {
                 text
         );
 
-        card.getChildren().add(
-                row
-        );
+        card.getChildren().add(row);
+
+        // Hover animation
+        card.setOnMouseEntered(e -> {
+
+            ScaleTransition scale =
+                    new ScaleTransition(
+                            Duration.millis(150),
+                            card
+                    );
+
+            scale.setToX(1.03);
+            scale.setToY(1.03);
+
+            scale.play();
+        });
+
+        card.setOnMouseExited(e -> {
+
+            ScaleTransition scale =
+                    new ScaleTransition(
+                            Duration.millis(150),
+                            card
+                    );
+
+            scale.setToX(1);
+            scale.setToY(1);
+
+            scale.play();
+        });
 
         return card;
     }
@@ -676,8 +699,7 @@ public class OwnerDashboard {
     private static VBox createIncomeOverview(
             DashboardData data) {
 
-        VBox box =
-                new VBox();
+        VBox box = new VBox();
 
         box.setSpacing(12);
 
@@ -689,75 +711,34 @@ public class OwnerDashboard {
         box.setPrefHeight(330);
 
         box.setStyle(
-                "-fx-background-color: white;" +
-                "-fx-background-radius: 14;" +
-                "-fx-border-color: " +
+                "-fx-background-color:white;" +
+                "-fx-background-radius:14;" +
+                "-fx-border-color:" +
                 BORDER_COLOR +
                 ";" +
-                "-fx-border-radius: 14;" +
-                "-fx-effect: dropshadow(gaussian, rgba(80,50,40,0.08), 8, 0, 0, 2);"
+                "-fx-border-radius:14;" +
+                "-fx-effect:dropshadow(gaussian, rgba(80,50,40,0.08), 8, 0, 0, 2);"
         );
 
         // --------------------------------------------------------
-        // TITLE
+        // HEADING
         // --------------------------------------------------------
 
-        HBox heading =
-                new HBox();
-
-        heading.setAlignment(
-                Pos.CENTER_LEFT
-        );
-
-        Label title =
+        Label heading =
                 new Label(
                         "Income Overview"
                 );
 
-        title.setStyle(
-                "-fx-font-size: 19px;" +
-                "-fx-font-weight: bold;" +
-                "-fx-text-fill: " +
+        heading.setStyle(
+                "-fx-font-size:20px;" +
+                "-fx-font-weight:bold;" +
+                "-fx-text-fill:" +
                 NAVY_TEXT +
                 ";"
         );
 
-        Region spacer =
-                new Region();
-
-        HBox.setHgrow(
-                spacer,
-                Priority.ALWAYS
-        );
-
-        Button filter =
-                new Button(
-                        "This Month  ˅"
-                );
-
-        filter.setStyle(
-                "-fx-background-color: white;" +
-                "-fx-border-color: " +
-                BORDER_COLOR +
-                ";" +
-                "-fx-border-radius: 8;" +
-                "-fx-background-radius: 8;" +
-                "-fx-text-fill: " +
-                BUTTON_COLOR +
-                ";" +
-                "-fx-font-size: 11px;" +
-                "-fx-padding: 7 12 7 12;" +
-                "-fx-cursor: hand;"
-        );
-
-        heading.getChildren().addAll(
-                title,
-                spacer,
-                filter
-        );
-
         // --------------------------------------------------------
-        // PIE CHART
+        // TOTAL INCOME
         // --------------------------------------------------------
 
         double totalIncome =
@@ -765,11 +746,6 @@ public class OwnerDashboard {
                 data.maintenanceIncome +
                 data.otherIncome;
 
-        /*
-         * PieChart does not behave well with three zero values.
-         * Give it one tiny invisible-ish slice only when there
-         * is no income, while the center still shows ₹0.
-         */
         double rentValue =
                 data.rentIncome;
 
@@ -780,10 +756,15 @@ public class OwnerDashboard {
                 data.otherIncome;
 
         if (totalIncome <= 0) {
+
             rentValue = 1;
             maintenanceValue = 0;
             otherValue = 0;
         }
+
+        // --------------------------------------------------------
+        // PIE CHART
+        // --------------------------------------------------------
 
         PieChart.Data rent =
                 new PieChart.Data(
@@ -803,50 +784,53 @@ public class OwnerDashboard {
                         otherValue
                 );
 
-        PieChart chart =
+        PieChart pieChart =
                 new PieChart();
 
-        chart.getData().addAll(
+        pieChart.getData().addAll(
                 rent,
                 maintenance,
                 other
         );
 
-        chart.setLabelsVisible(false);
-        chart.setLegendVisible(false);
-        chart.setAnimated(false);
+        pieChart.setLabelsVisible(false);
+        pieChart.setLegendVisible(false);
+        pieChart.setAnimated(false);
 
-        chart.setPrefSize(
-                190,
-                190
+        pieChart.setPrefSize(
+                180,
+                180
         );
 
-        chart.setMinSize(
-                190,
-                190
+        pieChart.setMinSize(
+                180,
+                180
         );
 
-        chart.applyCss();
+        pieChart.applyCss();
 
         if (rent.getNode() != null) {
+
             rent.getNode().setStyle(
-                    "-fx-pie-color: " +
+                    "-fx-pie-color:" +
                     BUTTON_COLOR +
                     ";"
             );
         }
 
         if (maintenance.getNode() != null) {
+
             maintenance.getNode().setStyle(
-                    "-fx-pie-color: " +
+                    "-fx-pie-color:" +
                     GREEN +
                     ";"
             );
         }
 
         if (other.getNode() != null) {
+
             other.getNode().setStyle(
-                    "-fx-pie-color: " +
+                    "-fx-pie-color:" +
                     GOLD +
                     ";"
             );
@@ -856,22 +840,22 @@ public class OwnerDashboard {
         // DONUT CENTER
         // --------------------------------------------------------
 
-        Circle center =
-                new Circle(50);
+        Circle centerCircle =
+                new Circle(48);
 
-        center.setStyle(
-                "-fx-fill: white;"
+        centerCircle.setStyle(
+                "-fx-fill:white;"
         );
 
-        Label total =
+        Label totalAmount =
                 new Label(
                         formatAmount(totalIncome)
                 );
 
-        total.setStyle(
-                "-fx-font-size: 16px;" +
-                "-fx-font-weight: bold;" +
-                "-fx-text-fill: " +
+        totalAmount.setStyle(
+                "-fx-font-size:15px;" +
+                "-fx-font-weight:bold;" +
+                "-fx-text-fill:" +
                 NAVY_TEXT +
                 ";"
         );
@@ -882,33 +866,33 @@ public class OwnerDashboard {
                 );
 
         totalText.setStyle(
-                "-fx-font-size: 10px;" +
-                "-fx-text-fill: " +
+                "-fx-font-size:10px;" +
+                "-fx-text-fill:" +
                 SECONDARY_TEXT +
                 ";"
         );
 
-        VBox centerContent =
+        VBox centerText =
                 new VBox(
-                        2,
-                        total,
+                        1,
+                        totalAmount,
                         totalText
                 );
 
-        centerContent.setAlignment(
+        centerText.setAlignment(
                 Pos.CENTER
         );
 
-        StackPane chartContainer =
+        StackPane chart =
                 new StackPane(
-                        chart,
-                        center,
-                        centerContent
+                        pieChart,
+                        centerCircle,
+                        centerText
                 );
 
-        chartContainer.setPrefSize(
-                200,
-                200
+        chart.setPrefSize(
+                190,
+                190
         );
 
         // --------------------------------------------------------
@@ -972,14 +956,14 @@ public class OwnerDashboard {
         HBox content =
                 new HBox();
 
-        content.setSpacing(20);
+        content.setSpacing(15);
 
         content.setAlignment(
                 Pos.CENTER_LEFT
         );
 
         content.getChildren().addAll(
-                chartContainer,
+                chart,
                 details
         );
 
@@ -1001,20 +985,11 @@ public class OwnerDashboard {
             String percentage,
             String color) {
 
-        HBox row =
-                new HBox();
-
-        row.setSpacing(7);
-
-        row.setAlignment(
-                Pos.CENTER_LEFT
-        );
-
         Circle dot =
-                new Circle(5.5);
+                new Circle(6);
 
         dot.setStyle(
-                "-fx-fill: " +
+                "-fx-fill:" +
                 color +
                 ";"
         );
@@ -1023,9 +998,9 @@ public class OwnerDashboard {
                 new Label(name);
 
         nameLabel.setStyle(
-                "-fx-font-size: 12px;" +
-                "-fx-font-weight: bold;" +
-                "-fx-text-fill: #344054;"
+                "-fx-font-size:13px;" +
+                "-fx-font-weight:bold;" +
+                "-fx-text-fill:#37474F;"
         );
 
         Region spacer =
@@ -1040,9 +1015,9 @@ public class OwnerDashboard {
                 new Label(amount);
 
         amountLabel.setStyle(
-                "-fx-font-size: 12px;" +
-                "-fx-font-weight: bold;" +
-                "-fx-text-fill: " +
+                "-fx-font-size:13px;" +
+                "-fx-font-weight:bold;" +
+                "-fx-text-fill:" +
                 NAVY_TEXT +
                 ";"
         );
@@ -1051,8 +1026,17 @@ public class OwnerDashboard {
                 new Label(percentage);
 
         percentageLabel.setStyle(
-                "-fx-font-size: 10px;" +
-                "-fx-text-fill: #6B9D79;"
+                "-fx-font-size:10px;" +
+                "-fx-text-fill:#6B9D79;"
+        );
+
+        HBox row =
+                new HBox();
+
+        row.setSpacing(8);
+
+        row.setAlignment(
+                Pos.CENTER_LEFT
         );
 
         row.setPrefWidth(250);
@@ -1075,8 +1059,7 @@ public class OwnerDashboard {
     private static VBox createRecentActivity(
             List<PaymentModel> payments) {
 
-        VBox box =
-                new VBox();
+        VBox box = new VBox();
 
         box.setSpacing(10);
 
@@ -1088,14 +1071,18 @@ public class OwnerDashboard {
         box.setPrefHeight(330);
 
         box.setStyle(
-                "-fx-background-color: white;" +
-                "-fx-background-radius: 14;" +
-                "-fx-border-color: " +
+                "-fx-background-color:white;" +
+                "-fx-background-radius:14;" +
+                "-fx-border-color:" +
                 BORDER_COLOR +
                 ";" +
-                "-fx-border-radius: 14;" +
-                "-fx-effect: dropshadow(gaussian, rgba(80,50,40,0.08), 8, 0, 0, 2);"
+                "-fx-border-radius:14;" +
+                "-fx-effect:dropshadow(gaussian, rgba(80,50,40,0.08), 8, 0, 0, 2);"
         );
+
+        // --------------------------------------------------------
+        // HEADING
+        // --------------------------------------------------------
 
         HBox heading =
                 new HBox();
@@ -1110,9 +1097,9 @@ public class OwnerDashboard {
                 );
 
         title.setStyle(
-                "-fx-font-size: 19px;" +
-                "-fx-font-weight: bold;" +
-                "-fx-text-fill: " +
+                "-fx-font-size:20px;" +
+                "-fx-font-weight:bold;" +
+                "-fx-text-fill:" +
                 NAVY_TEXT +
                 ";"
         );
@@ -1131,25 +1118,31 @@ public class OwnerDashboard {
                 );
 
         viewAll.setStyle(
-                "-fx-background-color: white;" +
-                "-fx-border-color: " +
+                "-fx-background-color:white;" +
+                "-fx-border-color:" +
                 BORDER_COLOR +
                 ";" +
-                "-fx-border-radius: 8;" +
-                "-fx-background-radius: 8;" +
-                "-fx-text-fill: " +
+                "-fx-border-radius:8;" +
+                "-fx-background-radius:8;" +
+                "-fx-text-fill:" +
                 BUTTON_COLOR +
                 ";" +
-                "-fx-font-size: 11px;" +
-                "-fx-padding: 7 12 7 12;" +
-                "-fx-cursor: hand;"
+                "-fx-font-size:11px;" +
+                "-fx-padding:7 12 7 12;" +
+                "-fx-cursor:hand;"
         );
+
+        addButtonAnimation(viewAll);
 
         heading.getChildren().addAll(
                 title,
                 spacer,
                 viewAll
         );
+
+        // --------------------------------------------------------
+        // ACTIVITY LIST
+        // --------------------------------------------------------
 
         VBox activityList =
                 new VBox();
@@ -1158,10 +1151,15 @@ public class OwnerDashboard {
 
         int count = 0;
 
-        for (PaymentModel payment : payments) {
+        for (PaymentModel payment :
+                payments) {
 
             if (count >= 3) {
                 break;
+            }
+
+            if (payment == null) {
+                continue;
             }
 
             activityList.getChildren().add(
@@ -1173,6 +1171,7 @@ public class OwnerDashboard {
             count++;
 
             if (count < 3) {
+
                 activityList.getChildren().add(
                         createDivider()
                 );
@@ -1187,15 +1186,20 @@ public class OwnerDashboard {
                     );
 
             empty.setStyle(
-                    "-fx-font-size: 11px;" +
-                    "-fx-text-fill: " +
+                    "-fx-font-size:12px;" +
+                    "-fx-text-fill:" +
                     SECONDARY_TEXT +
                     ";"
             );
 
             VBox.setMargin(
                     empty,
-                    new Insets(20, 0, 0, 0)
+                    new Insets(
+                            20,
+                            0,
+                            0,
+                            0
+                    )
             );
 
             activityList.getChildren().add(
@@ -1259,19 +1263,19 @@ public class OwnerDashboard {
         );
 
         iconBox.setStyle(
-                "-fx-background-color: " +
+                "-fx-background-color:" +
                 iconBackground +
                 ";" +
-                "-fx-background-radius: 11;"
+                "-fx-background-radius:11;"
         );
 
         Label iconLabel =
                 new Label(icon);
 
         iconLabel.setStyle(
-                "-fx-font-size: 17px;" +
-                "-fx-font-weight: bold;" +
-                "-fx-text-fill: " +
+                "-fx-font-size:17px;" +
+                "-fx-font-weight:bold;" +
+                "-fx-text-fill:" +
                 iconColor +
                 ";"
         );
@@ -1281,7 +1285,7 @@ public class OwnerDashboard {
         );
 
         // --------------------------------------------------------
-        // INFORMATION
+        // INFO
         // --------------------------------------------------------
 
         VBox info =
@@ -1293,9 +1297,9 @@ public class OwnerDashboard {
                 new Label(title);
 
         titleLabel.setStyle(
-                "-fx-font-size: 12px;" +
-                "-fx-font-weight: bold;" +
-                "-fx-text-fill: " +
+                "-fx-font-size:12px;" +
+                "-fx-font-weight:bold;" +
+                "-fx-text-fill:" +
                 NAVY_TEXT +
                 ";"
         );
@@ -1304,8 +1308,8 @@ public class OwnerDashboard {
                 new Label(date);
 
         dateLabel.setStyle(
-                "-fx-font-size: 10px;" +
-                "-fx-text-fill: " +
+                "-fx-font-size:10px;" +
+                "-fx-text-fill:" +
                 SECONDARY_TEXT +
                 ";"
         );
@@ -1315,10 +1319,6 @@ public class OwnerDashboard {
                 dateLabel
         );
 
-        // --------------------------------------------------------
-        // SPACER
-        // --------------------------------------------------------
-
         Region spacer =
                 new Region();
 
@@ -1327,29 +1327,28 @@ public class OwnerDashboard {
                 Priority.ALWAYS
         );
 
-        // --------------------------------------------------------
-        // AMOUNT
-        // --------------------------------------------------------
-
         Label amountLabel =
                 new Label(amount);
 
         String amountColor;
 
         if (amount.startsWith("+")) {
+
             amountColor = GREEN;
-        }
-        else if (amount.startsWith("-")) {
+
+        } else if (amount.startsWith("-")) {
+
             amountColor = NAVY_TEXT;
-        }
-        else {
+
+        } else {
+
             amountColor = RED;
         }
 
         amountLabel.setStyle(
-                "-fx-font-size: 12px;" +
-                "-fx-font-weight: bold;" +
-                "-fx-text-fill: " +
+                "-fx-font-size:12px;" +
+                "-fx-font-weight:bold;" +
+                "-fx-text-fill:" +
                 amountColor +
                 ";"
         );
@@ -1378,14 +1377,14 @@ public class OwnerDashboard {
         divider.setMaxHeight(1);
 
         divider.setStyle(
-                "-fx-background-color: #EEE6E1;"
+                "-fx-background-color:#EEE6E1;"
         );
 
         return divider;
     }
 
     // ============================================================
-    // CREATE ACTIVITY FROM FIRESTORE PAYMENT
+    // CREATE ACTIVITY FROM PAYMENT
     // ============================================================
 
     private static HBox createActivityFromPayment(
@@ -1402,65 +1401,91 @@ public class OwnerDashboard {
                 );
 
         String title;
+
         String icon;
+
         String iconBackground;
+
         String iconColor;
+
         String amountPrefix = "";
 
         if (status.equals("received")) {
 
-            if (paymentFor.contains("maintenance")) {
-                title = "Maintenance Received";
-                icon = "₹";
-                iconBackground = "#EDF5E9";
-                iconColor = GREEN;
+            if (paymentFor.contains(
+                    "maintenance")) {
+
+                title =
+                        "Maintenance Received";
+
+            } else if (
+                    paymentFor.contains("rent")) {
+
+                title =
+                        "Payment Received";
+
+            } else {
+
+                title =
+                        "Payment Received";
             }
-            else if (paymentFor.contains("rent")) {
-                title = "Payment Received";
-                icon = "₹";
-                iconBackground = "#EDF5E9";
-                iconColor = GREEN;
-            }
-            else {
-                title = "Payment Received";
-                icon = "₹";
-                iconBackground = "#EDF5E9";
-                iconColor = GREEN;
-            }
+
+            icon = "₹";
+
+            iconBackground = "#EDF5E9";
+
+            iconColor = GREEN;
 
             amountPrefix = "+ ";
 
         } else if (status.equals("pending")) {
 
-            if (paymentFor.contains("maintenance")) {
-                title = "Maintenance Due";
-            }
-            else if (paymentFor.contains("rent")) {
-                title = "Rent Due";
-            }
-            else {
-                title = "Payment Due";
+            if (paymentFor.contains(
+                    "maintenance")) {
+
+                title =
+                        "Maintenance Due";
+
+            } else if (
+                    paymentFor.contains("rent")) {
+
+                title =
+                        "Rent Due";
+
+            } else {
+
+                title =
+                        "Payment Due";
             }
 
             icon = "▣";
+
             iconBackground = "#FBF0E5";
+
             iconColor = "#C98545";
 
         } else if (status.equals("overdue")) {
 
-            title = paymentFor.contains("rent")
-                    ? "Rent Overdue"
-                    : "Payment Overdue";
+            title =
+                    paymentFor.contains("rent")
+                            ? "Rent Overdue"
+                            : "Payment Overdue";
 
             icon = "!";
+
             iconBackground = "#F8E9E7";
+
             iconColor = RED;
 
         } else {
 
-            title = "Payment Activity";
+            title =
+                    "Payment Activity";
+
             icon = "₹";
+
             iconBackground = "#F0EAFB";
+
             iconColor = PURPLE;
         }
 
@@ -1472,13 +1497,18 @@ public class OwnerDashboard {
                 );
 
         if (!amountPrefix.isEmpty()) {
-            amount = amountPrefix + amount;
+
+            amount =
+                    amountPrefix +
+                    amount;
         }
 
         return createActivity(
                 icon,
                 title,
-                safeString(payment.getDate()),
+                safeString(
+                        payment.getDate()
+                ),
                 amount,
                 iconBackground,
                 iconColor
@@ -1506,7 +1536,9 @@ public class OwnerDashboard {
         }
 
         String normalizedEmail =
-                ownerEmail.trim().toLowerCase();
+                ownerEmail
+                        .trim()
+                        .toLowerCase();
 
         try {
 
@@ -1531,9 +1563,9 @@ public class OwnerDashboard {
             LocalDate today =
                     LocalDate.now();
 
-            // ----------------------------------------------------
+            // ====================================================
             // ACTIVE TENANTS
-            // ----------------------------------------------------
+            // ====================================================
 
             for (ResidentModel resident :
                     residents) {
@@ -1557,13 +1589,14 @@ public class OwnerDashboard {
                         );
 
                 if (isTenant && isActive) {
+
                     data.activeTenantCount++;
                 }
             }
 
-            // ----------------------------------------------------
-            // PAYMENT CALCULATIONS
-            // ----------------------------------------------------
+            // ====================================================
+            // PAYMENTS
+            // ====================================================
 
             for (PaymentModel payment :
                     payments) {
@@ -1593,7 +1626,7 @@ public class OwnerDashboard {
                         );
 
                 // ------------------------------------------------
-                // CURRENT MONTH RECEIVED INCOME
+                // CURRENT MONTH RECEIVED
                 // ------------------------------------------------
 
                 if (status.equals("received") &&
@@ -1606,6 +1639,7 @@ public class OwnerDashboard {
                     if (paymentFor.contains("rent")) {
 
                         data.rentReceived += amount;
+
                         data.rentIncome += amount;
 
                     } else if (
@@ -1624,7 +1658,7 @@ public class OwnerDashboard {
                 }
 
                 // ------------------------------------------------
-                // PENDING AMOUNT
+                // PENDING
                 // ------------------------------------------------
 
                 if (status.equals("pending")) {
@@ -1638,11 +1672,10 @@ public class OwnerDashboard {
 
                     if (!tenantEmail.isEmpty()) {
 
-                        data.pendingTenantEmails
-                                .add(
-                                        tenantEmail
-                                                .toLowerCase()
-                                );
+                        data.pendingTenantEmails.add(
+                                tenantEmail
+                                        .toLowerCase()
+                        );
                     }
 
                     // --------------------------------------------
@@ -1650,11 +1683,9 @@ public class OwnerDashboard {
                     // --------------------------------------------
 
                     if (paymentDate != null &&
-                            paymentDate
-                                    .getYear()
+                            paymentDate.getYear()
                                     == today.getYear() &&
-                            paymentDate
-                                    .getMonthValue()
+                            paymentDate.getMonthValue()
                                     == today.getMonthValue() &&
                             !paymentDate.isBefore(
                                     today
@@ -1668,9 +1699,9 @@ public class OwnerDashboard {
             data.pendingTenantCount =
                     data.pendingTenantEmails.size();
 
-            // ----------------------------------------------------
+            // ====================================================
             // RECENT ACTIVITY
-            // ----------------------------------------------------
+            // ====================================================
 
             List<PaymentModel> sortedPayments =
                     new ArrayList<>(
@@ -1693,6 +1724,10 @@ public class OwnerDashboard {
 
             data.recentPayments =
                     sortedPayments;
+
+            // ====================================================
+            // DEBUG
+            // ====================================================
 
             System.out.println(
                     "===================================="
@@ -1923,6 +1958,7 @@ public class OwnerDashboard {
             double total) {
 
         if (total <= 0) {
+
             return "0.0%";
         }
 
@@ -1946,7 +1982,7 @@ public class OwnerDashboard {
     }
 
     // ============================================================
-    // LOWERCASE STRING
+    // SAFE LOWERCASE
     // ============================================================
 
     private static String safeLower(
@@ -1966,13 +2002,17 @@ public class OwnerDashboard {
         int activeTenantCount;
 
         double rentReceived;
+
         double pendingAmount;
 
         int pendingTenantCount;
+
         int upcomingDueCount;
 
         double rentIncome;
+
         double maintenanceIncome;
+
         double otherIncome;
 
         List<String> pendingTenantEmails =
@@ -1998,17 +2038,22 @@ public class OwnerDashboard {
         );
 
         notice.setPadding(
-                new Insets(13, 18, 13, 18)
+                new Insets(
+                        13,
+                        18,
+                        13,
+                        18
+                )
         );
 
         notice.setMinHeight(78);
         notice.setPrefHeight(78);
 
         notice.setStyle(
-                "-fx-background-color: #F7F1ED;" +
-                "-fx-background-radius: 13;" +
-                "-fx-border-color: #DCCFC7;" +
-                "-fx-border-radius: 13;"
+                "-fx-background-color:#F7F1ED;" +
+                "-fx-background-radius:13;" +
+                "-fx-border-color:#DCCFC7;" +
+                "-fx-border-radius:13;"
         );
 
         // --------------------------------------------------------
@@ -2034,19 +2079,19 @@ public class OwnerDashboard {
         );
 
         iconBox.setStyle(
-                "-fx-background-color: " +
+                "-fx-background-color:" +
                 BUTTON_COLOR +
                 ";" +
-                "-fx-background-radius: 23;"
+                "-fx-background-radius:23;"
         );
 
         Label icon =
                 new Label("!");
 
         icon.setStyle(
-                "-fx-font-size: 20px;" +
-                "-fx-font-weight: bold;" +
-                "-fx-text-fill: white;"
+                "-fx-font-size:20px;" +
+                "-fx-font-weight:bold;" +
+                "-fx-text-fill:white;"
         );
 
         iconBox.getChildren().add(
@@ -2066,9 +2111,9 @@ public class OwnerDashboard {
                 new Label("Notice");
 
         heading.setStyle(
-                "-fx-font-size: 15px;" +
-                "-fx-font-weight: bold;" +
-                "-fx-text-fill: " +
+                "-fx-font-size:15px;" +
+                "-fx-font-weight:bold;" +
+                "-fx-text-fill:" +
                 NAVY_TEXT +
                 ";"
         );
@@ -2080,8 +2125,8 @@ public class OwnerDashboard {
                 );
 
         text.setStyle(
-                "-fx-font-size: 11px;" +
-                "-fx-text-fill: #5F6368;"
+                "-fx-font-size:11px;" +
+                "-fx-text-fill:#5F6368;"
         );
 
         info.getChildren().addAll(
@@ -2119,15 +2164,17 @@ public class OwnerDashboard {
         );
 
         viewNotices.setStyle(
-                "-fx-background-color: " +
+                "-fx-background-color:" +
                 BUTTON_COLOR +
                 ";" +
-                "-fx-background-radius: 8;" +
-                "-fx-text-fill: white;" +
-                "-fx-font-size: 11px;" +
-                "-fx-font-weight: bold;" +
-                "-fx-cursor: hand;"
+                "-fx-background-radius:8;" +
+                "-fx-text-fill:white;" +
+                "-fx-font-size:11px;" +
+                "-fx-font-weight:bold;" +
+                "-fx-cursor:hand;"
         );
+
+        addButtonAnimation(viewNotices);
 
         notice.getChildren().addAll(
                 iconBox,
@@ -2137,5 +2184,186 @@ public class OwnerDashboard {
         );
 
         return notice;
+    }
+
+    // ============================================================
+    // CARD ANIMATION
+    // ============================================================
+
+    private static void animateCard(
+            VBox card,
+            int delay) {
+
+        card.setOpacity(0);
+
+        card.setTranslateY(30);
+
+        card.setScaleX(0.95);
+
+        card.setScaleY(0.95);
+
+        FadeTransition fade =
+                new FadeTransition(
+                        Duration.millis(500),
+                        card
+                );
+
+        fade.setFromValue(0);
+
+        fade.setToValue(1);
+
+        fade.setDelay(
+                Duration.millis(delay)
+        );
+
+        TranslateTransition slide =
+                new TranslateTransition(
+                        Duration.millis(500),
+                        card
+                );
+
+        slide.setFromY(30);
+
+        slide.setToY(0);
+
+        slide.setDelay(
+                Duration.millis(delay)
+        );
+
+        ScaleTransition scale =
+                new ScaleTransition(
+                        Duration.millis(350),
+                        card
+                );
+
+        scale.setFromX(0.95);
+
+        scale.setFromY(0.95);
+
+        scale.setToX(1);
+
+        scale.setToY(1);
+
+        scale.setDelay(
+                Duration.millis(delay)
+        );
+
+        fade.play();
+
+        slide.play();
+
+        scale.play();
+    }
+
+    // ============================================================
+    // BOX ANIMATION
+    // ============================================================
+
+    private static void animateBox(
+        Node box,
+        int delay) {
+
+    box.setOpacity(0);
+    box.setTranslateY(25);
+
+    FadeTransition fade =
+            new FadeTransition(
+                    Duration.millis(600),
+                    box
+            );
+
+    fade.setFromValue(0);
+    fade.setToValue(1);
+    fade.setDelay(
+            Duration.millis(delay)
+    );
+
+    TranslateTransition slide =
+            new TranslateTransition(
+                    Duration.millis(600),
+                    box
+            );
+
+    slide.setFromY(25);
+    slide.setToY(0);
+    slide.setDelay(
+            Duration.millis(delay)
+    );
+
+    fade.play();
+    slide.play();
+}
+
+    // ============================================================
+    // HEADER ANIMATION
+    // ============================================================
+
+   
+    // ============================================================
+    // BUTTON ANIMATION
+    // ============================================================
+
+    private static void addButtonAnimation(
+            Button button) {
+
+        button.setOnMouseEntered(e -> {
+
+            ScaleTransition scale =
+                    new ScaleTransition(
+                            Duration.millis(120),
+                            button
+                    );
+
+            scale.setToX(1.06);
+
+            scale.setToY(1.06);
+
+            scale.play();
+        });
+
+        button.setOnMouseExited(e -> {
+
+            ScaleTransition scale =
+                    new ScaleTransition(
+                            Duration.millis(120),
+                            button
+                    );
+
+            scale.setToX(1);
+
+            scale.setToY(1);
+
+            scale.play();
+        });
+
+        button.setOnMousePressed(e -> {
+
+            ScaleTransition scale =
+                    new ScaleTransition(
+                            Duration.millis(80),
+                            button
+                    );
+
+            scale.setToX(0.96);
+
+            scale.setToY(0.96);
+
+            scale.play();
+        });
+
+        button.setOnMouseReleased(e -> {
+
+            ScaleTransition scale =
+                    new ScaleTransition(
+                            Duration.millis(80),
+                            button
+                    );
+
+            scale.setToX(1.06);
+
+            scale.setToY(1.06);
+
+            scale.play();
+        });
     }
 }

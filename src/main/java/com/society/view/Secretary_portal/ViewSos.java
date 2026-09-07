@@ -1,5 +1,8 @@
 package com.society.view.Secretary_portal;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -8,7 +11,6 @@ import java.util.List;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.Timestamp;
 import com.google.cloud.firestore.CollectionReference;
-import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
@@ -26,6 +28,12 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tooltip;
+import javafx.scene.image.Image;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -63,6 +71,13 @@ public class ViewSos {
     private static final String BORDER = "#EEEEEE";
     private static final String WHITE = "#FFFFFF";
     private static final String GREY = "#777777";
+
+    // =========================================================
+    // BACKGROUND IMAGE
+    // =========================================================
+
+    private static final String BACKGROUND_IMAGE =
+            "/background-Dashboard5.jpeg";
 
     // =========================================================
     // DATA
@@ -118,14 +133,167 @@ public class ViewSos {
                 sidebarObj.createSidebar(stage);
 
         // =====================================================
-        // MAIN CONTENT
+        // RIGHT SIDE
+        // HEADER + CONTENT
+        // =====================================================
+
+        VBox rightSide =
+                new VBox();
+
+        rightSide.setMaxSize(
+                Double.MAX_VALUE,
+                Double.MAX_VALUE
+        );
+
+        rightSide.setStyle(
+                "-fx-background-color:transparent;"
+        );
+
+        // =====================================================
+        // HEADER
+        // HEADER IS DIRECTLY ATTACHED WITH SIDEBAR
+        // =====================================================
+
+        HBox header =
+                new HBox();
+
+        header.setPrefHeight(80);
+        header.setMinHeight(80);
+        header.setMaxHeight(80);
+
+        header.setPadding(
+                new Insets(20)
+        );
+
+        header.setAlignment(
+                Pos.CENTER_LEFT
+        );
+
+        header.setStyle(
+                "-fx-background-color: #4e342e;"
+        );
+
+        // =====================================================
+        // GREETING
+        // =====================================================
+
+        Label greeting =
+                new Label( "SOS Alert"
+                      
+                );
+
+        greeting.setStyle(
+                "-fx-font-size:24px;" +
+                "-fx-font-weight:bold;" +
+                "-fx-text-fill:white;"
+        );
+
+         Label subtitle =
+                new Label(
+                        "View emergency alerts from residents and guards"
+                );
+
+        subtitle.setStyle(
+                "-fx-font-size:13px;" +
+                "-fx-text-fill:" + GREY + ";"
+        );
+
+        // =====================================================
+        // HEADER SPACER
+        // =====================================================
+
+        Region headerSpacer =
+                new Region();
+
+        HBox.setHgrow(
+                headerSpacer,
+                Priority.ALWAYS
+        );
+
+        // =====================================================
+        // NOTIFICATION
+        // =====================================================
+
+        Label notification =
+                new Label("🔔");
+
+        notification.setStyle(
+                "-fx-font-size:20px;" +
+                "-fx-text-fill:white;"
+        );
+
+        // =====================================================
+        // CURRENT DATE
+        // =====================================================
+
+        LocalDate today =
+                LocalDate.now();
+
+        Label day =
+                new Label(
+                        today.format(
+                                DateTimeFormatter.ofPattern(
+                                        "EEEE"
+                                )
+                        )
+                );
+
+        day.setStyle(
+                "-fx-font-size:13px;" +
+                "-fx-font-weight:bold;" +
+                "-fx-text-fill:white;"
+        );
+
+        Label date =
+                new Label(
+                        today.format(
+                                DateTimeFormatter.ofPattern(
+                                        "dd MMMM yyyy"
+                                )
+                        )
+                );
+
+        date.setStyle(
+                "-fx-font-size:12px;" +
+                "-fx-text-fill:white;"
+        );
+
+        // =====================================================
+        // DATE BOX
+        // =====================================================
+
+        VBox dateBox =
+                new VBox(
+                        2,
+                        day,
+                        date
+                );
+
+        dateBox.setAlignment(
+                Pos.CENTER_RIGHT
+        );
+
+        // =====================================================
+        // HEADER CONTENT
+        // =====================================================
+
+        header.getChildren().addAll(
+                greeting,
+                subtitle,
+                headerSpacer,
+                notification,
+                dateBox
+        );
+
+        // =====================================================
+        // ALERT CONTENT PANEL
         // =====================================================
 
         VBox mainvb =
                 new VBox(20);
 
         mainvb.setPadding(
-                new Insets(25)
+                new Insets(20, 20, 20, 20)
         );
 
         mainvb.setPrefWidth(1220);
@@ -143,53 +311,24 @@ public class ViewSos {
         // HEADING
         // =====================================================
 
-        Label heading =
-                new Label("VIEW SOS ALERTS");
-
-        heading.setStyle(
-                "-fx-font-size:18px;" +
-                "-fx-font-weight:bold;" +
-                "-fx-text-fill:" + DARK + ";"
-        );
 
         // =====================================================
         // TITLE
         // =====================================================
 
-        Label title =
-                new Label("SOS Alerts");
-
-        title.setStyle(
-                "-fx-font-size:20px;" +
-                "-fx-font-weight:bold;" +
-                "-fx-text-fill:black;"
-        );
 
         // =====================================================
         // SUBTITLE
         // =====================================================
 
-        Label subtitle =
-                new Label(
-                        "View emergency alerts from residents and guards"
-                );
-
-        subtitle.setStyle(
-                "-fx-font-size:13px;" +
-                "-fx-text-fill:" + GREY + ";"
-        );
+       
 
         // =====================================================
         // TITLE BOX
         // =====================================================
 
-        VBox titleBox =
-                new VBox(5);
-
-        titleBox.getChildren().addAll(
-                title,
-                subtitle
-        );
+        
+       
 
         // =====================================================
         // FILTER BUTTONS
@@ -278,7 +417,7 @@ public class ViewSos {
         );
 
         // =====================================================
-        // TOP FILTER AREA
+        // FILTER AREA
         // =====================================================
 
         HBox filterArea =
@@ -315,6 +454,10 @@ public class ViewSos {
 
         sosList.setFillWidth(true);
 
+        sosList.setStyle(
+                "-fx-background-color:transparent;"
+        );
+
         // =====================================================
         // SCROLL PANE
         // =====================================================
@@ -327,6 +470,7 @@ public class ViewSos {
         );
 
         scrollPane.setFitToWidth(true);
+
         scrollPane.setFitToHeight(false);
 
         scrollPane.setPrefHeight(500);
@@ -335,9 +479,25 @@ public class ViewSos {
                 Double.MAX_VALUE
         );
 
+        // =====================================================
+        // INVISIBLE SCROLLBARS
+        // =====================================================
+
+        scrollPane.setHbarPolicy(
+                ScrollPane.ScrollBarPolicy.NEVER
+        );
+
+        scrollPane.setVbarPolicy(
+                ScrollPane.ScrollBarPolicy.NEVER
+        );
+
+        scrollPane.setPannable(true);
+
         scrollPane.setStyle(
                 "-fx-background-color:transparent;" +
-                "-fx-border-color:transparent;"
+                "-fx-background:transparent;" +
+                "-fx-border-color:transparent;" +
+                "-fx-padding:0;"
         );
 
         // =====================================================
@@ -410,13 +570,7 @@ public class ViewSos {
                         "View All SOS Alerts"
                 );
 
-        viewAllBtn.setPrefWidth(
-                1180
-        );
-
-        viewAllBtn.setPrefHeight(
-                40
-        );
+        viewAllBtn.setPrefHeight(40);
 
         viewAllBtn.setMaxWidth(
                 Double.MAX_VALUE
@@ -444,19 +598,69 @@ public class ViewSos {
         });
 
         // =====================================================
-        // ADD CONTENT
+        // ADD CONTENT TO MAIN PANEL
         // =====================================================
 
         mainvb.getChildren().addAll(
-                heading,
-                titleBox,
+               
                 filterArea,
                 scrollPane,
                 viewAllBtn
         );
 
         // =====================================================
+        // CONTENT HOLDER
+        // 12px GAP BETWEEN SIDEBAR AND ALERT PANEL
+        // =====================================================
+
+        HBox contentHolder =
+                new HBox();
+
+        contentHolder.setMaxSize(
+                Double.MAX_VALUE,
+                Double.MAX_VALUE
+        );
+
+        contentHolder.setPadding(
+                new Insets(0, 0, 0, 12)
+        );
+
+        contentHolder.setStyle(
+                "-fx-background-color:transparent;"
+        );
+
+        contentHolder.getChildren().add(
+                mainvb
+        );
+
+        HBox.setHgrow(
+                mainvb,
+                Priority.ALWAYS
+        );
+
+        VBox.setVgrow(
+                contentHolder,
+                Priority.ALWAYS
+        );
+
+        // =====================================================
+        // RIGHT SIDE = HEADER + CONTENT
+        // =====================================================
+
+        rightSide.getChildren().addAll(
+                header,
+                contentHolder
+        );
+
+        VBox.setVgrow(
+                contentHolder,
+                Priority.ALWAYS
+        );
+
+        // =====================================================
         // ROOT
+        // SIDEBAR + RIGHT SIDE
+        // HEADER ATTACHED TO SIDEBAR
         // =====================================================
 
         HBox root =
@@ -468,16 +672,16 @@ public class ViewSos {
         );
 
         root.setStyle(
-                "-fx-background-color:" + DARK + ";"
+                "-fx-background-color:transparent;"
         );
 
         root.getChildren().addAll(
                 sidebar,
-                mainvb
+                rightSide
         );
 
         HBox.setHgrow(
-                mainvb,
+                rightSide,
                 Priority.ALWAYS
         );
 
@@ -503,12 +707,110 @@ public class ViewSos {
         stage.show();
 
         // =====================================================
+        // BACKGROUND IMAGE
+        // ONLY ALERT CONTENT AREA
+        // =====================================================
+
+        try {
+
+            if (getClass().getResource(
+                    BACKGROUND_IMAGE
+            ) != null) {
+
+                Image backgroundImage =
+                        new Image(
+                                getClass()
+                                        .getResource(
+                                                BACKGROUND_IMAGE
+                                        )
+                                        .toExternalForm()
+                        );
+
+                BackgroundImage bgImage =
+                        new BackgroundImage(
+                                backgroundImage,
+                                BackgroundRepeat.NO_REPEAT,
+                                BackgroundRepeat.NO_REPEAT,
+                                BackgroundPosition.CENTER,
+                                new BackgroundSize(
+                                        100,
+                                        100,
+                                        true,
+                                        true,
+                                        false,
+                                        true
+                                )
+                        );
+
+                mainvb.setBackground(
+                        new Background(
+                                bgImage
+                        )
+                );
+
+            } else {
+
+                System.err.println(
+                        "Background image not found: "
+                                + BACKGROUND_IMAGE
+                );
+
+                mainvb.setStyle(
+                        "-fx-background-color:"
+                                + BACKGROUND
+                                + ";"
+                );
+            }
+
+        } catch (Exception e) {
+
+            System.err.println(
+                    "Background image could not be loaded: "
+                            + e.getMessage()
+            );
+
+            mainvb.setStyle(
+                    "-fx-background-color:"
+                            + BACKGROUND
+                            + ";"
+            );
+        }
+
+        // =====================================================
         // FETCH FIRESTORE
         // =====================================================
 
         fetchEmergencyAlerts();
 
         return viewSosScene;
+    }
+
+
+    // =========================================================
+    // GET GREETING
+    // =========================================================
+
+    private String getGreeting() {
+
+        int hour =
+                LocalTime.now().getHour();
+
+        if (hour >= 5 && hour < 12) {
+
+            return "Good Morning";
+
+        } else if (hour >= 12 && hour < 17) {
+
+            return "Good Afternoon";
+
+        } else if (hour >= 17 && hour < 21) {
+
+            return "Good Evening";
+
+        } else {
+
+            return "Good Night";
+        }
     }
 
 
@@ -580,10 +882,6 @@ public class ViewSos {
 
     private void fetchEmergencyAlerts() {
 
-        // =====================================================
-        // REFRESH BUTTON DISABLE
-        // =====================================================
-
         if (refreshBtn != null) {
 
             refreshBtn.setDisable(true);
@@ -593,18 +891,10 @@ public class ViewSos {
 
             try {
 
-                // =================================================
-                // CLEAR OLD DATA
-                // =================================================
-
                 synchronized (allAlerts) {
 
                     allAlerts.clear();
                 }
-
-                // =================================================
-                // CHECK SOCIETY
-                // =================================================
 
                 if (currentSociety == null ||
                         currentSociety.trim().isEmpty()) {
@@ -629,6 +919,7 @@ public class ViewSos {
                         );
 
                         if (refreshBtn != null) {
+
                             refreshBtn.setDisable(false);
                         }
                     });
@@ -636,18 +927,10 @@ public class ViewSos {
                     return;
                 }
 
-                // =================================================
-                // EMERGENCY ALERTS COLLECTION
-                // =================================================
-
                 CollectionReference emergencyCollection =
                         db.collection(
                                 "emergency_alerts"
                         );
-
-                // =================================================
-                // GET ALL EMAIL DOCUMENTS
-                // =================================================
 
                 ApiFuture<QuerySnapshot> parentFuture =
                         emergencyCollection.get();
@@ -660,26 +943,13 @@ public class ViewSos {
                         + parentSnapshot.size()
                 );
 
-                // =================================================
-                // LOOP THROUGH EVERY EMAIL DOCUMENT
-                // =================================================
-
                 for (QueryDocumentSnapshot emailDocument :
                         parentSnapshot.getDocuments()) {
-
-                    // =================================================
-                    // PARENT EMAIL
-                    // =================================================
 
                     String parentEmail =
                             safeString(
                                     emailDocument.getString("email")
                             );
-
-                    // -------------------------------------------------
-                    // IF email FIELD DOES NOT EXIST
-                    // USE DOCUMENT ID
-                    // -------------------------------------------------
 
                     if (parentEmail.isEmpty()) {
 
@@ -689,18 +959,10 @@ public class ViewSos {
                                 );
                     }
 
-                    // =================================================
-                    // PARENT SOCIETY
-                    // =================================================
-
                     String parentSociety =
                             safeString(
                                     emailDocument.getString("society")
                             );
-
-                    // =================================================
-                    // STRICT SOCIETY FILTER
-                    // =================================================
 
                     if (parentSociety.isEmpty()) {
 
@@ -725,26 +987,14 @@ public class ViewSos {
                         continue;
                     }
 
-                    // =================================================
-                    // THIS EMAIL BELONGS TO CURRENT SOCIETY
-                    // =================================================
-
                     System.out.println(
                             "Fetching SOS for email: "
                             + parentEmail
                     );
 
-                    // =================================================
-                    // ALERT SUBCOLLECTION
-                    // =================================================
-
                     CollectionReference alertsCollection =
                             emailDocument.getReference()
                                     .collection("alert");
-
-                    // =================================================
-                    // GET ALL ALERT DOCUMENTS
-                    // =================================================
 
                     ApiFuture<QuerySnapshot> alertsFuture =
                             alertsCollection.get();
@@ -758,10 +1008,6 @@ public class ViewSos {
                             + " = "
                             + alertsSnapshot.size()
                     );
-
-                    // =================================================
-                    // LOOP THROUGH ALL ALERTS
-                    // =================================================
 
                     for (QueryDocumentSnapshot alertDocument :
                             alertsSnapshot.getDocuments()) {
@@ -778,10 +1024,6 @@ public class ViewSos {
                             continue;
                         }
 
-                        // =================================================
-                        // FINAL SOCIETY CHECK
-                        // =================================================
-
                         if (!alert.society.isEmpty() &&
                                 !alert.society.equalsIgnoreCase(
                                         currentSociety
@@ -789,10 +1031,6 @@ public class ViewSos {
 
                             continue;
                         }
-
-                        // =================================================
-                        // ADD ALERT
-                        // =================================================
 
                         synchronized (allAlerts) {
 
@@ -803,10 +1041,6 @@ public class ViewSos {
                     }
                 }
 
-                // =================================================
-                // SORT LATEST FIRST
-                // =================================================
-
                 synchronized (allAlerts) {
 
                     allAlerts.sort(
@@ -816,10 +1050,6 @@ public class ViewSos {
                             ).reversed()
                     );
                 }
-
-                // =================================================
-                // UI UPDATE
-                // =================================================
 
                 Platform.runLater(() -> {
 
@@ -834,10 +1064,6 @@ public class ViewSos {
                         refreshBtn.setDisable(false);
                     }
                 });
-
-                // =================================================
-                // DEBUG
-                // =================================================
 
                 System.out.println(
                         "===================================="
@@ -908,34 +1134,15 @@ public class ViewSos {
             SosAlertData alert =
                     new SosAlertData();
 
-            // =================================================
-            // ALERT ID
-            // =================================================
-
             alert.alertId =
                     safeString(
                             document.getId()
                     );
 
-            // =================================================
-            // IMPORTANT:
-            //
-            // EMAIL IS TAKEN FROM PARENT DOCUMENT
-            //
-            // NOT FROM alert.email
-            //
-            // This makes sure every email document is fetched
-            // separately internally.
-            // =================================================
-
             alert.email =
                     safeString(
                             parentEmail
                     );
-
-            // =================================================
-            // SOCIETY
-            // =================================================
 
             String alertSociety =
                     document.getString(
@@ -954,20 +1161,12 @@ public class ViewSos {
                             alertSociety
                     );
 
-            // =================================================
-            // TYPE
-            // =================================================
-
             alert.type =
                     safeString(
                             document.getString(
                                     "type"
                             )
                     );
-
-            // =================================================
-            // LOCATION
-            // =================================================
 
             alert.location =
                     safeString(
@@ -976,20 +1175,12 @@ public class ViewSos {
                             )
                     );
 
-            // =================================================
-            // DETAILS
-            // =================================================
-
             alert.details =
                     safeString(
                             document.getString(
                                     "details"
                             )
                     );
-
-            // =================================================
-            // STATUS
-            // =================================================
 
             alert.status =
                     safeString(
@@ -998,20 +1189,12 @@ public class ViewSos {
                             )
                     );
 
-            // =================================================
-            // TIME
-            // =================================================
-
             alert.time =
                     safeString(
                             document.getString(
                                     "time"
                             )
                     );
-
-            // =================================================
-            // CREATED AT
-            // =================================================
 
             Object createdAt =
                     document.get(
@@ -1122,10 +1305,6 @@ public class ViewSos {
 
         sosList.getChildren().clear();
 
-        // =====================================================
-        // FILTER ALERTS
-        // =====================================================
-
         List<SosAlertData> filtered =
                 new ArrayList<>();
 
@@ -1158,6 +1337,7 @@ public class ViewSos {
                         filtered.add(
                                 alert
                         );
+
                     }
 
                 } else {
@@ -1168,10 +1348,6 @@ public class ViewSos {
                 }
             }
         }
-
-        // =====================================================
-        // NO DATA
-        // =====================================================
 
         if (filtered.isEmpty()) {
 
@@ -1218,14 +1394,6 @@ public class ViewSos {
             return;
         }
 
-        // =====================================================
-        // FLAT LIST
-        //
-        // NO EMAIL GROUPING
-        // NO EMAIL SECTION
-        // NO HARDCODED NAME
-        // =====================================================
-
         for (SosAlertData alert :
                 filtered) {
 
@@ -1261,7 +1429,7 @@ public class ViewSos {
         );
 
         sos.setStyle(
-                "-fx-background-color:white;" +
+                "-fx-background-color:rgba(255,255,255,0.96);" +
                 "-fx-background-radius:10;" +
                 "-fx-border-color:" + BORDER + ";" +
                 "-fx-border-radius:10;"
@@ -1518,6 +1686,7 @@ public class ViewSos {
          *
          * NEVER displayed in UI.
          */
+
         String email = "";
 
         String society = "";
