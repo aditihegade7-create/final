@@ -8,13 +8,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.google.api.core.ApiFuture;
 import com.google.cloud.Timestamp;
 import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
-import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
 import com.society.config.FirebaseConfig;
 import com.society.model.Secretary_model.DashboardData;
@@ -24,35 +22,32 @@ import com.society.model.Secretary_model.DashboardData;
  * DashboardDao
  * ============================================================
  *
- * Fetches Secretary Dashboard data according to the
+ * Secretary Dashboard data is fetched according to the
  * currently logged-in Secretary's society.
  *
- * IMPORTANT:
+ * Complaint structure:
  *
- * Secretaries:
- *     Secretaries/{email}
- *          society
+ * complaints
+ *    / residentEmail
+ *       / complaints
+ *          / complaintId
  *
- * Residents:
- *     society OR societyName
+ * Complaint count flow:
  *
- * Owners:
- *     society
+ * Secretary Email
+ *       ↓
+ * Secretaries/{secretaryEmail}
+ *       ↓
+ * society
+ *       ↓
+ * Residents where society == secretary society
+ *       ↓
+ * resident email
+ *       ↓
+ * complaints/{residentEmail}/complaints
+ *       ↓
+ * count OPEN / IN PROGRESS complaints
  *
- * Guards:
- *     society
- *
- * Complaints:
- *     complaints/{residentEmail}/complaints/{complaintId}
- *
- * Maintenance:
- *     Maintenance/{secretaryEmail}/records/{maintenanceId}
- *
- * SOS:
- *     emergency_alerts/{residentEmail}/alert/{alertId}
- *
- * Events:
- *     Supports common Events/events structures.
  */
 public class DashboardDao {
 
@@ -76,35 +71,19 @@ public class DashboardDao {
 
     public DashboardDao(String secretaryEmail) {
 
-        this.firestore =
-                FirebaseConfig.getFirestore();
+        this.firestore = FirebaseConfig.getFirestore();
 
         this.secretaryEmail =
                 secretaryEmail == null
                         ? ""
-                        : secretaryEmail
-                                .trim()
-                                .toLowerCase();
+                        : secretaryEmail.trim().toLowerCase();
 
-        System.out.println(
-                "========================================"
-        );
+        System.out.println("========================================");
+        System.out.println("DashboardDao created");
+        System.out.println("Secretary Email : " + this.secretaryEmail);
+        System.out.println("========================================");
 
-        System.out.println(
-                "DashboardDao created"
-        );
-
-        System.out.println(
-                "Secretary Email : "
-                        + this.secretaryEmail
-        );
-
-        System.out.println(
-                "========================================"
-        );
-
-        this.societyName =
-                loadSecretarySociety();
+        this.societyName = loadSecretarySociety();
 
         System.out.println(
                 "DashboardDao: Secretary Society = "
@@ -150,16 +129,6 @@ public class DashboardDao {
                 return "";
             }
 
-            // ====================================================
-            // IMPORTANT
-            //
-            // Your Firestore field is:
-            //
-            // society
-            //
-            // NOT societyName
-            // ====================================================
-
             String society =
                     getString(
                             secretaryDocument,
@@ -185,8 +154,7 @@ public class DashboardDao {
                 return "";
             }
 
-            society =
-                    society.trim();
+            society = society.trim();
 
             System.out.println(
                     "DashboardDao: Secretary Society = "
@@ -465,7 +433,6 @@ public class DashboardDao {
                                 "society"
                         );
 
-                // fallback
                 if (society.isEmpty()) {
 
                     society =
@@ -514,6 +481,20 @@ public class DashboardDao {
     // ============================================================
     // OPEN COMPLAINTS
     // ============================================================
+    //
+    // IMPORTANT:
+    //
+    // Complaint documents do not need to contain society.
+    //
+    // We first find residents of the Secretary's society.
+    //
+    // Then we use the resident EMAIL to open:
+    //
+    // complaints/{residentEmail}/complaints
+    //
+    // Therefore complaint count is fetched THROUGH EMAIL.
+    //
+    // ============================================================
 
     public int getOpenComplaints() {
 
@@ -524,83 +505,82 @@ public class DashboardDao {
             if (societyName == null ||
                     societyName.trim().isEmpty()) {
 
+                System.out.println(
+                        "Complaint count skipped: society is empty."
+                );
+
                 return 0;
             }
 
             System.out.println(
-                    "Fetching complaints for society = "
+                    "\n========================================"
+            );
+
+            System.out.println(
+                    "FETCHING COMPLAINT COUNT"
+            );
+
+            System.out.println(
+                    "Secretary Email : "
+                            + secretaryEmail
+            );
+
+            System.out.println(
+                    "Secretary Society : "
                             + societyName
             );
 
+            System.out.println(
+                    "========================================"
+            );
+
             // ====================================================
-            // complaints/{residentEmail}/complaints/*
+            // STEP 1
+            // Get all residents
             // ====================================================
 
-            QuerySnapshot snapshot =
+            QuerySnapshot residentSnapshot =
                     firestore
-                            .collectionGroup("complaints")
+                            .collection("Residents")
                             .get()
                             .get();
 
             System.out.println(
-                    "Complaint documents found = "
-                            + snapshot.size()
+                    "Total Residents Found = "
+                            + residentSnapshot.size()
             );
 
-            Set<String> checkedResidents =
+            // Prevent duplicate resident emails
+            Set<String> checkedEmails =
                     new HashSet<>();
 
-            for (QueryDocumentSnapshot complaint :
-                    snapshot.getDocuments()) {
+            // ====================================================
+            // STEP 2
+            // Find residents belonging to Secretary society
+            // ====================================================
 
-                if (complaint == null ||
-                        !complaint.exists()) {
+            for (DocumentSnapshot resident :
+                    residentSnapshot.getDocuments()) {
+
+                if (resident == null ||
+                        !resident.exists()) {
 
                     continue;
                 }
-
-                // =================================================
-                // GET RESIDENT EMAIL FROM PATH
-                //
-                // complaints
-                //   / residentEmail
-                //      / complaints
-                //          / complaintId
-                // =================================================
-
-                String residentEmail =
-                        getParentResidentEmail(
-                                complaint
-                        );
-
-                if (residentEmail.isEmpty()) {
-                    continue;
-                }
-
-                // =================================================
-                // GET RESIDENT SOCIETY
-                // =================================================
 
                 String residentSociety =
-                        "";
+                        getString(
+                                resident,
+                                "society"
+                        );
 
-                if (!checkedResidents.contains(
-                        residentEmail)) {
-
-                    residentSociety =
-                            getResidentSociety(
-                                    residentEmail
-                            );
-
-                    checkedResidents.add(
-                            residentEmail
-                    );
-
-                } else {
+                // fallback
+                if (residentSociety.isEmpty()) {
 
                     residentSociety =
-                            getResidentSociety(
-                                    residentEmail
+                            getString(
+                                    resident,
+                                    "societyName"
                             );
                 }
 
@@ -608,37 +588,146 @@ public class DashboardDao {
                     continue;
                 }
 
+                // Society must match Secretary society
                 if (!residentSociety
+                        .trim()
                         .equalsIgnoreCase(
-                                societyName
+                                societyName.trim()
                         )) {
 
                     continue;
                 }
 
                 // =================================================
-                // STATUS
+                // STEP 3
+                // Get resident EMAIL
                 // =================================================
 
-                String status =
+                String residentEmail =
                         getString(
-                                complaint,
-                                "status"
+                                resident,
+                                "email"
                         );
 
-                if (isOpenComplaintStatus(
-                        status
-                )) {
+                /*
+                 * If email field is missing,
+                 * use Firestore document ID.
+                 *
+                 * This supports both:
+                 *
+                 * Residents/{email}
+                 *
+                 * and
+                 *
+                 * Residents/{randomId} + email field
+                 */
+                if (residentEmail.isEmpty()) {
 
-                    count++;
+                    residentEmail =
+                            resident.getId();
+                }
+
+                if (residentEmail == null ||
+                        residentEmail.trim().isEmpty()) {
+
+                    continue;
+                }
+
+                residentEmail =
+                        residentEmail
+                                .trim()
+                                .toLowerCase();
+
+                // Skip duplicate email
+                if (!checkedEmails.add(
+                        residentEmail)) {
+
+                    continue;
+                }
+
+                System.out.println(
+                        "Checking complaints for resident email = "
+                                + residentEmail
+                );
+
+                // =================================================
+                // STEP 4
+                // Fetch complaints using EMAIL
+                // =================================================
+
+                CollectionReference complaintCollection =
+                        firestore
+                                .collection("complaints")
+                                .document(residentEmail)
+                                .collection("complaints");
+
+                QuerySnapshot complaintSnapshot =
+                        complaintCollection
+                                .get()
+                                .get();
+
+                System.out.println(
+                        "Complaints found for "
+                                + residentEmail
+                                + " = "
+                                + complaintSnapshot.size()
+                );
+
+                // =================================================
+                // STEP 5
+                // Count OPEN complaints
+                // =================================================
+
+                for (DocumentSnapshot complaint :
+                        complaintSnapshot.getDocuments()) {
+
+                    if (complaint == null ||
+                            !complaint.exists()) {
+
+                        continue;
+                    }
+
+                    String status =
+                            getString(
+                                    complaint,
+                                    "status"
+                            );
+
+                    if (isOpenComplaintStatus(
+                            status
+                    )) {
+
+                        count++;
+
+                        System.out.println(
+                                "OPEN complaint found:"
+                                        + " resident="
+                                        + residentEmail
+                                        + ", complaintId="
+                                        + complaint.getId()
+                                        + ", status="
+                                        + status
+                        );
+                    }
                 }
             }
 
             System.out.println(
-                    "Open complaints for ["
-                            + societyName
-                            + "] = "
+                    "========================================"
+            );
+
+            System.out.println(
+                    "FINAL OPEN COMPLAINT COUNT = "
                             + count
+            );
+
+            System.out.println(
+                    "Society = "
+                            + societyName
+            );
+
+            System.out.println(
+                    "========================================"
             );
 
         } catch (Exception e) {
@@ -654,112 +743,16 @@ public class DashboardDao {
     }
 
     // ============================================================
-    // GET RESIDENT SOCIETY
-    // ============================================================
-
-    private String getResidentSociety(
-            String residentEmail) {
-
-        try {
-
-            if (residentEmail == null ||
-                    residentEmail.trim().isEmpty()) {
-
-                return "";
-            }
-
-            String email =
-                    residentEmail
-                            .trim()
-                            .toLowerCase();
-
-            DocumentSnapshot resident =
-                    firestore
-                            .collection("Residents")
-                            .document(email)
-                            .get()
-                            .get();
-
-            if (!resident.exists()) {
-
-                return "";
-            }
-
-            String society =
-                    getString(
-                            resident,
-                            "society"
-                    );
-
-            if (society.isEmpty()) {
-
-                society =
-                        getString(
-                                resident,
-                                "societyName"
-                        );
-            }
-
-            return society.trim();
-
-        } catch (Exception e) {
-
-            System.out.println(
-                    "Error fetching resident society: "
-                            + residentEmail
-            );
-
-            return "";
-        }
-    }
-
-    // ============================================================
-    // GET RESIDENT EMAIL FROM COMPLAINT PATH
-    // ============================================================
-
-    private String getParentResidentEmail(
-            DocumentSnapshot complaint) {
-
-        try {
-
-            DocumentReference complaintRef =
-                    complaint.getReference();
-
-            if (complaintRef == null) {
-                return "";
-            }
-
-            CollectionReference complaintsCollection =
-                    complaintRef.getParent();
-
-            if (complaintsCollection == null) {
-                return "";
-            }
-
-            DocumentReference residentDocument =
-                    complaintsCollection.getParent();
-
-            if (residentDocument == null) {
-                return "";
-            }
-
-            return residentDocument
-                    .getId()
-                    .trim()
-                    .toLowerCase();
-
-        } catch (Exception e) {
-
-            return "";
-        }
-    }
-
-    // ============================================================
     // COMPLAINT STATUS
     // ============================================================
 
     private boolean isOpenComplaintStatus(
             String status) {
+
+        /*
+         * Empty status is treated as open so that
+         * older complaint documents are not missed.
+         */
 
         if (status == null ||
                 status.trim().isEmpty()) {
@@ -772,7 +765,10 @@ public class DashboardDao {
                         .trim()
                         .toLowerCase();
 
-        // closed states
+        // --------------------------------------------------------
+        // Closed statuses
+        // --------------------------------------------------------
+
         if (value.equals("resolved") ||
                 value.equals("closed") ||
                 value.equals("completed") ||
@@ -782,6 +778,16 @@ public class DashboardDao {
 
             return false;
         }
+
+        /*
+         * OPEN
+         * IN PROGRESS
+         * PENDING
+         * UNDER REVIEW
+         * etc.
+         *
+         * are treated as open.
+         */
 
         return true;
     }
@@ -808,15 +814,6 @@ public class DashboardDao {
                 return 0.0;
             }
 
-            // ====================================================
-            // EXACT PROJECT STRUCTURE:
-            //
-            // Maintenance
-            //    / secretaryEmail
-            //       / records
-            //          / maintenanceId
-            // ====================================================
-
             CollectionReference records =
                     firestore
                             .collection("Maintenance")
@@ -841,10 +838,6 @@ public class DashboardDao {
 
                     continue;
                 }
-
-                // =================================================
-                // SOCIETY
-                // =================================================
 
                 String maintenanceSociety =
                         getString(
@@ -874,10 +867,6 @@ public class DashboardDao {
 
                     continue;
                 }
-
-                // =================================================
-                // AMOUNT
-                // =================================================
 
                 Object amountObject =
                         document.get("amount");
@@ -916,12 +905,6 @@ public class DashboardDao {
 
     // ============================================================
     // COMPATIBILITY METHOD
-    // ============================================================
-    //
-    // Your SecretaryDashboard previously used
-    // getMaintenanceCollection().
-    //
-    // Keep this method so old code does not break.
     // ============================================================
 
     public double getMaintenanceCollection() {
@@ -990,18 +973,6 @@ public class DashboardDao {
 
                 return result;
             }
-
-            // ====================================================
-            // EXACT PROJECT STRUCTURE:
-            //
-            // emergency_alerts
-            //    / residentEmail
-            //       / alert
-            //          / alertId
-            //
-            // collectionGroup("alert") searches all alert
-            // subcollections.
-            // ====================================================
 
             QuerySnapshot snapshot =
                     firestore
@@ -1100,10 +1071,6 @@ public class DashboardDao {
                 result.add(alert);
             }
 
-            // ====================================================
-            // NEWEST FIRST
-            // ====================================================
-
             Collections.sort(
                     result,
                     new Comparator<SosAlertData>() {
@@ -1134,10 +1101,6 @@ public class DashboardDao {
                         }
                     }
             );
-
-            // ====================================================
-            // MAX 5
-            // ====================================================
 
             if (result.size() > 5) {
 
@@ -1186,16 +1149,6 @@ public class DashboardDao {
                 return result;
             }
 
-            /*
-             * We check both common collection names because
-             * Firestore collection names are case-sensitive.
-             *
-             * Existing project code can therefore use:
-             *
-             * Events
-             * events
-             */
-
             readEventCollection(
                     "Events",
                     result
@@ -1206,26 +1159,14 @@ public class DashboardDao {
                     result
             );
 
-            // ====================================================
-            // ALSO SEARCH NESTED "events" COLLECTIONS
-            // ====================================================
-
             readEventCollectionGroup(
                     "events",
                     result
             );
 
-            // ====================================================
-            // REMOVE DUPLICATES
-            // ====================================================
-
             removeDuplicateEvents(
                     result
             );
-
-            // ====================================================
-            // SORT
-            // ====================================================
 
             Collections.sort(
                     result,
@@ -1246,10 +1187,6 @@ public class DashboardDao {
                         }
                     }
             );
-
-            // ====================================================
-            // ONLY FIRST 5
-            // ====================================================
 
             if (result.size() > 5) {
 
@@ -1330,7 +1267,6 @@ public class DashboardDao {
 
         } catch (Exception e) {
 
-            // Non-existing collection simply returns no documents.
             System.out.println(
                     "Could not read collection "
                             + collectionName
@@ -1409,10 +1345,6 @@ public class DashboardDao {
             event.id =
                     document.getId();
 
-            // ====================================================
-            // TITLE
-            // ====================================================
-
             event.title =
                     firstString(
                             document,
@@ -1422,10 +1354,6 @@ public class DashboardDao {
                             "name"
                     );
 
-            // ====================================================
-            // DATE
-            // ====================================================
-
             event.date =
                     firstString(
                             document,
@@ -1433,10 +1361,6 @@ public class DashboardDao {
                             "eventDate",
                             "startDate"
                     );
-
-            // ====================================================
-            // TIME
-            // ====================================================
 
             event.time =
                     firstString(
@@ -1446,10 +1370,6 @@ public class DashboardDao {
                             "startTime"
                     );
 
-            // ====================================================
-            // LOCATION
-            // ====================================================
-
             event.location =
                     firstString(
                             document,
@@ -1458,20 +1378,12 @@ public class DashboardDao {
                             "place"
                     );
 
-            // ====================================================
-            // SOCIETY
-            // ====================================================
-
             event.society =
                     firstString(
                             document,
                             "society",
                             "societyName"
                     );
-
-            // ====================================================
-            // DESCRIPTION
-            // ====================================================
 
             event.description =
                     firstString(
@@ -1509,7 +1421,6 @@ public class DashboardDao {
         if (event.date == null ||
                 event.date.trim().isEmpty()) {
 
-            // If no date exists, don't assume upcoming.
             return false;
         }
 
@@ -1530,8 +1441,6 @@ public class DashboardDao {
         } catch (Exception ignored) {
         }
 
-        // Common format: dd-MM-yyyy
-
         try {
 
             java.time.LocalDate date =
@@ -1550,8 +1459,6 @@ public class DashboardDao {
         } catch (Exception ignored) {
         }
 
-        // Common format: dd/MM/yyyy
-
         try {
 
             java.time.LocalDate date =
@@ -1569,12 +1476,6 @@ public class DashboardDao {
 
         } catch (Exception ignored) {
         }
-
-        /*
-         * If the project uses a non-standard date string,
-         * still allow it to appear rather than hiding valid
-         * event data.
-         */
 
         return true;
     }

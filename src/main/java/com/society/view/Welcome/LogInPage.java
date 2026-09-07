@@ -3,6 +3,7 @@ package com.society.view.Welcome;
 import com.society.dao.Welcome.UserDao;
 import com.society.model.Welcome.User;
 import com.society.service.resident_service.ResidentSession;
+import com.society.service.resident_service.SecretarySession;
 import com.society.view.ScreenSize;
 
 import com.society.view.Guard_portal.GuardDashboard;
@@ -725,11 +726,13 @@ public class LogInPage {
             UserDao.setLoggedInEmail(email);
             UserDao.setLoggedInRole(role);
 
-            if (role.equalsIgnoreCase("resident")) {
-                ResidentSession.setLoggedInEmail(email);
-            } else {
-                ResidentSession.clearSession();
-            }
+                if (role.equalsIgnoreCase("resident")) {
+        ResidentSession.setLoggedInEmail(email);
+        } else if (role.equalsIgnoreCase("secretary")) {
+        SecretarySession.setLoggedInEmail(email);
+        } else {
+        ResidentSession.clearSession();
+        }
 
             // ================================================
             // STEP 3: OPEN DASHBOARD

@@ -1,3 +1,4 @@
+
 package com.society.model.Secretary_model;
 
 public class Resident {
@@ -37,6 +38,7 @@ public class Resident {
 
     // =========================================================
     // UI CONSTRUCTOR
+    // Keeps compatibility with existing code
     // =========================================================
 
     public Resident(
@@ -126,7 +128,9 @@ public class Resident {
     }
 
     // =========================================================
-    // MOBILE - COMPATIBILITY WITH EXISTING UI
+    // MOBILE
+    // Compatibility with existing UI/code
+    // Firestore will still use "phone"
     // =========================================================
 
     public String getMobile() {
@@ -150,7 +154,9 @@ public class Resident {
     }
 
     // =========================================================
-    // FLAT - COMPATIBILITY WITH EXISTING UI
+    // FLAT
+    // Compatibility with existing UI/code
+    // Firestore will still use "flatNo"
     // =========================================================
 
     public String getFlat() {
@@ -306,3 +312,4 @@ public class Resident {
                 '}';
     }
 }
+

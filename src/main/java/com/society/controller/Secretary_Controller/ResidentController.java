@@ -1,11 +1,9 @@
 package com.society.controller.Secretary_Controller;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
-
 import com.society.config.FirebaseConfig;
 import com.society.dao.Secretary_dao.ResidentDao;
 import com.society.dao.Secretary_dao.ResidentDaoImpl;
@@ -14,21 +12,8 @@ import com.society.model.Secretary_model.Resident;
 
 public class ResidentController {
 
-    // =========================================================
-    // DAO
-    // =========================================================
-
     private final ResidentDao residentDao;
-
-    // =========================================================
-    // FIRESTORE
-    // =========================================================
-
     private final Firestore firestore;
-
-    // =========================================================
-    // COLLECTIONS
-    // =========================================================
 
     private static final String SECRETARIES =
             "Secretaries";
@@ -47,12 +32,9 @@ public class ResidentController {
     }
 
     // =========================================================
-    // ADD / UPDATE RESIDENT
+    // ADD RESIDENT
     //
-    // IMPORTANT:
-    // Society is NOT taken from UI.
-    //
-    // Society comes from logged-in Secretary.
+    // Existing 5-field method.
     // =========================================================
 
     public boolean addResident(
@@ -63,189 +45,415 @@ public class ResidentController {
             String status
     ) {
 
-        try {
+        String residentEmail =
+                cleanEmail(email);
 
-            // =================================================
-            // 1. GET LOGGED-IN SECRETARY EMAIL
-            // =================================================
-
-            String secretaryEmail =
-                    UserDao.getLoggedInEmail();
-
-            if (secretaryEmail == null ||
-                    secretaryEmail.trim().isEmpty()) {
-
-                System.out.println(
-                        "ERROR: Logged-in Secretary email not found."
-                );
-
-                return false;
-            }
-
-            secretaryEmail =
-                    secretaryEmail
-                            .trim()
-                            .toLowerCase();
+        if (residentEmail.isEmpty()) {
 
             System.out.println(
-                    "Logged-in Secretary = "
-                            + secretaryEmail
+                    "ResidentController: Email is empty."
             );
-
-            // =================================================
-            // 2. GET SECRETARY DOCUMENT
-            //
-            // Secretaries/{secretaryEmail}
-            // =================================================
-
-            DocumentSnapshot secretaryDocument =
-                    firestore
-                            .collection(SECRETARIES)
-                            .document(secretaryEmail)
-                            .get()
-                            .get();
-
-            if (!secretaryDocument.exists()) {
-
-                System.out.println(
-                        "ERROR: Secretary document not found."
-                );
-
-                System.out.println(
-                        "Document = "
-                                + secretaryEmail
-                );
-
-                return false;
-            }
-
-            // =================================================
-            // 3. GET SECRETARY SOCIETY
-            // =================================================
-
-            String secretarySociety =
-                    secretaryDocument
-                            .getString("society");
-
-            if (secretarySociety == null ||
-                    secretarySociety.trim().isEmpty()) {
-
-                System.out.println(
-                        "ERROR: Secretary society not found."
-                );
-
-                return false;
-            }
-
-            secretarySociety =
-                    secretarySociety.trim();
-
-            System.out.println(
-                    "Secretary Society = ["
-                            + secretarySociety
-                            + "]"
-            );
-
-            // =================================================
-            // 4. CLEAN RESIDENT EMAIL
-            // =================================================
-
-            String residentEmail =
-                    cleanEmail(email);
-
-            if (residentEmail.isEmpty()) {
-
-                System.out.println(
-                        "ERROR: Resident email is required."
-                );
-
-                return false;
-            }
-
-            // =================================================
-            // 5. CREATE RESIDENT
-            // =================================================
-
-            Resident resident =
-                    new Resident();
-
-            resident.setName(
-                    clean(name)
-            );
-
-            resident.setFlatNo(
-                    clean(flat)
-            );
-
-            resident.setPhone(
-                    clean(mobile)
-            );
-
-            resident.setEmail(
-                    residentEmail
-            );
-
-            resident.setStatus(
-                    clean(status)
-            );
-
-            // =================================================
-            // VERY IMPORTANT
-            //
-            // Society automatically comes from Secretary.
-            // =================================================
-
-            resident.setSociety(
-                    secretarySociety
-            );
-
-            // =================================================
-            // 6. SAVE
-            // =================================================
-
-            boolean saved =
-                    residentDao.addResident(
-                            resident
-                    );
-
-            if (saved) {
-
-                System.out.println(
-                        "=========================================="
-                );
-
-                System.out.println(
-                        "RESIDENT SAVED SUCCESSFULLY"
-                );
-
-                System.out.println(
-                        "Email   = "
-                                + residentEmail
-                );
-
-                System.out.println(
-                        "Society = "
-                                + secretarySociety
-                );
-
-                System.out.println(
-                        "=========================================="
-                );
-            }
-
-            return saved;
-
-        } catch (Exception e) {
-
-            System.out.println(
-                    "addResident ERROR: "
-                            + e.getMessage()
-            );
-
-            e.printStackTrace();
 
             return false;
         }
+
+        // -----------------------------------------------------
+        // FIRST FIND EXISTING RESIDENT
+        // -----------------------------------------------------
+
+        Resident existingResident =
+                residentDao.getResidentByEmail(
+                        residentEmail
+                );
+
+        // -----------------------------------------------------
+        // GET SECRETARY SOCIETY
+        // -----------------------------------------------------
+
+        String secretarySociety =
+                getLoggedInSecretarySociety();
+
+        if (secretarySociety == null
+                || secretarySociety.trim().isEmpty()) {
+
+            System.out.println(
+                    "ResidentController: Secretary society not found."
+            );
+
+            return false;
+        }
+
+        // -----------------------------------------------------
+        // IF EXISTING RESIDENT EXISTS
+        // -----------------------------------------------------
+
+        if (existingResident != null) {
+
+            // Preserve existing complete registration data.
+
+            existingResident.setName(
+                    clean(name)
+            );
+
+            existingResident.setEmail(
+                    residentEmail
+            );
+
+            existingResident.setPhone(
+                    clean(mobile)
+            );
+
+            existingResident.setFlatNo(
+                    clean(flat)
+            );
+
+            existingResident.setStatus(
+                    clean(status)
+            );
+
+            // IMPORTANT:
+            // Society is always taken from logged-in Secretary.
+
+            existingResident.setSociety(
+                    secretarySociety.trim()
+            );
+
+            if (existingResident.getRole() == null
+                    || existingResident.getRole().trim().isEmpty()) {
+
+                existingResident.setRole(
+                        "Resident"
+                );
+            }
+
+            System.out.println(
+                    "Updating existing resident: "
+                            + residentEmail
+            );
+
+            return residentDao.addResident(
+                    existingResident
+            );
+        }
+
+        // -----------------------------------------------------
+        // IF NO EXISTING RESIDENT
+        // -----------------------------------------------------
+        //
+        // The Secretary UI only has 5 fields.
+        // Therefore the other fields cannot be invented.
+        //
+        // We create a record with the available details.
+        // -----------------------------------------------------
+
+        Resident resident =
+                new Resident();
+
+        resident.setName(
+                clean(name)
+        );
+
+        resident.setEmail(
+                residentEmail
+        );
+
+        resident.setPhone(
+                clean(mobile)
+        );
+
+        resident.setFlatNo(
+                clean(flat)
+        );
+
+        resident.setStatus(
+                clean(status)
+        );
+
+        resident.setSociety(
+                secretarySociety.trim()
+        );
+
+        resident.setRole(
+                "Resident"
+        );
+
+        System.out.println(
+                "No existing resident found."
+        );
+
+        System.out.println(
+                "Creating new resident with available details: "
+                        + residentEmail
+        );
+
+        return residentDao.addResident(
+                resident
+        );
+    }
+
+    // =========================================================
+    // FULL ADD / UPDATE RESIDENT
+    //
+    // Used by ManageResidents when complete existing
+    // registration details are available.
+    // =========================================================
+
+    public boolean addResident(
+            String name,
+            String email,
+            String phone,
+            String flatNo,
+            String status,
+            String aadhar,
+            String address,
+            String dob,
+            String gender,
+            String joiningDate,
+            String memberSince,
+            String ownerName,
+            String society,
+            String role
+    ) {
+
+        String residentEmail =
+                cleanEmail(email);
+
+        if (residentEmail.isEmpty()) {
+
+            System.out.println(
+                    "ResidentController: Email is empty."
+            );
+
+            return false;
+        }
+
+        // -----------------------------------------------------
+        // GET SECRETARY SOCIETY
+        // -----------------------------------------------------
+
+        String secretarySociety =
+                getLoggedInSecretarySociety();
+
+        if (secretarySociety == null
+                || secretarySociety.trim().isEmpty()) {
+
+            System.out.println(
+                    "ResidentController: Secretary society missing."
+            );
+
+            return false;
+        }
+
+        // -----------------------------------------------------
+        // GET EXISTING RESIDENT
+        // -----------------------------------------------------
+
+        Resident existingResident =
+                residentDao.getResidentByEmail(
+                        residentEmail
+                );
+
+        Resident resident;
+
+        if (existingResident != null) {
+
+            resident =
+                    existingResident;
+
+        } else {
+
+            resident =
+                    new Resident();
+        }
+
+        // -----------------------------------------------------
+        // UPDATE VALUES
+        // -----------------------------------------------------
+
+        resident.setName(
+                clean(name)
+        );
+
+        resident.setEmail(
+                residentEmail
+        );
+
+        resident.setPhone(
+                clean(phone)
+        );
+
+        resident.setFlatNo(
+                clean(flatNo)
+        );
+
+        resident.setStatus(
+                clean(status)
+        );
+
+        // -----------------------------------------------------
+        // PRESERVE COMPLETE DETAILS
+        //
+        // Only replace them if a non-empty value is supplied.
+        // -----------------------------------------------------
+
+        if (!clean(aadhar).isEmpty()) {
+
+            resident.setAadhar(
+                    clean(aadhar)
+            );
+        }
+
+        if (!clean(address).isEmpty()) {
+
+            resident.setAddress(
+                    clean(address)
+            );
+        }
+
+        if (!clean(dob).isEmpty()) {
+
+            resident.setDob(
+                    clean(dob)
+            );
+        }
+
+        if (!clean(gender).isEmpty()) {
+
+            resident.setGender(
+                    clean(gender)
+            );
+        }
+
+        if (!clean(joiningDate).isEmpty()) {
+
+            resident.setJoiningDate(
+                    clean(joiningDate)
+            );
+        }
+
+        if (!clean(memberSince).isEmpty()) {
+
+            resident.setMemberSince(
+                    clean(memberSince)
+            );
+        }
+
+        if (!clean(ownerName).isEmpty()) {
+
+            resident.setOwnerName(
+                    clean(ownerName)
+            );
+        }
+
+        // -----------------------------------------------------
+        // SOCIETY
+        //
+        // NEVER trust society coming from UI.
+        // Always use logged-in Secretary society.
+        // -----------------------------------------------------
+
+        resident.setSociety(
+                secretarySociety.trim()
+        );
+
+        // -----------------------------------------------------
+        // ROLE
+        // -----------------------------------------------------
+
+        if (!clean(role).isEmpty()) {
+
+            resident.setRole(
+                    clean(role)
+            );
+
+        } else {
+
+            resident.setRole(
+                    "Resident"
+            );
+        }
+
+        // -----------------------------------------------------
+        // SAVE
+        // -----------------------------------------------------
+
+        return residentDao.addResident(
+                resident
+        );
+    }
+
+    // =========================================================
+    // GET ALL RESIDENTS
+    // =========================================================
+
+    public List<Resident> getAllResidents() {
+
+        return residentDao.getAllResidents();
+    }
+
+    // =========================================================
+    // GET RESIDENT BY EMAIL
+    // =========================================================
+
+    public Resident getResidentByEmail(
+            String email
+    ) {
+
+        String cleanedEmail =
+                cleanEmail(email);
+
+        if (cleanedEmail.isEmpty()) {
+
+            return null;
+        }
+
+        return residentDao.getResidentByEmail(
+                cleanedEmail
+        );
+    }
+
+    // =========================================================
+    // GET RESIDENTS BY CURRENT SECRETARY SOCIETY
+    // =========================================================
+
+    public List<Resident> getResidentsBySociety() {
+
+        String society =
+                getLoggedInSecretarySociety();
+
+        if (society == null
+                || society.trim().isEmpty()) {
+
+            System.out.println(
+                    "ResidentController: Cannot fetch residents."
+                            + " Secretary society is empty."
+            );
+
+            return List.of();
+        }
+
+        return residentDao.getResidentsBySociety(
+                society.trim()
+        );
+    }
+
+    // =========================================================
+    // GET RESIDENTS BY SOCIETY
+    // =========================================================
+
+    public List<Resident> getResidentsBySociety(
+            String society
+    ) {
+
+        if (society == null
+                || society.trim().isEmpty()) {
+
+            return List.of();
+        }
+
+        return residentDao.getResidentsBySociety(
+                society.trim()
+        );
     }
 
     // =========================================================
@@ -256,18 +464,14 @@ public class ResidentController {
 
         try {
 
-            // -------------------------------------------------
-            // GET EMAIL
-            // -------------------------------------------------
-
             String secretaryEmail =
                     UserDao.getLoggedInEmail();
 
-            if (secretaryEmail == null ||
-                    secretaryEmail.trim().isEmpty()) {
+            if (secretaryEmail == null
+                    || secretaryEmail.trim().isEmpty()) {
 
                 System.out.println(
-                        "ERROR: Secretary email not found."
+                        "Secretary email not found."
                 );
 
                 return "";
@@ -278,9 +482,10 @@ public class ResidentController {
                             .trim()
                             .toLowerCase();
 
-            // -------------------------------------------------
-            // GET SECRETARY DOCUMENT
-            // -------------------------------------------------
+            System.out.println(
+                    "Logged-in Secretary Email = "
+                            + secretaryEmail
+            );
 
             DocumentSnapshot document =
                     firestore
@@ -292,36 +497,42 @@ public class ResidentController {
             if (!document.exists()) {
 
                 System.out.println(
-                        "ERROR: Secretary document not found."
+                        "Secretary document not found: "
+                                + secretaryEmail
                 );
 
                 return "";
             }
 
-            // -------------------------------------------------
-            // SOCIETY
-            // -------------------------------------------------
+            Object societyValue =
+                    document.get("society");
 
-            String society =
-                    document.getString("society");
-
-            if (society == null ||
-                    society.trim().isEmpty()) {
+            if (societyValue == null) {
 
                 System.out.println(
-                        "ERROR: Society field missing."
+                        "Secretary society field is null."
                 );
 
                 return "";
             }
 
-            return society.trim();
+            String society =
+                    String.valueOf(
+                            societyValue
+                    ).trim();
+
+            System.out.println(
+                    "Secretary Society = ["
+                            + society
+                            + "]"
+            );
+
+            return society;
 
         } catch (Exception e) {
 
             System.out.println(
-                    "getLoggedInSecretarySociety ERROR: "
-                            + e.getMessage()
+                    "Error getting Secretary society."
             );
 
             e.printStackTrace();
@@ -331,276 +542,12 @@ public class ResidentController {
     }
 
     // =========================================================
-    // GET RESIDENTS FOR LOGGED-IN SECRETARY
-    //
-    // THIS METHOD MUST BE USED BY SECRETARY UI.
+    // CLEAN
     // =========================================================
 
-    public List<Resident> getResidentsBySociety() {
-
-        List<Resident> finalResidents =
-                new ArrayList<>();
-
-        try {
-
-            // =================================================
-            // 1. GET SECRETARY SOCIETY
-            // =================================================
-
-            String secretarySociety =
-                    getLoggedInSecretarySociety();
-
-            if (secretarySociety == null ||
-                    secretarySociety.trim().isEmpty()) {
-
-                System.out.println(
-                        "ERROR: Secretary society is empty."
-                );
-
-                return finalResidents;
-            }
-
-            secretarySociety =
-                    secretarySociety.trim();
-
-            // =================================================
-            // 2. FIRESTORE FILTER
-            // =================================================
-
-            List<Resident> residents =
-                    residentDao
-                            .getResidentsBySociety(
-                                    secretarySociety
-                            );
-
-            if (residents == null ||
-                    residents.isEmpty()) {
-
-                System.out.println(
-                        "No residents found for society: "
-                                + secretarySociety
-                );
-
-                return finalResidents;
-            }
-
-            // =================================================
-            // 3. SECOND SAFETY FILTER
-            //
-            // Exact comparison in Java.
-            // =================================================
-
-            for (Resident resident : residents) {
-
-                if (resident == null) {
-
-                    continue;
-                }
-
-                String residentSociety =
-                        resident.getSociety();
-
-                if (residentSociety == null ||
-                        residentSociety.trim().isEmpty()) {
-
-                    System.out.println(
-                            "BLOCKED - Society missing"
-                    );
-
-                    continue;
-                }
-
-                residentSociety =
-                        residentSociety.trim();
-
-                // -------------------------------------------------
-                // CASE-INSENSITIVE EXACT MATCH
-                // -------------------------------------------------
-
-                if (residentSociety.equalsIgnoreCase(
-                        secretarySociety
-                )) {
-
-                    finalResidents.add(
-                            resident
-                    );
-
-                    System.out.println(
-                            "ALLOWED: "
-                                    + resident.getEmail()
-                                    + " -> "
-                                    + residentSociety
-                    );
-
-                } else {
-
-                    System.out.println(
-                            "BLOCKED: "
-                                    + resident.getEmail()
-                                    + " -> "
-                                    + residentSociety
-                    );
-                }
-            }
-
-            // =================================================
-            // 4. FINAL RESULT
-            // =================================================
-
-            System.out.println(
-                    "=========================================="
-            );
-
-            System.out.println(
-                    "FINAL RESIDENT FILTER"
-            );
-
-            System.out.println(
-                    "Secretary Society = ["
-                            + secretarySociety
-                            + "]"
-            );
-
-            System.out.println(
-                    "DAO Results       = "
-                            + residents.size()
-            );
-
-            System.out.println(
-                    "Final Results     = "
-                            + finalResidents.size()
-            );
-
-            System.out.println(
-                    "=========================================="
-            );
-
-            return finalResidents;
-
-        } catch (Exception e) {
-
-            System.out.println(
-                    "getResidentsBySociety ERROR: "
-                            + e.getMessage()
-            );
-
-            e.printStackTrace();
-
-            return new ArrayList<>();
-        }
-    }
-
-    // =========================================================
-    // GET RESIDENTS BY MANUALLY PROVIDED SOCIETY
-    // =========================================================
-
-    public List<Resident> getResidentsBySociety(
-            String society
+    private String clean(
+            String value
     ) {
-
-        try {
-
-            String cleanSociety =
-                    clean(society);
-
-            if (cleanSociety.isEmpty()) {
-
-                return new ArrayList<>();
-            }
-
-            return residentDao
-                    .getResidentsBySociety(
-                            cleanSociety
-                    );
-
-        } catch (Exception e) {
-
-            System.out.println(
-                    "getResidentsBySociety(society) ERROR: "
-                            + e.getMessage()
-            );
-
-            e.printStackTrace();
-
-            return new ArrayList<>();
-        }
-    }
-
-    // =========================================================
-    // GET ALL RESIDENTS
-    //
-    // WARNING:
-    // Do NOT use this for Secretary society table.
-    // =========================================================
-
-    public List<Resident> getAllResidents() {
-
-        try {
-
-            List<Resident> residents =
-                    residentDao.getAllResidents();
-
-            if (residents == null) {
-
-                return new ArrayList<>();
-            }
-
-            return residents;
-
-        } catch (Exception e) {
-
-            System.out.println(
-                    "getAllResidents ERROR: "
-                            + e.getMessage()
-            );
-
-            e.printStackTrace();
-
-            return new ArrayList<>();
-        }
-    }
-
-    // =========================================================
-    // GET RESIDENT BY EMAIL
-    // =========================================================
-
-    public Resident getResidentByEmail(
-            String email
-    ) {
-
-        try {
-
-            String cleanEmail =
-                    cleanEmail(email);
-
-            if (cleanEmail.isEmpty()) {
-
-                return null;
-            }
-
-            return residentDao
-                    .getResidentByEmail(
-                            cleanEmail
-                    );
-
-        } catch (Exception e) {
-
-            System.out.println(
-                    "getResidentByEmail ERROR: "
-                            + e.getMessage()
-            );
-
-            e.printStackTrace();
-
-            return null;
-        }
-    }
-
-    // =========================================================
-    // CLEAN STRING
-    // =========================================================
-
-    private String clean(String value) {
 
         if (value == null) {
 
@@ -614,14 +561,16 @@ public class ResidentController {
     // CLEAN EMAIL
     // =========================================================
 
-    private String cleanEmail(String email) {
+    private String cleanEmail(
+            String value
+    ) {
 
-        if (email == null) {
+        if (value == null) {
 
             return "";
         }
 
-        return email
+        return value
                 .trim()
                 .toLowerCase();
     }

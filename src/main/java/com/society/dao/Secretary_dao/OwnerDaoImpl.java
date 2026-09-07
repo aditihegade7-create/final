@@ -1,3 +1,4 @@
+
 package com.society.dao.Secretary_dao;
 
 import java.util.ArrayList;
@@ -30,7 +31,16 @@ public class OwnerDaoImpl implements OwnerDao {
 
     // =========================================================
     // ADD OWNER
+    //
     // EMAIL = FIRESTORE DOCUMENT ID
+    //
+    // Firestore fields:
+    // name
+    // flat
+    // phone
+    // email
+    // status
+    // society
     // =========================================================
 
     @Override
@@ -55,7 +65,8 @@ public class OwnerDaoImpl implements OwnerDao {
             // GET EMAIL
             // -------------------------------------------------
 
-            String email = owner.getEmail();
+            String email =
+                    owner.getEmail();
 
             if (email == null ||
                     email.trim().isEmpty()) {
@@ -71,10 +82,11 @@ public class OwnerDaoImpl implements OwnerDao {
             // NORMALIZE EMAIL
             // -------------------------------------------------
 
-            email = email.trim().toLowerCase();
+            email =
+                    email.trim().toLowerCase();
 
             // -------------------------------------------------
-            // SET NORMALIZED EMAIL IN MODEL
+            // SET NORMALIZED EMAIL
             // -------------------------------------------------
 
             owner.setEmail(email);
@@ -102,7 +114,9 @@ public class OwnerDaoImpl implements OwnerDao {
 
             // -------------------------------------------------
             // SAVE OWNER
-            // EMAIL = DOCUMENT ID
+            //
+            // Email is used as Document ID.
+            // Owner model contains phone field.
             // -------------------------------------------------
 
             firestore
@@ -113,6 +127,10 @@ public class OwnerDaoImpl implements OwnerDao {
 
             System.out.println(
                     "Owner added successfully."
+            );
+
+            System.out.println(
+                    "Firestore Collection: Owners"
             );
 
             System.out.println(
@@ -235,8 +253,8 @@ public class OwnerDaoImpl implements OwnerDao {
     // =========================================================
     // GET OWNERS BY SOCIETY
     //
-    // This method fetches ONLY owners belonging to
-    // the supplied society.
+    // Only owners belonging to the supplied society
+    // will be returned.
     // =========================================================
 
     @Override
@@ -262,7 +280,8 @@ public class OwnerDaoImpl implements OwnerDao {
                 return owners;
             }
 
-            society = society.trim();
+            society =
+                    society.trim();
 
             System.out.println(
                     "Fetching owners for society: "
@@ -367,6 +386,7 @@ public class OwnerDaoImpl implements OwnerDao {
 
     // =========================================================
     // GET OWNER BY EMAIL
+    //
     // EMAIL = FIRESTORE DOCUMENT ID
     // =========================================================
 
@@ -474,7 +494,11 @@ public class OwnerDaoImpl implements OwnerDao {
 
     // =========================================================
     // UPDATE OWNER
-    // EMAIL = DOCUMENT ID
+    //
+    // EMAIL = FIRESTORE DOCUMENT ID
+    //
+    // IMPORTANT:
+    // Firestore field is "phone", NOT "mobile"
     // =========================================================
 
     @Override
@@ -482,7 +506,7 @@ public class OwnerDaoImpl implements OwnerDao {
             String email,
             String name,
             String flat,
-            String mobile,
+            String phone,
             String status,
             String society) {
 
@@ -542,8 +566,8 @@ public class OwnerDaoImpl implements OwnerDao {
                 flat = flat.trim();
             }
 
-            if (mobile != null) {
-                mobile = mobile.trim();
+            if (phone != null) {
+                phone = phone.trim();
             }
 
             if (status != null) {
@@ -556,6 +580,10 @@ public class OwnerDaoImpl implements OwnerDao {
 
             // -------------------------------------------------
             // UPDATE OWNER
+            //
+            // IMPORTANT:
+            // "phone" matches Owner.java
+            // and Firestore.
             // -------------------------------------------------
 
             firestore
@@ -568,8 +596,8 @@ public class OwnerDaoImpl implements OwnerDao {
                             "flat",
                             flat,
 
-                            "mobile",
-                            mobile,
+                            "phone",
+                            phone,
 
                             "status",
                             status,
@@ -600,7 +628,8 @@ public class OwnerDaoImpl implements OwnerDao {
 
     // =========================================================
     // DELETE OWNER
-    // EMAIL = DOCUMENT ID
+    //
+    // EMAIL = FIRESTORE DOCUMENT ID
     // =========================================================
 
     @Override
@@ -680,3 +709,4 @@ public class OwnerDaoImpl implements OwnerDao {
         }
     }
 }
+

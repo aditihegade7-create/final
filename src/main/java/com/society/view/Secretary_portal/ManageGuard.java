@@ -1,5 +1,8 @@
 package com.society.view.Secretary_portal;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import com.google.cloud.firestore.DocumentSnapshot;
@@ -7,12 +10,12 @@ import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QuerySnapshot;
 
 import com.society.config.FirebaseConfig;
-import com.society.dao.Secretary_dao.GuardDao;
-import com.society.dao.Welcome.UserDao;
 import com.society.controller.Secretary_Controller.GuardController;
+import com.society.dao.Welcome.UserDao;
 import com.society.model.Secretary_model.Guard;
 import com.society.view.ScreenSize;
 
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -23,6 +26,13 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -85,6 +95,13 @@ public class ManageGuard {
             "Secretaries";
 
     // =====================================================
+    // BACKGROUND IMAGE
+    // =====================================================
+
+    private static final String BACKGROUND_IMAGE =
+            "/background-Dashboard5.jpeg";
+
+    // =====================================================
     // CREATE SCENE
     // =====================================================
 
@@ -131,8 +148,128 @@ public class ManageGuard {
         VBox sidebar =
                 sidebarObj.createSidebar(stage);
 
+        // Keep the existing sidebar fixed exactly like the portal layout.
+        // This does not change any sidebar functionality.
+        sidebar.setPrefWidth(304);
+        sidebar.setMinWidth(304);
+        sidebar.setMaxWidth(304);
+
         // =====================================================
-        // MAIN CONTENT
+        // RIGHT SIDE
+        // HEADER + CONTENT
+        // =====================================================
+
+        VBox rightSide =
+                new VBox();
+
+        rightSide.setMaxSize(
+                Double.MAX_VALUE,
+                Double.MAX_VALUE
+        );
+
+        rightSide.setStyle(
+                "-fx-background-color:transparent;"
+        );
+        rightSide.setFillWidth(true);
+        rightSide.setMinWidth(0);
+
+        // =====================================================
+        // HEADER
+        // =====================================================
+
+        // =====================================================
+// HEADER
+// =====================================================
+
+HBox header = new HBox();
+
+header.setPrefHeight(80);
+header.setMinHeight(80);
+header.setMaxHeight(80);
+header.setMaxWidth(Double.MAX_VALUE);
+header.setMinWidth(0);
+
+header.setPadding(new Insets(12, 20, 12, 20));
+
+header.setAlignment(Pos.CENTER_LEFT);
+
+header.setStyle(
+        "-fx-background-color: #4e342e;"
+);
+
+// =====================================================
+// DATE - LEFT CORNER
+// =====================================================
+
+
+// =====================================================
+// TITLE + SUBTITLE
+// =====================================================
+
+Label title = new Label(
+        "Manage Guards"
+);
+
+title.setStyle(
+        "-fx-font-size:28px;"
+        + "-fx-font-weight:bold;"
+        + "-fx-text-fill:black;"
+);
+
+Label subtitle = new Label(
+        "View and manage guards of your society"
+);
+
+subtitle.setStyle(
+        "-fx-font-size:14px;"
+        + "-fx-text-fill:#777777;"
+);
+
+// Title + Subtitle vertically
+VBox titleBox = new VBox(
+        2,
+        title,
+        subtitle
+);
+
+titleBox.setAlignment(
+        Pos.CENTER_LEFT
+);
+
+// =====================================================
+// SPACER
+// =====================================================
+
+Region headerSpacer = new Region();
+
+HBox.setHgrow(
+        headerSpacer,
+        Priority.ALWAYS
+);
+
+// =====================================================
+// NOTIFICATION
+// =====================================================
+
+Label notification = new Label("🔔");
+
+notification.setStyle(
+        "-fx-font-size:20px;"
+        + "-fx-text-fill:white;"
+);
+
+// =====================================================
+// HEADER CONTENT
+// =====================================================
+
+header.getChildren().addAll(
+      
+        titleBox,
+        headerSpacer,
+        notification
+);
+        // =====================================================
+        // MAIN CONTENT PANEL
         // =====================================================
 
         VBox mainvb =
@@ -142,6 +279,8 @@ public class ManageGuard {
                 Double.MAX_VALUE,
                 Double.MAX_VALUE
         );
+        mainvb.setMinWidth(0);
+        mainvb.setMinHeight(0);
 
         mainvb.setPadding(
                 new Insets(20)
@@ -149,39 +288,21 @@ public class ManageGuard {
 
         mainvb.setSpacing(10);
 
+        // IMPORTANT:
+        // Transparent so background image remains visible
         mainvb.setStyle(
-                "-fx-background-color:#b3adad;"
+                "-fx-background-color:transparent;"
         );
 
         // =====================================================
         // TITLE
         // =====================================================
 
-        Label title =
-                new Label(
-                        "Manage Guards"
-                );
-
-        title.setStyle(
-                "-fx-font-size:28px;"
-                        + "-fx-font-weight:bold;"
-                        + "-fx-text-fill:black;"
-        );
-
         // =====================================================
         // SUBTITLE
         // =====================================================
 
-        Label subtitle =
-                new Label(
-                        "View and manage guards of your society"
-                );
-
-        subtitle.setStyle(
-                "-fx-font-size:14px;"
-                        + "-fx-text-fill:#777777;"
-        );
-
+       
         // =====================================================
         // SEARCH
         // =====================================================
@@ -195,15 +316,18 @@ public class ManageGuard {
 
         search.setPrefHeight(45);
 
-        search.setPrefWidth(600);
+        // Wider search bar
+        search.setPrefWidth(750);
+
+        search.setMinWidth(0);
 
         search.setMaxWidth(
                 Double.MAX_VALUE
         );
 
         search.setStyle(
-                "-fx-background-color:#F8F9FA;"
-                        + "-fx-border-color:#E1E5E8;"
+                "-fx-background-color: #F8F9FA;"
+                        + "-fx-border-color: #E1E5E8;"
                         + "-fx-border-radius:8;"
                         + "-fx-background-radius:8;"
                         + "-fx-font-size:14px;"
@@ -228,7 +352,7 @@ public class ManageGuard {
         addGuardBtn.setPrefHeight(45);
 
         addGuardBtn.setStyle(
-                "-fx-background-color:#434141;"
+                "-fx-background-color: #4e342e;"
                         + "-fx-text-fill:white;"
                         + "-fx-font-weight:bold;"
                         + "-fx-background-radius:8;"
@@ -247,15 +371,13 @@ public class ManageGuard {
         refreshBtn.setPrefHeight(45);
 
         refreshBtn.setMinWidth(45);
-
         refreshBtn.setMinHeight(45);
 
         refreshBtn.setMaxWidth(45);
-
         refreshBtn.setMaxHeight(45);
 
         refreshBtn.setStyle(
-                "-fx-background-color:#56342B;"
+                "-fx-background-color: #4e342e;"
                         + "-fx-text-fill:white;"
                         + "-fx-font-size:24px;"
                         + "-fx-font-weight:bold;"
@@ -264,13 +386,8 @@ public class ManageGuard {
                         + "-fx-padding:0;"
         );
 
-        Tooltip refreshTooltip =
-                new Tooltip(
-                        "Refresh"
-                );
-
         refreshBtn.setTooltip(
-                refreshTooltip
+                new Tooltip("Refresh")
         );
 
         // =====================================================
@@ -312,6 +429,10 @@ public class ManageGuard {
 
         guardList.setFillWidth(true);
 
+        guardList.setStyle(
+                "-fx-background-color:transparent;"
+        );
+
         // =====================================================
         // SCROLL PANE
         // =====================================================
@@ -325,18 +446,38 @@ public class ManageGuard {
 
         scrollPane.setFitToWidth(true);
 
-        scrollPane.setStyle(
-                "-fx-background-color:transparent;"
-                        + "-fx-border-color:transparent;"
-        );
+        scrollPane.setFitToHeight(false);
 
+        scrollPane.setPannable(true);
+
+        // Invisible scrollbars
         scrollPane.setHbarPolicy(
                 ScrollPane.ScrollBarPolicy.NEVER
         );
 
         scrollPane.setVbarPolicy(
-                ScrollPane.ScrollBarPolicy.AS_NEEDED
+                ScrollPane.ScrollBarPolicy.NEVER
         );
+
+        scrollPane.setStyle(
+                "-fx-background-color:transparent;"
+                        + "-fx-background:transparent;"
+                        + "-fx-border-color:transparent;"
+                        + "-fx-padding:0;"
+        );
+
+        // Keep the ScrollPane viewport transparent so the
+        // background image remains visible behind the guard list.
+        Platform.runLater(() -> {
+            javafx.scene.Node viewport =
+                    scrollPane.lookup(".viewport");
+
+            if (viewport != null) {
+                viewport.setStyle(
+                        "-fx-background-color:transparent;"
+                );
+            }
+        });
 
         VBox.setVgrow(
                 scrollPane,
@@ -344,7 +485,182 @@ public class ManageGuard {
         );
 
         // =====================================================
-        // MAIN ROOT
+        // MAIN CONTENT
+        // =====================================================
+
+        mainvb.getChildren().addAll(
+               
+                searchBox,
+                scrollPane
+        );
+
+        // =====================================================
+        // CONTENT HOLDER
+        // 12PX GAP FROM SIDEBAR
+        // =====================================================
+
+        HBox contentHolder =
+                new HBox();
+
+        contentHolder.setMaxSize(
+                Double.MAX_VALUE,
+                Double.MAX_VALUE
+        );
+        contentHolder.setMinWidth(0);
+        contentHolder.setMinHeight(0);
+
+        contentHolder.setPadding(
+                new Insets(
+                        0,
+                        0,
+                        0,
+                        12
+                )
+        );
+
+        contentHolder.setStyle(
+                "-fx-background-color:transparent;"
+        );
+
+        contentHolder.getChildren().add(
+                mainvb
+        );
+
+        HBox.setHgrow(
+                mainvb,
+                Priority.ALWAYS
+        );
+
+        VBox.setVgrow(
+                contentHolder,
+                Priority.ALWAYS
+        );
+
+        // =====================================================
+        // BACKGROUND IMAGE
+        // UI ONLY - NO FUNCTIONALITY CHANGE
+        // =====================================================
+
+        StackPane contentStack =
+                new StackPane();
+
+        contentStack.setMaxSize(
+                Double.MAX_VALUE,
+                Double.MAX_VALUE
+        );
+        contentStack.setMinWidth(0);
+        contentStack.setMinHeight(0);
+
+        Image backgroundImage = null;
+
+        try {
+            java.net.URL imageUrl =
+                    getClass().getResource(BACKGROUND_IMAGE);
+
+            // First try the normal Maven/classpath resource.
+            if (imageUrl != null) {
+                backgroundImage =
+                        new Image(
+                                imageUrl.toExternalForm(),
+                                false
+                        );
+
+                System.out.println(
+                        "BACKGROUND IMAGE LOADED FROM RESOURCES: "
+                                + imageUrl
+                );
+            } else {
+                // Fallback for running directly from the project folder.
+                java.io.File imageFile =
+                        new java.io.File(
+                                "src/main/resources/background-Dashboard5.jpeg"
+                        );
+
+                if (imageFile.exists()) {
+                    backgroundImage =
+                            new Image(
+                                    imageFile.toURI().toString(),
+                                    false
+                            );
+
+                    System.out.println(
+                            "BACKGROUND IMAGE LOADED FROM FILE: "
+                                    + imageFile.getAbsolutePath()
+                    );
+                } else {
+                    System.err.println(
+                            "BACKGROUND IMAGE NOT FOUND: "
+                                    + BACKGROUND_IMAGE
+                    );
+                    System.err.println(
+                            "Place background-Dashboard5.jpeg inside "
+                                    + "src/main/resources/"
+                    );
+                }
+            }
+
+        } catch (Exception e) {
+            System.err.println(
+                    "ERROR LOADING BACKGROUND IMAGE: "
+                            + e.getMessage()
+            );
+            e.printStackTrace();
+        }
+
+        // ImageView is placed behind the existing content so the image
+        // is always visible in the page area. All existing controls
+        // and their actions remain unchanged.
+        if (backgroundImage != null) {
+
+            ImageView backgroundView =
+                    new ImageView(backgroundImage);
+
+            backgroundView.setPreserveRatio(false);
+            backgroundView.setSmooth(true);
+            backgroundView.setMouseTransparent(true);
+
+            backgroundView.fitWidthProperty().bind(
+                    contentStack.widthProperty()
+            );
+
+            backgroundView.fitHeightProperty().bind(
+                    contentStack.heightProperty()
+            );
+
+            contentStack.getChildren().add(
+                    backgroundView
+            );
+        } else {
+            // Keep the page usable if the image is temporarily missing.
+            contentStack.setStyle(
+                    "-fx-background-color:#f4f4f4;"
+            );
+        }
+
+        // Existing content remains exactly the same and stays above
+        // the background image.
+        contentStack.getChildren().add(
+                contentHolder
+        );
+
+        // =====================================================
+        // RIGHT SIDE
+        // HEADER DIRECTLY ATTACHED
+        // =====================================================
+
+        rightSide.getChildren().addAll(
+                header,
+                contentStack
+        );
+
+        VBox.setVgrow(
+                contentStack,
+                Priority.ALWAYS
+        );
+
+        // =====================================================
+        // ROOT
+        // SIDEBAR + RIGHT SIDE
         // =====================================================
 
         HBox mainRoot =
@@ -355,17 +671,24 @@ public class ManageGuard {
                 Double.MAX_VALUE
         );
 
-        mainRoot.getChildren().addAll(
-                sidebar,
-                mainvb
+        // No separate color for gap
+        mainRoot.setStyle(
+                "-fx-background-color:transparent;"
         );
 
-        mainRoot.setStyle(
-                "-fx-background-color:#434141;"
+        mainRoot.getChildren().addAll(
+                sidebar,
+                rightSide
+        );
+
+        // Keep sidebar fixed and let only the right side expand.
+        HBox.setHgrow(
+                sidebar,
+                Priority.NEVER
         );
 
         HBox.setHgrow(
-                mainvb,
+                rightSide,
                 Priority.ALWAYS
         );
 
@@ -396,7 +719,6 @@ public class ManageGuard {
 
             search.clear();
 
-            // Get latest society
             currentSociety =
                     getCurrentSociety();
 
@@ -434,17 +756,6 @@ public class ManageGuard {
         );
 
         // =====================================================
-        // MAIN CONTENT
-        // =====================================================
-
-        mainvb.getChildren().addAll(
-                title,
-                subtitle,
-                searchBox,
-                scrollPane
-        );
-
-        // =====================================================
         // LOAD CURRENT SOCIETY GUARDS
         // =====================================================
 
@@ -467,28 +778,39 @@ public class ManageGuard {
     }
 
     // =====================================================
-    // GET CURRENT SOCIETY
+    // GET GREETING
     // =====================================================
-    //
-    // LOGIN EMAIL
-    //      ↓
-    // UserDao.getLoggedInEmail()
-    //      ↓
-    // Secretaries collection
-    //      ↓
-    // email field
-    //      ↓
-    // society field
-    //
+
+    private String getGreeting() {
+
+        int hour =
+                LocalTime.now().getHour();
+
+        if (hour >= 5 && hour < 12) {
+
+            return "Good Morning";
+
+        } else if (hour >= 12 && hour < 17) {
+
+            return "Good Afternoon";
+
+        } else if (hour >= 17 && hour < 21) {
+
+            return "Good Evening";
+
+        } else {
+
+            return "Good Night";
+        }
+    }
+
+    // =====================================================
+    // GET CURRENT SOCIETY
     // =====================================================
 
     private String getCurrentSociety() {
 
         try {
-
-            // =================================================
-            // GET LOGGED-IN EMAIL
-            // =================================================
 
             String loggedInEmail =
                     UserDao.getLoggedInEmail();
@@ -513,10 +835,6 @@ public class ManageGuard {
                             + loggedInEmail
             );
 
-            // =================================================
-            // QUERY SECRETARIES
-            // =================================================
-
             QuerySnapshot snapshot =
                     db.collection(
                             SECRETARY_COLLECTION
@@ -528,10 +846,6 @@ public class ManageGuard {
                             .limit(1)
                             .get()
                             .get();
-
-            // =================================================
-            // CHECK RESULT
-            // =================================================
 
             if (snapshot.isEmpty()) {
 
@@ -547,18 +861,10 @@ public class ManageGuard {
                 return "";
             }
 
-            // =================================================
-            // GET SECRETARY DOCUMENT
-            // =================================================
-
             DocumentSnapshot document =
                     snapshot
                             .getDocuments()
                             .get(0);
-
-            // =================================================
-            // GET SOCIETY
-            // =================================================
 
             String society =
                     document.getString(
@@ -582,10 +888,6 @@ public class ManageGuard {
 
             society =
                     society.trim();
-
-            // =================================================
-            // DEBUG
-            // =================================================
 
             System.out.println(
                     "=========================================="
@@ -639,10 +941,6 @@ public class ManageGuard {
 
         guardList.getChildren().clear();
 
-        // =====================================================
-        // SOCIETY VALIDATION
-        // =====================================================
-
         if (currentSociety == null
                 || currentSociety.trim().isEmpty()) {
 
@@ -653,7 +951,7 @@ public class ManageGuard {
 
             errorLabel.setStyle(
                     "-fx-font-size:16px;"
-                            + "-fx-text-fill:#b00020;"
+                            + "-fx-text-fill: #b00020;"
             );
 
             guardList.getChildren().add(
@@ -666,10 +964,6 @@ public class ManageGuard {
 
             return;
         }
-
-        // =====================================================
-        // FETCH ONLY CURRENT SOCIETY
-        // =====================================================
 
         System.out.println(
                 "=========================================="
@@ -693,10 +987,6 @@ public class ManageGuard {
                         currentSociety
                 );
 
-        // =====================================================
-        // EMPTY
-        // =====================================================
-
         if (guards == null
                 || guards.isEmpty()) {
 
@@ -708,7 +998,7 @@ public class ManageGuard {
 
             emptyLabel.setStyle(
                     "-fx-font-size:16px;"
-                            + "-fx-text-fill:#555555;"
+                            + "-fx-text-fill: #555555;"
             );
 
             guardList.getChildren().add(
@@ -717,10 +1007,6 @@ public class ManageGuard {
 
             return;
         }
-
-        // =====================================================
-        // DISPLAY
-        // =====================================================
 
         for (Guard guard : guards) {
 
@@ -752,10 +1038,6 @@ public class ManageGuard {
                                 .toLowerCase()
                                 .trim();
 
-        // =====================================================
-        // SOCIETY VALIDATION
-        // =====================================================
-
         if (currentSociety == null
                 || currentSociety.trim().isEmpty()) {
 
@@ -766,7 +1048,7 @@ public class ManageGuard {
 
             label.setStyle(
                     "-fx-font-size:16px;"
-                            + "-fx-text-fill:#b00020;"
+                            + "-fx-text-fill: #b00020;"
             );
 
             guardList.getChildren().add(
@@ -775,10 +1057,6 @@ public class ManageGuard {
 
             return;
         }
-
-        // =====================================================
-        // FETCH ONLY CURRENT SOCIETY
-        // =====================================================
 
         List<Guard> guards =
                 guardController.getGuardsBySociety(
@@ -803,7 +1081,7 @@ public class ManageGuard {
 
                 String mobile =
                         safe(
-                                guard.getMobile()
+                                guard.getPhone()
                         )
                                 .toLowerCase();
 
@@ -848,10 +1126,6 @@ public class ManageGuard {
                 }
             }
         }
-
-        // =====================================================
-        // NO RESULT
-        // =====================================================
 
         if (!found) {
 
@@ -916,7 +1190,7 @@ public class ManageGuard {
         );
 
         profile.setStyle(
-                "-fx-background-color:#E5E7EB;"
+                "-fx-background-color: #E5E7EB;"
                         + "-fx-background-radius:50%;"
                         + "-fx-font-size:21px;"
         );
@@ -937,7 +1211,7 @@ public class ManageGuard {
         name.setStyle(
                 "-fx-font-size:15px;"
                         + "-fx-font-weight:bold;"
-                        + "-fx-text-fill:#123C36;"
+                        + "-fx-text-fill: #123C36;"
         );
 
         // =====================================================
@@ -948,7 +1222,7 @@ public class ManageGuard {
                 new Label(
                         "Mobile: "
                                 + safe(
-                                        guard.getMobile()
+                                        guard.getPhone()
                                 )
                 );
 
@@ -968,7 +1242,7 @@ public class ManageGuard {
 
         shiftLabel.setStyle(
                 "-fx-font-size:11px;"
-                        + "-fx-text-fill:#777777;"
+                        + "-fx-text-fill: #777777;"
         );
 
         ComboBox<String> shiftCombo =
@@ -1001,7 +1275,6 @@ public class ManageGuard {
         );
 
         shiftCombo.setPrefWidth(125);
-
         shiftCombo.setPrefHeight(35);
 
         VBox shiftBox =
@@ -1056,7 +1329,6 @@ public class ManageGuard {
         }
 
         statusCombo.setPrefWidth(105);
-
         statusCombo.setPrefHeight(35);
 
         VBox statusBox =
@@ -1113,7 +1385,6 @@ public class ManageGuard {
         }
 
         gateCombo.setPrefWidth(120);
-
         gateCombo.setPrefHeight(35);
 
         VBox gateBox =
@@ -1229,12 +1500,6 @@ public class ManageGuard {
                 return;
             }
 
-            // =================================================
-            // IMPORTANT
-            // USE FIRESTORE DOCUMENT ID
-            // NOT EMAIL
-            // =================================================
-
             String guardId =
                     safe(
                             guard.getId()
@@ -1250,10 +1515,6 @@ public class ManageGuard {
 
                 return;
             }
-
-            // =================================================
-            // VALIDATION
-            // =================================================
 
             if (shift == null
                     || shift.trim().isEmpty()
@@ -1271,10 +1532,6 @@ public class ManageGuard {
                 return;
             }
 
-            // =================================================
-            // UPDATE
-            // =================================================
-
             boolean updated =
                     guardController.updateGuard(
                             guardId,
@@ -1282,10 +1539,6 @@ public class ManageGuard {
                             status,
                             gate
                     );
-
-            // =================================================
-            // SUCCESS
-            // =================================================
 
             if (updated) {
 
@@ -1336,16 +1589,8 @@ public class ManageGuard {
 
     private void openAddGuardDialog() {
 
-        // =====================================================
-        // GET LATEST SOCIETY
-        // =====================================================
-
         currentSociety =
                 getCurrentSociety();
-
-        // =====================================================
-        // CHECK SOCIETY
-        // =====================================================
 
         if (currentSociety == null
                 || currentSociety.trim().isEmpty()) {
@@ -1382,9 +1627,7 @@ public class ManageGuard {
         );
 
         formBox.setPrefWidth(430);
-
         formBox.setMaxWidth(430);
-
         formBox.setMaxHeight(540);
 
         formBox.setStyle(
@@ -1625,11 +1868,10 @@ public class ManageGuard {
                 );
 
         cancelBtn.setPrefWidth(100);
-
         cancelBtn.setPrefHeight(38);
 
         cancelBtn.setStyle(
-                "-fx-background-color:#E5E7EB;"
+                "-fx-background-color: #E5E7EB;"
                         + "-fx-text-fill:#333333;"
                         + "-fx-background-radius:8;"
                         + "-fx-cursor:hand;"
@@ -1645,11 +1887,10 @@ public class ManageGuard {
                 );
 
         saveBtn.setPrefWidth(130);
-
         saveBtn.setPrefHeight(38);
 
         saveBtn.setStyle(
-                "-fx-background-color:#2E9D63;"
+                "-fx-background-color: #2E9D63;"
                         + "-fx-text-fill:white;"
                         + "-fx-font-weight:bold;"
                         + "-fx-background-radius:8;"
@@ -1777,11 +2018,6 @@ public class ManageGuard {
             String gate =
                     gateCombo.getValue();
 
-            // =================================================
-            // IMPORTANT
-            // SOCIETY ALWAYS COMES FROM LOGGED-IN SECRETARY
-            // =================================================
-
             String society =
                     currentSociety;
 
@@ -1820,10 +2056,6 @@ public class ManageGuard {
 
                 return;
             }
-
-            // =================================================
-            // SAVE GUARD
-            // =================================================
 
             System.out.println(
                     "=========================================="
@@ -1879,10 +2111,6 @@ public class ManageGuard {
                         overlay
                 );
 
-                // =================================================
-                // CLEAR
-                // =================================================
-
                 nameField.clear();
 
                 mobileField.clear();
@@ -1900,10 +2128,6 @@ public class ManageGuard {
                 gateCombo.setValue(
                         "Main Gate"
                 );
-
-                // =================================================
-                // REFRESH CURRENT SOCIETY
-                // =================================================
 
                 loadGuards();
 
