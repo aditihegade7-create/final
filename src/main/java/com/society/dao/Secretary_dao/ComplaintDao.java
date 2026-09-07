@@ -30,6 +30,9 @@ public class ComplaintDao {
     private static final String RESIDENT_COLLECTION =
             "Residents";
 
+    private static final String SECRETARY_COLLECTION =
+            "Secretaries";
+
     // =====================================================
     // CONSTRUCTOR
     // =====================================================
@@ -57,40 +60,161 @@ public class ComplaintDao {
     }
 
     // =====================================================
+    // NORMALIZE SOCIETY
+    // =====================================================
+
+    private String normalizeSociety(String society) {
+
+        if (society == null) {
+            return "";
+        }
+
+        return society.trim();
+    }
+
+    // =====================================================
     // GET COMPLAINT COLLECTION BY EMAIL
-    //
-    // complaints
-    //      └── email
-    //           └── complaints
     // =====================================================
 
     private CollectionReference getComplaintCollection(
             String email) {
 
-        email = normalizeEmail(email);
+        String normalizedEmail =
+                normalizeEmail(email);
 
-        if (email.isEmpty()) {
+        if (normalizedEmail.isEmpty()) {
             return null;
         }
 
         return firestore
                 .collection(COMPLAINT_COLLECTION)
-                .document(email)
+                .document(normalizedEmail)
                 .collection("complaints");
     }
 
     // =====================================================
-    // CHECK RESIDENT EXISTS
+    // GET RESIDENT SOCIETY BY EMAIL
     // =====================================================
     //
-    // Checks:
+    // Residents collection:
     //
-    // Residents collection
-    //       ↓
-    // email field == given email
+    // Residents
+    //    └── document
+    //          ├── email
+    //          └── society
     //
-    // This does NOT assume that email is the document ID.
+    // Email hardcoded नाही.
     //
+    // =====================================================
+
+    public String getResidentSociety(String email) {
+
+        try {
+
+            String normalizedEmail =
+                    normalizeEmail(email);
+
+            if (normalizedEmail.isEmpty()) {
+
+                System.out.println(
+                        "Resident society check failed: email empty."
+                );
+
+                return null;
+            }
+
+            System.out.println("====================================");
+            System.out.println("GETTING RESIDENT SOCIETY");
+            System.out.println(
+                    "Resident Email = "
+                            + normalizedEmail
+            );
+            System.out.println("====================================");
+
+            // -------------------------------------------------
+            // FIRST: email FIELD
+            // -------------------------------------------------
+
+            QuerySnapshot snapshot =
+                    firestore
+                            .collection(RESIDENT_COLLECTION)
+                            .whereEqualTo(
+                                    "email",
+                                    normalizedEmail
+                            )
+                            .limit(1)
+                            .get()
+                            .get();
+
+            if (!snapshot.isEmpty()) {
+
+                DocumentSnapshot document =
+                        snapshot.getDocuments().get(0);
+
+                String society =
+                        document.getString("society");
+
+                if (society != null &&
+                        !society.trim().isEmpty()) {
+
+                    System.out.println(
+                            "Resident Society = "
+                                    + society
+                    );
+
+                    return society.trim();
+                }
+            }
+
+            // -------------------------------------------------
+            // SECOND: EMAIL AS DOCUMENT ID
+            // -------------------------------------------------
+
+            DocumentSnapshot directDocument =
+                    firestore
+                            .collection(RESIDENT_COLLECTION)
+                            .document(normalizedEmail)
+                            .get()
+                            .get();
+
+            if (directDocument.exists()) {
+
+                String society =
+                        directDocument.getString("society");
+
+                if (society != null &&
+                        !society.trim().isEmpty()) {
+
+                    System.out.println(
+                            "Resident Society by Document ID = "
+                                    + society
+                    );
+
+                    return society.trim();
+                }
+            }
+
+            System.out.println(
+                    "Resident society NOT FOUND for "
+                            + normalizedEmail
+            );
+
+            return null;
+
+        } catch (Exception e) {
+
+            System.err.println(
+                    "ERROR GETTING RESIDENT SOCIETY"
+            );
+
+            e.printStackTrace();
+
+            return null;
+        }
+    }
+
+    // =====================================================
+    // CHECK RESIDENT EXISTS
     // =====================================================
 
     public boolean residentExists(String email) {
@@ -109,12 +233,6 @@ public class ComplaintDao {
                 return false;
             }
 
-            System.out.println("====================================");
-            System.out.println("CHECKING RESIDENT");
-            System.out.println("Email = " + normalizedEmail);
-            System.out.println("Collection = " + RESIDENT_COLLECTION);
-            System.out.println("====================================");
-
             QuerySnapshot snapshot =
                     firestore
                             .collection(RESIDENT_COLLECTION)
@@ -128,20 +246,8 @@ public class ComplaintDao {
 
             if (!snapshot.isEmpty()) {
 
-                System.out.println(
-                        "RESIDENT FOUND: "
-                                + normalizedEmail
-                );
-
                 return true;
             }
-
-            /*
-             * Extra check:
-             *
-             * If your Residents documents use EMAIL
-             * itself as document ID, this also supports it.
-             */
 
             DocumentSnapshot directDocument =
                     firestore
@@ -150,27 +256,12 @@ public class ComplaintDao {
                             .get()
                             .get();
 
-            if (directDocument.exists()) {
-
-                System.out.println(
-                        "RESIDENT FOUND BY DOCUMENT ID: "
-                                + normalizedEmail
-                );
-
-                return true;
-            }
-
-            System.out.println(
-                    "RESIDENT NOT FOUND: "
-                            + normalizedEmail
-            );
-
-            return false;
+            return directDocument.exists();
 
         } catch (Exception e) {
 
-            System.out.println(
-                    "ERROR checking resident."
+            System.err.println(
+                    "ERROR CHECKING RESIDENT"
             );
 
             e.printStackTrace();
@@ -189,10 +280,6 @@ public class ComplaintDao {
 
         try {
 
-            // =================================================
-            // EMAIL
-            // =================================================
-
             String normalizedEmail =
                     normalizeEmail(email);
 
@@ -205,10 +292,6 @@ public class ComplaintDao {
                 return false;
             }
 
-            // =================================================
-            // COMPLAINT
-            // =================================================
-
             if (complaint == null) {
 
                 System.out.println(
@@ -218,46 +301,71 @@ public class ComplaintDao {
                 return false;
             }
 
-            // =================================================
-            // CHECK RESIDENT FIRST
-            // =================================================
+            // -------------------------------------------------
+            // RESIDENT CHECK
+            // -------------------------------------------------
 
-            System.out.println(
-                    "Checking whether resident belongs to society..."
-            );
-
-            boolean residentFound =
-                    residentExists(normalizedEmail);
-
-            if (!residentFound) {
+            if (!residentExists(
+                    normalizedEmail)) {
 
                 System.out.println(
                         "Complaint NOT saved."
                 );
 
                 System.out.println(
-                        "Resident does not exist in society."
-                );
-
-                System.out.println(
-                        "Email = "
-                                + normalizedEmail
+                        "Resident does not exist."
                 );
 
                 return false;
             }
 
-            // =================================================
+            // -------------------------------------------------
+            // GET RESIDENT SOCIETY
+            // -------------------------------------------------
+
+            String residentSociety =
+                    getResidentSociety(
+                            normalizedEmail
+                    );
+
+            if (residentSociety == null ||
+                    residentSociety.trim().isEmpty()) {
+
+                System.out.println(
+                        "Complaint NOT saved."
+                );
+
+                System.out.println(
+                        "Resident society not found."
+                );
+
+                return false;
+            }
+
+            residentSociety =
+                    normalizeSociety(
+                            residentSociety
+                    );
+
+            // -------------------------------------------------
             // SET EMAIL
-            // =================================================
+            // -------------------------------------------------
 
             complaint.setEmail(
                     normalizedEmail
             );
 
-            // =================================================
+            // -------------------------------------------------
+            // SET SOCIETY
+            // -------------------------------------------------
+
+            complaint.setSociety(
+                    residentSociety
+            );
+
+            // -------------------------------------------------
             // STATUS
-            // =================================================
+            // -------------------------------------------------
 
             String status =
                     complaint.getStatus();
@@ -270,14 +378,16 @@ public class ComplaintDao {
             } else {
 
                 status =
-                        normalizeStatus(status);
+                        normalizeStatus(
+                                status
+                        );
             }
 
             complaint.setStatus(status);
 
-            // =================================================
-            // CREATE DOCUMENT
-            // =================================================
+            // -------------------------------------------------
+            // GET COLLECTION
+            // -------------------------------------------------
 
             CollectionReference collection =
                     getComplaintCollection(
@@ -287,6 +397,10 @@ public class ComplaintDao {
             if (collection == null) {
                 return false;
             }
+
+            // -------------------------------------------------
+            // CREATE DOCUMENT
+            // -------------------------------------------------
 
             DocumentReference document;
 
@@ -317,9 +431,9 @@ public class ComplaintDao {
                         );
             }
 
-            // =================================================
+            // -------------------------------------------------
             // FIRESTORE DATA
-            // =================================================
+            // -------------------------------------------------
 
             Map<String, Object> data =
                     new HashMap<>();
@@ -332,6 +446,11 @@ public class ComplaintDao {
             data.put(
                     "email",
                     normalizedEmail
+            );
+
+            data.put(
+                    "society",
+                    residentSociety
             );
 
             data.put(
@@ -374,27 +493,42 @@ public class ComplaintDao {
                     FieldValue.serverTimestamp()
             );
 
-            // =================================================
+            // -------------------------------------------------
             // SAVE
-            // =================================================
+            // -------------------------------------------------
 
             document
                     .set(data)
                     .get();
 
             System.out.println("====================================");
-            System.out.println("COMPLAINT SAVED SUCCESSFULLY");
-            System.out.println("Email = " + normalizedEmail);
-            System.out.println("Complaint ID = " + complaintId);
-            System.out.println("Status = " + status);
+            System.out.println(
+                    "COMPLAINT SAVED SUCCESSFULLY"
+            );
+            System.out.println(
+                    "Email = "
+                            + normalizedEmail
+            );
+            System.out.println(
+                    "Society = "
+                            + residentSociety
+            );
+            System.out.println(
+                    "Complaint ID = "
+                            + complaintId
+            );
+            System.out.println(
+                    "Status = "
+                            + status
+            );
             System.out.println("====================================");
 
             return true;
 
         } catch (Exception e) {
 
-            System.out.println(
-                    "ERROR saving complaint."
+            System.err.println(
+                    "ERROR SAVING COMPLAINT"
             );
 
             e.printStackTrace();
@@ -427,13 +561,6 @@ public class ComplaintDao {
                 return complaints;
             }
 
-            System.out.println("====================================");
-            System.out.println("FETCHING COMPLAINTS");
-            System.out.println(
-                    "Email = " + normalizedEmail
-            );
-            System.out.println("====================================");
-
             CollectionReference collection =
                     getComplaintCollection(
                             normalizedEmail
@@ -448,6 +575,20 @@ public class ComplaintDao {
                             .get()
                             .get();
 
+            System.out.println("====================================");
+            System.out.println(
+                    "FETCHING COMPLAINTS BY EMAIL"
+            );
+            System.out.println(
+                    "Email = "
+                            + normalizedEmail
+            );
+            System.out.println(
+                    "Total = "
+                            + snapshot.size()
+            );
+            System.out.println("====================================");
+
             for (QueryDocumentSnapshot document :
                     snapshot.getDocuments()) {
 
@@ -457,11 +598,6 @@ public class ComplaintDao {
                         );
 
                 if (complaint != null) {
-
-                    /*
-                     * Always use requested email.
-                     * This guarantees email based fetching.
-                     */
 
                     complaint.setEmail(
                             normalizedEmail
@@ -473,26 +609,12 @@ public class ComplaintDao {
                 }
             }
 
-            System.out.println(
-                    "FETCH COMPLETE"
-            );
-
-            System.out.println(
-                    "Email = "
-                            + normalizedEmail
-            );
-
-            System.out.println(
-                    "Total = "
-                            + complaints.size()
-            );
-
             return complaints;
 
         } catch (Exception e) {
 
-            System.out.println(
-                    "ERROR fetching complaints by email."
+            System.err.println(
+                    "ERROR FETCHING COMPLAINTS BY EMAIL"
             );
 
             e.printStackTrace();
@@ -502,13 +624,22 @@ public class ComplaintDao {
     }
 
     // =====================================================
-    // FETCH BY EMAIL + STATUS
+    // FETCH COMPLAINTS BY EMAIL + SOCIETY
+    // =====================================================
+    //
+    // This is the important method for Secretary.
+    //
+    // Email:
+    //     dynamically received
+    //
+    // Society:
+    //     dynamically received from Secretary
+    //
     // =====================================================
 
-    public List<Complaint>
-    getComplaintsByEmailAndStatus(
+    public List<Complaint> getComplaintsByEmailAndSociety(
             String email,
-            String status) {
+            String society) {
 
         List<Complaint> complaints =
                 new ArrayList<>();
@@ -518,55 +649,74 @@ public class ComplaintDao {
             String normalizedEmail =
                     normalizeEmail(email);
 
-            String normalizedStatus =
-                    normalizeStatus(status);
+            String normalizedSociety =
+                    normalizeSociety(society);
 
             if (normalizedEmail.isEmpty()) {
+
+                System.out.println(
+                        "Fetch failed: email empty."
+                );
+
+                return complaints;
+            }
+
+            if (normalizedSociety.isEmpty()) {
+
+                System.out.println(
+                        "Fetch failed: society empty."
+                );
+
                 return complaints;
             }
 
             System.out.println("====================================");
             System.out.println(
-                    "FETCH BY EMAIL + STATUS"
+                    "FETCH COMPLAINTS BY EMAIL + SOCIETY"
             );
             System.out.println(
-                    "Email = " + normalizedEmail
+                    "Email = "
+                            + normalizedEmail
             );
             System.out.println(
-                    "Status = " + normalizedStatus
+                    "Society = "
+                            + normalizedSociety
             );
             System.out.println("====================================");
 
-            /*
-             * FIRST FETCH USING EMAIL.
-             *
-             * This is intentional.
-             * We don't directly depend on Firestore
-             * compound indexes.
-             */
+            // -------------------------------------------------
+            // FETCH USING EMAIL
+            // -------------------------------------------------
 
-            List<Complaint> all =
+            List<Complaint> emailComplaints =
                     getComplaintsByEmail(
                             normalizedEmail
                     );
 
-            // =================================================
-            // FILTER STATUS
-            // =================================================
+            // -------------------------------------------------
+            // SOCIETY FILTER
+            // -------------------------------------------------
 
-            for (Complaint complaint : all) {
+            for (Complaint complaint :
+                    emailComplaints) {
 
                 if (complaint == null) {
                     continue;
                 }
 
-                String complaintStatus =
-                        normalizeStatus(
-                                complaint.getStatus()
+                String complaintSociety =
+                        normalizeSociety(
+                                complaint.getSociety()
                         );
 
-                if (complaintStatus.equals(
-                        normalizedStatus)) {
+                if (complaintSociety.isEmpty()) {
+
+                    continue;
+                }
+
+                if (complaintSociety.equalsIgnoreCase(
+                        normalizedSociety
+                )) {
 
                     complaints.add(
                             complaint
@@ -575,7 +725,7 @@ public class ComplaintDao {
             }
 
             System.out.println(
-                    "Filtered complaints = "
+                    "Matching complaints = "
                             + complaints.size()
             );
 
@@ -583,14 +733,61 @@ public class ComplaintDao {
 
         } catch (Exception e) {
 
-            System.out.println(
-                    "ERROR fetching complaints by email/status."
+            System.err.println(
+                    "ERROR FETCHING EMAIL + SOCIETY COMPLAINTS"
             );
 
             e.printStackTrace();
 
             return complaints;
         }
+    }
+
+    // =====================================================
+    // FETCH BY EMAIL + SOCIETY + STATUS
+    // =====================================================
+
+    public List<Complaint>
+    getComplaintsByEmailSocietyAndStatus(
+            String email,
+            String society,
+            String status) {
+
+        List<Complaint> result =
+                new ArrayList<>();
+
+        String requiredStatus =
+                normalizeStatus(status);
+
+        List<Complaint> complaints =
+                getComplaintsByEmailAndSociety(
+                        email,
+                        society
+                );
+
+        for (Complaint complaint :
+                complaints) {
+
+            if (complaint == null) {
+                continue;
+            }
+
+            String complaintStatus =
+                    normalizeStatus(
+                            complaint.getStatus()
+                    );
+
+            if (complaintStatus.equalsIgnoreCase(
+                    requiredStatus
+            )) {
+
+                result.add(
+                        complaint
+                );
+            }
+        }
+
+        return result;
     }
 
     // =====================================================
@@ -652,23 +849,63 @@ public class ComplaintDao {
                 }
             }
 
-            System.out.println(
-                    "Total ALL complaints = "
-                            + allComplaints.size()
-            );
-
             return allComplaints;
 
         } catch (Exception e) {
 
-            System.out.println(
-                    "ERROR fetching all complaints."
+            System.err.println(
+                    "ERROR FETCHING ALL COMPLAINTS"
             );
 
             e.printStackTrace();
 
             return allComplaints;
         }
+    }
+
+    // =====================================================
+    // GET ALL COMPLAINTS BY SOCIETY
+    // =====================================================
+
+    public List<Complaint> getAllComplaintsBySociety(
+            String society) {
+
+        List<Complaint> result =
+                new ArrayList<>();
+
+        String normalizedSociety =
+                normalizeSociety(society);
+
+        if (normalizedSociety.isEmpty()) {
+            return result;
+        }
+
+        List<Complaint> all =
+                getAllComplaints();
+
+        for (Complaint complaint :
+                all) {
+
+            if (complaint == null) {
+                continue;
+            }
+
+            String complaintSociety =
+                    normalizeSociety(
+                            complaint.getSociety()
+                    );
+
+            if (complaintSociety.equalsIgnoreCase(
+                    normalizedSociety
+            )) {
+
+                result.add(
+                        complaint
+                );
+            }
+        }
+
+        return result;
     }
 
     // =====================================================
@@ -688,7 +925,8 @@ public class ComplaintDao {
         List<Complaint> all =
                 getAllComplaints();
 
-        for (Complaint complaint : all) {
+        for (Complaint complaint :
+                all) {
 
             if (complaint == null) {
                 continue;
@@ -700,7 +938,8 @@ public class ComplaintDao {
                     );
 
             if (complaintStatus.equals(
-                    requiredStatus)) {
+                    requiredStatus
+            )) {
 
                 result.add(
                         complaint
@@ -727,19 +966,11 @@ public class ComplaintDao {
 
             if (normalizedEmail.isEmpty()) {
 
-                System.out.println(
-                        "Update failed: email empty."
-                );
-
                 return false;
             }
 
             if (complaintId == null ||
                     complaintId.trim().isEmpty()) {
-
-                System.out.println(
-                        "Update failed: complaint ID empty."
-                );
 
                 return false;
             }
@@ -748,25 +979,13 @@ public class ComplaintDao {
                     complaintId.trim();
 
             String normalizedStatus =
-                    normalizeStatus(newStatus);
+                    normalizeStatus(
+                            newStatus
+                    );
 
-            // =================================================
-            // RESIDENT CHECK
-            // =================================================
-
-            if (!residentExists(
-                    normalizedEmail)) {
-
-                System.out.println(
-                        "Update failed: resident not found."
-                );
-
-                return false;
-            }
-
-            // =================================================
-            // DOCUMENT PATH
-            // =================================================
+            // -------------------------------------------------
+            // DOCUMENT
+            // -------------------------------------------------
 
             DocumentReference document =
                     firestore
@@ -783,10 +1002,6 @@ public class ComplaintDao {
                                     normalizedId
                             );
 
-            // =================================================
-            // CHECK DOCUMENT
-            // =================================================
-
             DocumentSnapshot snapshot =
                     document
                             .get()
@@ -798,22 +1013,12 @@ public class ComplaintDao {
                         "Complaint not found."
                 );
 
-                System.out.println(
-                        "Email = "
-                                + normalizedEmail
-                );
-
-                System.out.println(
-                        "ID = "
-                                + normalizedId
-                );
-
                 return false;
             }
 
-            // =================================================
+            // -------------------------------------------------
             // UPDATE
-            // =================================================
+            // -------------------------------------------------
 
             Map<String, Object> update =
                     new HashMap<>();
@@ -837,27 +1042,16 @@ public class ComplaintDao {
                     .update(update)
                     .get();
 
-            System.out.println("====================================");
             System.out.println(
-                    "COMPLAINT STATUS UPDATED"
+                    "Complaint status updated successfully."
             );
-            System.out.println(
-                    "Email = " + normalizedEmail
-            );
-            System.out.println(
-                    "Complaint ID = " + normalizedId
-            );
-            System.out.println(
-                    "Status = " + normalizedStatus
-            );
-            System.out.println("====================================");
 
             return true;
 
         } catch (Exception e) {
 
-            System.out.println(
-                    "ERROR updating complaint."
+            System.err.println(
+                    "ERROR UPDATING COMPLAINT"
             );
 
             e.printStackTrace();
@@ -923,8 +1117,8 @@ public class ComplaintDao {
 
         } catch (Exception e) {
 
-            System.out.println(
-                    "ERROR fetching complaint by email/id."
+            System.err.println(
+                    "ERROR FETCHING COMPLAINT BY EMAIL/ID"
             );
 
             e.printStackTrace();
@@ -942,11 +1136,16 @@ public class ComplaintDao {
 
         try {
 
+            if (document == null ||
+                    !document.exists()) {
+
+                return null;
+            }
+
             Complaint complaint =
                     new Complaint();
 
             // ID
-
             String id =
                     document.getString("id");
 
@@ -960,43 +1159,41 @@ public class ComplaintDao {
             complaint.setId(id);
 
             // EMAIL
-
             complaint.setEmail(
                     document.getString("email")
             );
 
-            // TITLE
+            // SOCIETY
+            complaint.setSociety(
+                    document.getString("society")
+            );
 
+            // TITLE
             complaint.setTitle(
                     document.getString("title")
             );
 
             // CATEGORY
-
             complaint.setCategory(
                     document.getString("category")
             );
 
             // DESCRIPTION
-
             complaint.setDescription(
                     document.getString("description")
             );
 
             // FLAT
-
             complaint.setFlatNumber(
                     document.getString("flatNumber")
             );
 
             // DATE
-
             complaint.setPreferredDate(
                     document.getString("preferredDate")
             );
 
             // STATUS
-
             complaint.setStatus(
                     normalizeStatus(
                             document.getString("status")
@@ -1004,7 +1201,6 @@ public class ComplaintDao {
             );
 
             // IMAGE
-
             complaint.setImageFileName(
                     document.getString(
                             "imageFileName"
@@ -1015,8 +1211,8 @@ public class ComplaintDao {
 
         } catch (Exception e) {
 
-            System.out.println(
-                    "ERROR converting complaint document."
+            System.err.println(
+                    "ERROR CONVERTING COMPLAINT"
             );
 
             e.printStackTrace();
@@ -1042,27 +1238,23 @@ public class ComplaintDao {
                 status.trim()
                         .toUpperCase();
 
-        if (value.equals("OPEN")) {
+        switch (value) {
 
-            return "IN PROGRESS";
+            case "OPEN":
+                return "IN PROGRESS";
+
+            case "IN PROGRESS":
+                return "IN PROGRESS";
+
+            case "RESOLVED":
+                return "RESOLVED";
+
+            case "CLOSED":
+                return "CLOSED";
+
+            default:
+                return "IN PROGRESS";
         }
-
-        if (value.equals("IN PROGRESS")) {
-
-            return "IN PROGRESS";
-        }
-
-        if (value.equals("RESOLVED")) {
-
-            return "RESOLVED";
-        }
-
-        if (value.equals("CLOSED")) {
-
-            return "CLOSED";
-        }
-
-        return "IN PROGRESS";
     }
 
     // =====================================================

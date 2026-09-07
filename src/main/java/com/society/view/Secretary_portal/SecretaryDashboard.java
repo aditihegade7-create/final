@@ -21,6 +21,12 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.image.Image;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -79,6 +85,13 @@ public class SecretaryDashboard {
     // ============================================================
 
     private User loggedInUser;
+
+    // ============================================================
+    // BACKGROUND IMAGE
+    // ============================================================
+
+    private static final String BACKGROUND_IMAGE =
+            "/background-Dashboard5.jpeg";
 
     // ============================================================
     // CONSTRUCTOR
@@ -216,11 +229,12 @@ public class SecretaryDashboard {
                 Pos.CENTER_LEFT
         );
 
-        /*
-         * HEADER COLOR SAME AS SIDEBAR
-         */
+        // ========================================================
+        // HEADER BACKGROUND COLOR
+        // ========================================================
+
         header.setStyle(
-                "-fx-background-color:#5a5757;"
+                "-fx-background-color: #4e342e;"
         );
 
         // ========================================================
@@ -260,8 +274,7 @@ public class SecretaryDashboard {
                 new Label("🔔");
 
         notification.setStyle(
-               
-                        "-fx-font-size:20px;"
+                "-fx-font-size:20px;"
                         + "-fx-text-fill:white;"
         );
 
@@ -298,9 +311,8 @@ public class SecretaryDashboard {
                 );
 
         date.setStyle(
-                
-                        "-fx-font-size:12px;"
-                        + "-fx-text-fill:#eeeeee;"
+                "-fx-font-size:12px;"
+                        + "-fx-text-fill:white;"
         );
 
         VBox dateBox =
@@ -409,8 +421,9 @@ public class SecretaryDashboard {
                 new Insets(20)
         );
 
+        // Transparent so background image is visible
         cardsRow.setStyle(
-                "-fx-background-color:#b3adad;"
+                "-fx-background-color:transparent;"
         );
 
         cardsRow.getChildren().addAll(
@@ -487,8 +500,9 @@ public class SecretaryDashboard {
                 )
         );
 
+        // Transparent so background image is visible
         lowerContent.setStyle(
-                "-fx-background-color:#b3adad;"
+                "-fx-background-color:transparent;"
         );
 
         lowerContent.getChildren().addAll(
@@ -504,9 +518,70 @@ public class SecretaryDashboard {
         VBox mainContent =
                 new VBox();
 
-        mainContent.setStyle(
-                "-fx-background-color:#b3adad;"
-        );
+        // ========================================================
+        // BACKGROUND IMAGE
+        // ========================================================
+
+        try {
+
+            if (getClass().getResource(
+                    BACKGROUND_IMAGE
+            ) != null) {
+
+                Image backgroundImage =
+                        new Image(
+                                getClass()
+                                        .getResource(
+                                                BACKGROUND_IMAGE
+                                        )
+                                        .toExternalForm()
+                        );
+
+                BackgroundImage bgImage =
+                        new BackgroundImage(
+                                backgroundImage,
+                                BackgroundRepeat.NO_REPEAT,
+                                BackgroundRepeat.NO_REPEAT,
+                                BackgroundPosition.CENTER,
+                                new BackgroundSize(
+                                        100,
+                                        100,
+                                        true,
+                                        true,
+                                        false,
+                                        true
+                                )
+                        );
+
+                mainContent.setBackground(
+                        new Background(
+                                bgImage
+                        )
+                );
+
+            } else {
+
+                System.err.println(
+                        "Background image not found: "
+                                + BACKGROUND_IMAGE
+                );
+
+                mainContent.setStyle(
+                        "-fx-background-color:#b3adad;"
+                );
+            }
+
+        } catch (Exception e) {
+
+            System.err.println(
+                    "Background image could not be loaded: "
+                            + e.getMessage()
+            );
+
+            mainContent.setStyle(
+                    "-fx-background-color:#b3adad;"
+            );
+        }
 
         mainContent.setMaxWidth(
                 Double.MAX_VALUE
@@ -572,8 +647,8 @@ public class SecretaryDashboard {
         );
 
         scrollPane.setStyle(
-                "-fx-background:#b3adad;"
-                        + "-fx-background-color:#b3adad;"
+                "-fx-background:transparent;"
+                        + "-fx-background-color:transparent;"
         );
 
         // ========================================================
@@ -584,7 +659,7 @@ public class SecretaryDashboard {
                 new VBox();
 
         root.setStyle(
-                "-fx-background-color:#b3adad;"
+                "-fx-background-color:transparent;"
         );
 
         root.getChildren().add(

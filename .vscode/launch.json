@@ -5,7 +5,10 @@
     "version": "0.2.0",
     "configurations": [
     
+<<<<<<< HEAD
 
+=======
+>>>>>>> c763484bfa90201a0630cbe819e9abfd2dd9e970
         {
             "type": "java",
             "name": "Main",

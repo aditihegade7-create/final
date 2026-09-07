@@ -1,3 +1,4 @@
+
 package com.society.controller.Secretary_Controller;
 
 import java.util.Collections;
@@ -47,7 +48,7 @@ public class GuardController {
 
     public boolean addGuard(
             String name,
-            String mobile,
+            String phone,
             String shift,
             String email,
             String status,
@@ -69,10 +70,10 @@ public class GuardController {
                 return false;
             }
 
-            if (isEmpty(mobile)) {
+            if (isEmpty(phone)) {
 
                 System.out.println(
-                        "GUARD ERROR: Mobile is required."
+                        "GUARD ERROR: Phone is required."
                 );
 
                 return false;
@@ -127,26 +128,19 @@ public class GuardController {
             // CLEAN DATA
             // =================================================
 
-            name =
-                    cleanValue(name);
+            name = cleanValue(name);
 
-            mobile =
-                    cleanValue(mobile);
+            phone = cleanValue(phone);
 
-            shift =
-                    cleanValue(shift);
+            shift = cleanValue(shift);
 
-            email =
-                    cleanEmail(email);
+            email = cleanEmail(email);
 
-            status =
-                    cleanValue(status);
+            status = cleanValue(status);
 
-            assignedGate =
-                    cleanValue(assignedGate);
+            assignedGate = cleanValue(assignedGate);
 
-            society =
-                    cleanValue(society);
+            society = cleanValue(society);
 
             // =================================================
             // EMAIL VALIDATION
@@ -165,15 +159,14 @@ public class GuardController {
             // CREATE GUARD OBJECT
             // =================================================
 
-            Guard guard =
-                    new Guard();
+            Guard guard = new Guard();
 
             guard.setName(
                     name
             );
 
-            guard.setMobile(
-                    mobile
+            guard.setPhone(
+                    phone
             );
 
             guard.setShift(
@@ -218,7 +211,7 @@ public class GuardController {
             );
 
             System.out.println(
-                    "Mobile        : " + guard.getMobile()
+                    "Phone         : " + guard.getPhone()
             );
 
             System.out.println(
@@ -363,17 +356,13 @@ public class GuardController {
             // CLEAN DATA
             // =================================================
 
-            id =
-                    cleanValue(id);
+            id = cleanValue(id);
 
-            shift =
-                    cleanValue(shift);
+            shift = cleanValue(shift);
 
-            status =
-                    cleanValue(status);
+            status = cleanValue(status);
 
-            assignedGate =
-                    cleanValue(assignedGate);
+            assignedGate = cleanValue(assignedGate);
 
             // =================================================
             // UPDATE
@@ -619,6 +608,11 @@ public class GuardController {
                         "Society: "
                                 + guard.getSociety()
                 );
+
+                System.out.println(
+                        "Phone: "
+                                + guard.getPhone()
+                );
             }
 
             return guard;
@@ -697,3 +691,4 @@ public class GuardController {
         );
     }
 }
+

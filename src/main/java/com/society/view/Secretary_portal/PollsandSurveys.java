@@ -9,10 +9,6 @@ import com.society.controller.Secretary_Controller.PollController;
 import com.society.model.Secretary_model.Poll;
 import com.society.view.ScreenSize;
 
-import javafx.animation.FadeTransition;
-import javafx.animation.ParallelTransition;
-import javafx.animation.ScaleTransition;
-import javafx.animation.TranslateTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -25,170 +21,364 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.BorderPane;
+import javafx.scene.image.Image;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 
 public class PollsandSurveys {
 
+    // =========================================================
+    // SCENE
+    // =========================================================
+
     private Scene pollsScene;
+
+    // =========================================================
+    // CONTROLLER
+    // =========================================================
+
     private PollController pollController;
+
+    // =========================================================
+    // POLL LIST
+    // =========================================================
+
     private VBox pollList;
+
+    // =========================================================
+    // FILTER
+    // =========================================================
+
     private ComboBox<String> filterCombo;
+
+    // =========================================================
+    // DATE FORMAT
+    // =========================================================
 
     private final DateTimeFormatter dateFormatter =
             DateTimeFormatter.ofPattern("dd MMM yyyy");
+
+    // =========================================================
+    // COLORS
+    // =========================================================
+
+    private static final String PAGE_BG = "#F7F7F7";
+    private static final String HEADER_BG = "#4e342e";
+    private static final String PRIMARY = "#4e342e";
+    private static final String TEXT = "#292525";
+    private static final String SECONDARY_TEXT = "#666666";
+    private static final String BORDER = "#E1E1E1";
+
+    // =========================================================
+    // BACKGROUND IMAGE
+    // =========================================================
+
+    private static final String BACKGROUND_IMAGE = "/background-Dashboard5.jpeg";
+
+    // =========================================================
+    // CREATE SCENE
+    // =========================================================
 
     public Scene createScene(Stage stage) {
 
         pollController = new PollController();
 
-        // ================= SIDEBAR =================
-        SecretarySidebar sidebarObj = new SecretarySidebar();
-        VBox sidebar = sidebarObj.createSidebar(stage);
+        // =====================================================
+        // SIDEBAR
+        // =====================================================
+
+        SecretarySidebar sidebarObj =
+                new SecretarySidebar();
+
+        VBox sidebar =
+                sidebarObj.createSidebar(stage);
 
         sidebar.setPrefWidth(280);
         sidebar.setMinWidth(280);
         sidebar.setMaxWidth(280);
 
-        // ================= MAIN CONTENT =================
-        VBox main = new VBox(15);
-        main.setPadding(new Insets(22, 25, 20, 25));
-        main.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-        main.setStyle("-fx-background-color:#E8DDD3;");
+        // =====================================================
+        // MAIN
+        // =====================================================
 
-        // =========================================================
-        // TOP GLOBAL HEADER
-        // =========================================================
-        HBox topHeader = new HBox();
+        VBox main =
+                new VBox();
 
-        topHeader.setPrefHeight(80);
-        topHeader.setMinHeight(80);
-        topHeader.setMaxHeight(80);
-
-        topHeader.setPadding(new Insets(18, 25, 18, 25));
-        topHeader.setAlignment(Pos.CENTER_LEFT);
-
-        topHeader.setStyle(
-                "-fx-background-color:#593a32;"
+        main.setMaxSize(
+                Double.MAX_VALUE,
+                Double.MAX_VALUE
         );
 
-        Label topHeaderTitle = new Label("POLLS & SURVEYS");
+        main.setStyle(
+                "-fx-background-color:" + PAGE_BG + ";"
+        );
 
-        topHeaderTitle.setStyle(
-                "-fx-font-size:25px;" +
+        HBox.setHgrow(
+                main,
+                Priority.ALWAYS
+        );
+
+        // =====================================================
+        // HEADER
+        // =====================================================
+
+        Label heading =
+                new Label("Polls & Surveys");
+
+        heading.setStyle(
+                "-fx-font-size:24px;" +
                 "-fx-font-weight:bold;" +
                 "-fx-text-fill:white;"
         );
 
-        Region topHeaderSpacer = new Region();
-        HBox.setHgrow(topHeaderSpacer, Priority.ALWAYS);
-
-        Label topHeaderText = new Label("Secretary Polls & Surveys");
-
-        topHeaderText.setStyle(
-                "-fx-font-size:16px;" +
-                "-fx-font-weight:bold;" +
-                "-fx-text-fill:white;"
-        );
-
-        topHeader.getChildren().addAll(
-                topHeaderTitle,
-                topHeaderSpacer,
-                topHeaderText
-        );
-
-        // =========================================================
-        // PAGE HEADER
-        // =========================================================
-        VBox headingBox = new VBox(4);
-
-        Label title = new Label("Polls & Surveys");
-
-        title.setStyle(
-                "-fx-font-size:26px;" +
-                "-fx-font-weight:bold;" +
-                "-fx-text-fill:#24456D;"
-        );
-
-        Label subtitle = new Label(
-                "Create polls, collect opinions and manage society surveys"
-        );
+        Label subtitle =
+                new Label(
+                        "Create polls, collect opinions and manage society surveys"
+                );
 
         subtitle.setStyle(
-                "-fx-font-size:14px;" +
-                "-fx-text-fill:#666666;"
+                "-fx-font-size:13px;" +
+                "-fx-text-fill:white;"
         );
 
-        headingBox.getChildren().addAll(title, subtitle);
+        VBox headingBox =
+                new VBox(3);
 
-        // =========================================================
-        // CREATE NEW POLL BUTTON
-        // =========================================================
-        Button createButton = new Button("+ Create New Poll");
+        headingBox.setAlignment(
+                Pos.CENTER_LEFT
+        );
+
+        headingBox.getChildren().addAll(
+                heading,
+                subtitle
+        );
+
+        // =====================================================
+        // CREATE BUTTON
+        // =====================================================
+
+        Button createButton =
+                new Button("+ Create New Poll");
 
         createButton.setPrefWidth(165);
+        createButton.setMinWidth(165);
+        createButton.setMaxWidth(165);
+
         createButton.setPrefHeight(40);
+        createButton.setMinHeight(40);
+        createButton.setMaxHeight(40);
 
         createButton.setStyle(
-                "-fx-background-color:#56342B;" +
-                "-fx-text-fill:white;" +
+                "-fx-background-color:white;" +
+                "-fx-text-fill:" + HEADER_BG + ";" +
                 "-fx-font-weight:bold;" +
                 "-fx-font-size:14px;" +
                 "-fx-background-radius:7;" +
                 "-fx-cursor:hand;"
         );
 
-        addPopupAnimation(createButton);
+        createButton.setOnAction(
+                e -> openCreatePollPopup()
+        );
 
-        createButton.setOnAction(e -> openCreatePollPopup());
+        // =====================================================
+        // HEADER BOX
+        // =====================================================
 
-        HBox pageHeader = new HBox();
+        HBox header =
+                new HBox();
 
-        pageHeader.setAlignment(Pos.CENTER_LEFT);
-        pageHeader.setSpacing(15);
+        header.setAlignment(
+                Pos.CENTER_LEFT
+        );
 
-        HBox.setHgrow(headingBox, Priority.ALWAYS);
+        header.setPadding(
+                new Insets(
+                        15,
+                        25,
+                        15,
+                        25
+                )
+        );
 
-        pageHeader.getChildren().addAll(
+        header.setSpacing(20);
+
+        header.setPrefHeight(80);
+        header.setMinHeight(80);
+        header.setMaxHeight(80);
+
+        header.setMaxWidth(
+                Double.MAX_VALUE
+        );
+
+        header.setStyle(
+                "-fx-background-color:" + HEADER_BG + ";"
+        );
+
+        HBox.setHgrow(
+                headingBox,
+                Priority.ALWAYS
+        );
+
+        header.getChildren().addAll(
                 headingBox,
                 createButton
         );
 
-        // =========================================================
-        // STATISTICS
-        // =========================================================
-        HBox statistics = new HBox(15);
+        // =====================================================
+        // CONTENT
+        // =====================================================
 
-        statistics.setAlignment(Pos.CENTER_LEFT);
+        VBox content =
+                new VBox(15);
 
-        Label activeValue = new Label("0");
-        Label surveyValue = new Label("0");
-        Label closedValue = new Label("0");
-
-        statistics.getChildren().addAll(
-                createStatCard("Active Polls", activeValue),
-                createStatCard("Surveys", surveyValue),
-                createStatCard("Closed", closedValue)
+        content.setPadding(
+                new Insets(
+                        20,
+                        25,
+                        20,
+                        25
+                )
         );
 
-        // =========================================================
-        // LIST HEADER
-        // =========================================================
-        Label listTitle = new Label("Polls & Surveys");
+        content.setMaxSize(
+                Double.MAX_VALUE,
+                Double.MAX_VALUE
+        );
+
+        VBox.setVgrow(
+                content,
+                Priority.ALWAYS
+        );
+
+        // =====================================================
+        // BACKGROUND IMAGE
+        // =====================================================
+
+        try {
+
+            if (getClass().getResource(
+                    BACKGROUND_IMAGE
+            ) != null) {
+
+                Image backgroundImage =
+                        new Image(
+                                getClass()
+                                        .getResource(
+                                                BACKGROUND_IMAGE
+                                        )
+                                        .toExternalForm()
+                        );
+
+                BackgroundImage bgImage =
+                        new BackgroundImage(
+                                backgroundImage,
+                                BackgroundRepeat.NO_REPEAT,
+                                BackgroundRepeat.NO_REPEAT,
+                                BackgroundPosition.CENTER,
+                                new BackgroundSize(
+                                        100,
+                                        100,
+                                        true,
+                                        true,
+                                        false,
+                                        true
+                                )
+                        );
+
+                content.setBackground(
+                        new Background(
+                                bgImage
+                        )
+                );
+
+            } else {
+
+                System.err.println(
+                        "Background image not found: "
+                                + BACKGROUND_IMAGE
+                );
+
+                content.setStyle(
+                        "-fx-background-color:" + PAGE_BG + ";"
+                );
+            }
+
+        } catch (Exception e) {
+
+            System.err.println(
+                    "Background image could not be loaded: "
+                            + e.getMessage()
+            );
+
+            content.setStyle(
+                    "-fx-background-color:" + PAGE_BG + ";"
+            );
+        }
+
+        // =====================================================
+        // STATISTICS
+        // =====================================================
+
+        HBox statistics =
+                new HBox(12);
+
+        Label activeValue =
+                new Label("0");
+
+        Label surveyValue =
+                new Label("0");
+
+        Label closedValue =
+                new Label("0");
+
+        VBox activeCard =
+                createStatCard(
+                        "Active Polls",
+                        activeValue
+                );
+
+        VBox surveyCard =
+                createStatCard(
+                        "Surveys",
+                        surveyValue
+                );
+
+        VBox closedCard =
+                createStatCard(
+                        "Closed",
+                        closedValue
+                );
+
+        statistics.getChildren().addAll(
+                activeCard,
+                surveyCard,
+                closedCard
+        );
+
+        // =====================================================
+        // SECTION HEADER
+        // =====================================================
+
+        Label listTitle =
+                new Label("Polls & Surveys");
 
         listTitle.setStyle(
                 "-fx-font-size:20px;" +
                 "-fx-font-weight:bold;" +
-                "-fx-text-fill:#333333;"
+                "-fx-text-fill:" + TEXT + ";"
         );
 
-        filterCombo = new ComboBox<>();
+        filterCombo =
+                new ComboBox<>();
 
         filterCombo.getItems().addAll(
                 "All",
@@ -202,105 +392,200 @@ public class PollsandSurveys {
         filterCombo.setPrefWidth(120);
         filterCombo.setPrefHeight(35);
 
-        filterCombo.setOnAction(e -> loadPolls());
+        filterCombo.setStyle(
+                "-fx-background-color:white;" +
+                "-fx-border-color:" + BORDER + ";" +
+                "-fx-border-radius:6;" +
+                "-fx-background-radius:6;"
+        );
 
-        Button refreshButton = new Button("⟳ Refresh");
+        filterCombo.setOnAction(
+                e -> loadPolls()
+        );
+
+        // =====================================================
+        // REFRESH BUTTON
+        // =====================================================
+
+        Button refreshButton =
+                new Button("↻ Refresh");
 
         refreshButton.setPrefWidth(110);
+        refreshButton.setMinWidth(110);
+        refreshButton.setMaxWidth(110);
+
         refreshButton.setPrefHeight(35);
+        refreshButton.setMinHeight(35);
+        refreshButton.setMaxHeight(35);
 
         refreshButton.setStyle(
-                "-fx-background-color:#56342B;" +
-                "-fx-text-fill:white;" +
+                "-fx-background-color:white;" +
+                "-fx-text-fill:" + HEADER_BG + ";" +
                 "-fx-font-weight:bold;" +
                 "-fx-background-radius:7;" +
+                "-fx-border-color:" + BORDER + ";" +
+                "-fx-border-radius:7;" +
                 "-fx-cursor:hand;"
         );
 
-        addPopupAnimation(refreshButton);
+        refreshButton.setOnAction(
+                e -> {
 
-        refreshButton.setOnAction(e -> {
-            loadPolls();
-            updateStatistics(
-                    activeValue,
-                    surveyValue,
-                    closedValue
-            );
-        });
+                    loadPolls();
 
-        HBox listHeader = new HBox(12);
+                    updateStatistics(
+                            activeValue,
+                            surveyValue,
+                            closedValue
+                    );
+                }
+        );
 
-        listHeader.setAlignment(Pos.CENTER_LEFT);
+        // =====================================================
+        // LIST HEADER
+        // =====================================================
 
-        Region listSpacer = new Region();
-        HBox.setHgrow(listSpacer, Priority.ALWAYS);
+        HBox listHeader =
+                new HBox(10);
+
+        listHeader.setAlignment(
+                Pos.CENTER_LEFT
+        );
+
+        HBox.setHgrow(
+                listTitle,
+                Priority.ALWAYS
+        );
 
         listHeader.getChildren().addAll(
                 listTitle,
-                listSpacer,
                 filterCombo,
                 refreshButton
         );
 
-        // =========================================================
+        // =====================================================
         // SEPARATOR
-        // =========================================================
-        Separator separator = new Separator();
+        // =====================================================
 
-        // =========================================================
+        Separator separator =
+                new Separator();
+
+        separator.setStyle(
+                "-fx-background-color:" + BORDER + ";"
+        );
+
+        // =====================================================
         // POLL LIST
-        // =========================================================
-        pollList = new VBox(12);
+        // =====================================================
 
-        pollList.setPadding(new Insets(5));
-        pollList.setFillWidth(true);
+        pollList =
+                new VBox(12);
 
-        // =========================================================
-        // SCROLL PANE
-        // =========================================================
-        ScrollPane scrollPane = new ScrollPane();
+        pollList.setPadding(
+                new Insets(5)
+        );
 
-        scrollPane.setContent(pollList);
+        pollList.setFillWidth(
+                true
+        );
+
+        pollList.setMaxWidth(
+                Double.MAX_VALUE
+        );
+
+        pollList.setStyle(
+                "-fx-background-color:transparent;"
+        );
+
+        // =====================================================
+        // SCROLL
+        // =====================================================
+
+        ScrollPane scrollPane =
+                new ScrollPane();
+
+        scrollPane.setContent(
+                pollList
+        );
 
         scrollPane.setFitToWidth(true);
+
+        scrollPane.setFitToHeight(false);
+
+        // =====================================================
+        // INVISIBLE SCROLLBARS
+        // =====================================================
+
         scrollPane.setHbarPolicy(
                 ScrollPane.ScrollBarPolicy.NEVER
         );
 
         scrollPane.setVbarPolicy(
-                ScrollPane.ScrollBarPolicy.AS_NEEDED
+                ScrollPane.ScrollBarPolicy.NEVER
         );
 
-        scrollPane.setMaxHeight(Double.MAX_VALUE);
+        // =====================================================
+        // TRANSPARENT SCROLLPANE
+        // =====================================================
 
         scrollPane.setStyle(
                 "-fx-background-color:transparent;" +
-                "-fx-background-insets:0;"
+                "-fx-background:transparent;" +
+                "-fx-border-color:transparent;" +
+                "-fx-padding:0;"
         );
 
-        VBox.setVgrow(scrollPane, Priority.ALWAYS);
+        // =====================================================
+        // SCROLLING ENABLED
+        // =====================================================
 
-        // =========================================================
+        scrollPane.setPannable(
+                true
+        );
+
+        scrollPane.setMaxHeight(
+                Double.MAX_VALUE
+        );
+
+        VBox.setVgrow(
+                scrollPane,
+                Priority.ALWAYS
+        );
+
+        // =====================================================
         // FOOTER
-        // =========================================================
-        Label footer = new Label(
-                "Society360 • Polls & Surveys Management"
-        );
+        // =====================================================
+
+        Label footer =
+                new Label(
+                        "Poll and survey data is synchronized with Firestore."
+                );
 
         footer.setStyle(
                 "-fx-font-size:12px;" +
                 "-fx-text-fill:#777777;"
         );
 
-        HBox footerBox = new HBox(footer);
+        HBox footerBox =
+                new HBox();
 
-        footerBox.setAlignment(Pos.CENTER);
+        footerBox.setAlignment(
+                Pos.CENTER
+        );
 
-        // =========================================================
-        // ADD CONTENT TO MAIN
-        // =========================================================
-        main.getChildren().addAll(
-                pageHeader,
+        footerBox.setMaxWidth(
+                Double.MAX_VALUE
+        );
+
+        footerBox.getChildren().add(
+                footer
+        );
+
+        // =====================================================
+        // MAIN CONTENT
+        // =====================================================
+
+        content.getChildren().addAll(
                 statistics,
                 listHeader,
                 separator,
@@ -308,51 +593,73 @@ public class PollsandSurveys {
                 footerBox
         );
 
-        // =========================================================
-        // CONTENT WRAPPER
-        // =========================================================
-        VBox contentWrapper = new VBox();
+        // =====================================================
+        // MAIN
+        // =====================================================
 
-        contentWrapper.setMaxSize(
+        main.getChildren().addAll(
+                header,
+                content
+        );
+
+        VBox.setVgrow(
+                content,
+                Priority.ALWAYS
+        );
+
+        // =====================================================
+        // ROOT
+        // =====================================================
+
+        HBox mainRoot =
+                new HBox();
+
+        mainRoot.setMaxSize(
                 Double.MAX_VALUE,
                 Double.MAX_VALUE
         );
 
-        contentWrapper.setStyle(
-                "-fx-background-color:#E8DDD3;"
-        );
-
-        contentWrapper.getChildren().addAll(
-                topHeader,
+        mainRoot.getChildren().addAll(
+                sidebar,
                 main
         );
 
-        VBox.setVgrow(main, Priority.ALWAYS);
-
-        // =========================================================
-        // ROOT
-        // =========================================================
-        BorderPane root = new BorderPane();
-
-        root.setLeft(sidebar);
-        root.setCenter(contentWrapper);
-
-        root.setStyle(
-                "-fx-background-color:#E8DDD3;"
+        HBox.setHgrow(
+                main,
+                Priority.ALWAYS
         );
 
-        // =========================================================
+        // =====================================================
+        // STACK ROOT
+        // =====================================================
+
+        StackPane root =
+                new StackPane();
+
+        root.setMaxSize(
+                Double.MAX_VALUE,
+                Double.MAX_VALUE
+        );
+
+        root.getChildren().add(
+                mainRoot
+        );
+
+        // =====================================================
         // SCENE
-        // =========================================================
-        pollsScene = new Scene(
-                root,
-                ScreenSize.getWidth(),
-                ScreenSize.getHeight()
-        );
+        // =====================================================
 
-        // =========================================================
-        // INITIAL DATA
-        // =========================================================
+        pollsScene =
+                new Scene(
+                        root,
+                        ScreenSize.getWidth(),
+                        ScreenSize.getHeight()
+                );
+
+        // =====================================================
+        // INITIAL LOAD
+        // =====================================================
+
         loadPolls();
 
         updateStatistics(
@@ -361,324 +668,407 @@ public class PollsandSurveys {
                 closedValue
         );
 
-        // =========================================================
-        // DOWN → UP ANIMATION
-        // =========================================================
-        animateContent(pageHeader, 30, 80);
-        animateContent(statistics, 40, 160);
-        animateContent(listHeader, 45, 240);
-        animateContent(separator, 50, 300);
-        animateContent(scrollPane, 55, 360);
-        animateContent(footerBox, 60, 420);
-
         return pollsScene;
     }
 
-    // =============================================================
+    // =========================================================
     // STAT CARD
-    // =============================================================
-    private VBox createStatCard(
-            String titleText,
-            Label valueLabel
-    ) {
+    // =========================================================
 
-        VBox card = new VBox(5);
+    private VBox createStatCard(
+            String title,
+            Label value) {
+
+        VBox card =
+                new VBox(5);
+
+        card.setPadding(
+                new Insets(15)
+        );
 
         card.setPrefWidth(180);
-        card.setMinWidth(180);
-        card.setMaxWidth(180);
-
         card.setPrefHeight(80);
 
-        card.setPadding(new Insets(12));
-
-        card.setAlignment(Pos.CENTER_LEFT);
-
         card.setStyle(
-                "-fx-background-color:white;" +
+                "-fx-background-color:rgba(255,255,255,0.96);" +
                 "-fx-background-radius:10;" +
-                "-fx-border-color:#DDDDDD;" +
+                "-fx-border-color:" + BORDER + ";" +
                 "-fx-border-radius:10;"
         );
 
-        Label titleLabel = new Label(titleText);
+        Label titleLabel =
+                new Label(title);
 
         titleLabel.setStyle(
                 "-fx-font-size:13px;" +
                 "-fx-text-fill:#777777;"
         );
 
-        valueLabel.setStyle(
+        value.setStyle(
                 "-fx-font-size:24px;" +
                 "-fx-font-weight:bold;" +
-                "-fx-text-fill:#24456D;"
+                "-fx-text-fill:" + PRIMARY + ";"
         );
 
         card.getChildren().addAll(
                 titleLabel,
-                valueLabel
+                value
         );
 
         return card;
     }
 
-    // =============================================================
+    // =========================================================
     // UPDATE STATISTICS
-    // =============================================================
+    // =========================================================
+
     private void updateStatistics(
             Label activeValue,
             Label surveyValue,
-            Label closedValue
-    ) {
+            Label closedValue) {
 
         try {
 
-            int active =
-                    pollController.getActivePolls().size();
+            activeValue.setText(
+                    String.valueOf(
+                            pollController
+                                    .getActivePolls()
+                                    .size()
+                    )
+            );
 
-            int surveys =
-                    pollController.getSurveys().size();
+            surveyValue.setText(
+                    String.valueOf(
+                            pollController
+                                    .getSurveys()
+                                    .size()
+                    )
+            );
 
-            int closed =
-                    pollController.getHistory().size();
-
-            activeValue.setText(String.valueOf(active));
-            surveyValue.setText(String.valueOf(surveys));
-            closedValue.setText(String.valueOf(closed));
+            closedValue.setText(
+                    String.valueOf(
+                            pollController
+                                    .getHistory()
+                                    .size()
+                    )
+            );
 
         } catch (Exception e) {
 
-            activeValue.setText("0");
-            surveyValue.setText("0");
-            closedValue.setText("0");
+            e.printStackTrace();
         }
     }
 
-    // =============================================================
+    // =========================================================
     // LOAD POLLS
-    // =============================================================
+    // =========================================================
+
     private void loadPolls() {
+
+        if (pollList == null
+                || pollController == null) {
+
+            return;
+        }
 
         pollList.getChildren().clear();
 
-        try {
+        List<Poll> polls =
+                pollController.getAllPolls();
 
-            List<Poll> polls =
-                    pollController.getAllPolls();
+        String filter =
+                filterCombo == null
+                        ? "All"
+                        : filterCombo.getValue();
 
-            String selectedFilter =
-                    filterCombo.getValue();
+        if (polls == null
+                || polls.isEmpty()) {
 
-            if (selectedFilter == null) {
-                selectedFilter = "All";
+            showNoPolls(
+                    "No polls or surveys found."
+            );
+
+            return;
+        }
+
+        int count = 0;
+
+        for (Poll poll : polls) {
+
+            if (poll == null) {
+                continue;
             }
 
-            List<Poll> filteredPolls =
-                    new ArrayList<>();
+            if (!matchesFilter(
+                    poll,
+                    filter)) {
 
-            for (Poll poll : polls) {
-
-                if (matchesFilter(
-                        poll,
-                        selectedFilter
-                )) {
-
-                    filteredPolls.add(poll);
-                }
+                continue;
             }
 
-            if (filteredPolls.isEmpty()) {
+            pollList.getChildren().add(
+                    createPollCard(poll)
+            );
 
-                showNoPolls();
+            count++;
+        }
 
-            } else {
+        if (count == 0) {
 
-                for (Poll poll : filteredPolls) {
-
-                    VBox card =
-                            createPollCard(poll);
-
-                    pollList.getChildren().add(card);
-                }
-            }
-
-        } catch (Exception e) {
-
-            showNoPolls();
+            showNoPolls(
+                    "No records found for this filter."
+            );
         }
     }
 
-    // =============================================================
+    // =========================================================
     // FILTER
-    // =============================================================
+    // =========================================================
+
     private boolean matchesFilter(
             Poll poll,
-            String filter
-    ) {
+            String filter) {
 
-        if ("All".equals(filter)) {
+        if (filter == null
+                || filter.equals("All")) {
+
             return true;
         }
 
-        if ("Active".equals(filter)) {
+        if (filter.equals("Active")) {
 
-            return "ACTIVE".equalsIgnoreCase(
-                    safe(poll.getStatus())
-            );
+            return poll.getStatus() != null
+                    && poll.getStatus()
+                    .equalsIgnoreCase("ACTIVE");
         }
 
-        if ("Surveys".equals(filter)) {
+        if (filter.equals("Surveys")) {
 
-            return "Survey".equalsIgnoreCase(
-                    safe(poll.getType())
-            );
+            return poll.getType() != null
+                    && poll.getType()
+                    .equalsIgnoreCase("Survey");
         }
 
-        if ("Closed".equals(filter)) {
+        if (filter.equals("Closed")) {
 
-            return "CLOSED".equalsIgnoreCase(
-                    safe(poll.getStatus())
-            );
+            return poll.getStatus() != null
+                    && poll.getStatus()
+                    .equalsIgnoreCase("CLOSED");
         }
 
         return true;
     }
 
-    // =============================================================
-    // CREATE POLL CARD
-    // =============================================================
-    private VBox createPollCard(Poll poll) {
+    // =========================================================
+    // POLL CARD
+    // =========================================================
 
-        VBox card = new VBox(10);
+    private VBox createPollCard(
+            Poll poll) {
 
-        card.setPadding(new Insets(15));
+        VBox card =
+                new VBox(10);
 
-        card.setMaxWidth(Double.MAX_VALUE);
+        card.setPadding(
+                new Insets(15)
+        );
+
+        card.setMaxWidth(
+                Double.MAX_VALUE
+        );
 
         card.setStyle(
-                "-fx-background-color:white;" +
+                "-fx-background-color:rgba(255,255,255,0.96);" +
                 "-fx-background-radius:10;" +
-                "-fx-border-color:#DDDDDD;" +
+                "-fx-border-color:" + BORDER + ";" +
                 "-fx-border-radius:10;"
         );
 
-        // ---------------------------------------------------------
-        // QUESTION
-        // ---------------------------------------------------------
-        Label question =
-                new Label(safe(poll.getQuestion()));
+        // =====================================================
+        // TOP
+        // =====================================================
 
-        question.setWrapText(true);
+        Label question =
+                new Label(
+                        safe(poll.getQuestion())
+                );
+
+        question.setWrapText(
+                true
+        );
 
         question.setStyle(
-                "-fx-font-size:18px;" +
+                "-fx-font-size:17px;" +
                 "-fx-font-weight:bold;" +
-                "-fx-text-fill:#24456D;"
+                "-fx-text-fill:" + PRIMARY + ";"
         );
 
-        // ---------------------------------------------------------
-        // TYPE + STATUS
-        // ---------------------------------------------------------
-        HBox tags = new HBox(8);
+        Label type =
+                new Label(
+                        safe(poll.getType())
+                );
 
-        Label typeLabel =
-                new Label(safe(poll.getType()));
-
-        typeLabel.setStyle(
-                "-fx-background-color:#E8DDD3;" +
-                "-fx-text-fill:#56342B;" +
-                "-fx-font-size:12px;" +
+        type.setStyle(
+                "-fx-background-color:#EEEAE7;" +
+                "-fx-text-fill:" + PRIMARY + ";" +
                 "-fx-font-weight:bold;" +
-                "-fx-padding:5 10 5 10;" +
+                "-fx-padding:5px 10px;" +
                 "-fx-background-radius:12;"
         );
 
-        Label statusLabel =
-                new Label(safe(poll.getStatus()));
+        Label status =
+                new Label(
+                        safe(poll.getStatus())
+                );
 
-        statusLabel.setStyle(
-                "-fx-background-color:#EEE6E2;" +
-                "-fx-text-fill:#56342B;" +
-                "-fx-font-size:12px;" +
-                "-fx-font-weight:bold;" +
-                "-fx-padding:5 10 5 10;" +
-                "-fx-background-radius:12;"
+        if ("ACTIVE".equalsIgnoreCase(
+                poll.getStatus())) {
+
+            status.setStyle(
+                    "-fx-background-color:#DDF4E5;" +
+                    "-fx-text-fill:#218838;" +
+                    "-fx-font-weight:bold;" +
+                    "-fx-padding:5px 10px;" +
+                    "-fx-background-radius:12;"
+            );
+
+        } else {
+
+            status.setStyle(
+                    "-fx-background-color:#F8D7DA;" +
+                    "-fx-text-fill:#B02A37;" +
+                    "-fx-font-weight:bold;" +
+                    "-fx-padding:5px 10px;" +
+                    "-fx-background-radius:12;"
+            );
+        }
+
+        HBox titleRow =
+                new HBox(10);
+
+        titleRow.setAlignment(
+                Pos.CENTER_LEFT
         );
 
-        tags.getChildren().addAll(
-                typeLabel,
-                statusLabel
+        HBox.setHgrow(
+                question,
+                Priority.ALWAYS
         );
 
-        // ---------------------------------------------------------
+        titleRow.getChildren().addAll(
+                question,
+                type,
+                status
+        );
+
+        // =====================================================
         // DESCRIPTION
-        // ---------------------------------------------------------
-        Label description =
-                new Label(safe(poll.getDescription()));
+        // =====================================================
 
-        description.setWrapText(true);
+        Label description =
+                new Label(
+                        safe(poll.getDescription())
+                );
+
+        description.setWrapText(
+                true
+        );
 
         description.setStyle(
                 "-fx-font-size:13px;" +
-                "-fx-text-fill:#666666;"
+                "-fx-text-fill:" + SECONDARY_TEXT + ";"
         );
 
-        // ---------------------------------------------------------
+        // =====================================================
         // DETAILS
-        // ---------------------------------------------------------
-        HBox details = new HBox(18);
+        // =====================================================
 
-        details.setAlignment(Pos.CENTER_LEFT);
+        Label date =
+                new Label(
+                        "Created: "
+                                + formatDate(
+                                poll.getCreatedDate()
+                        )
+                );
 
-        Label createdLabel = new Label(
-                "Created: " +
-                formatDate(poll.getCreatedDate())
+        Label endDate =
+                new Label(
+                        "Ends: "
+                                + formatDate(
+                                poll.getEndDate()
+                        )
+                );
+
+        Label audience =
+                new Label(
+                        "Audience: "
+                                + safe(
+                                poll.getTargetAudience()
+                        )
+                );
+
+        Label votes =
+                new Label(
+                        "Total Votes: "
+                                + poll.getTotalVotes()
         );
 
-        Label endLabel = new Label(
-                "Ends: " +
-                formatDate(poll.getEndDate())
-        );
+        for (Label label :
+                List.of(
+                        date,
+                        endDate,
+                        audience,
+                        votes)) {
 
-        Label audienceLabel = new Label(
-                "Audience: " +
-                safe(poll.getTargetAudience())
-        );
+            label.setStyle(
+                    "-fx-font-size:12px;" +
+                    "-fx-text-fill:#777777;"
+            );
+        }
 
-        Label votesLabel = new Label(
-                "Votes: " +
-                String.valueOf(poll.getTotalVotes())
-        );
-
-        String detailStyle =
-                "-fx-font-size:12px;" +
-                "-fx-text-fill:#777777;";
-
-        createdLabel.setStyle(detailStyle);
-        endLabel.setStyle(detailStyle);
-        audienceLabel.setStyle(detailStyle);
-        votesLabel.setStyle(detailStyle);
+        HBox details =
+                new HBox(20);
 
         details.getChildren().addAll(
-                createdLabel,
-                endLabel,
-                audienceLabel,
-                votesLabel
+                date,
+                endDate,
+                audience,
+                votes
         );
 
-        // ---------------------------------------------------------
+        // =====================================================
         // OPTIONS
-        // ---------------------------------------------------------
-        VBox optionsBox = new VBox(5);
+        // =====================================================
+
+        VBox optionsBox =
+                new VBox(5);
 
         if (poll.getOptions() != null) {
 
-            for (String option : poll.getOptions()) {
+            for (int i = 0;
+                    i < poll.getOptions().size();
+                    i++) {
+
+                String option =
+                        poll.getOptions().get(i);
+
+                long count = 0;
+
+                if (poll.getVoteCounts() != null
+                        && i < poll.getVoteCounts().size()) {
+
+                    count =
+                            poll.getVoteCounts()
+                                    .get(i);
+                }
 
                 Label optionLabel =
                         new Label(
-                                "• " +
-                                safe(option)
+                                "• "
+                                        + safe(option)
+                                        + "   ("
+                                        + count
+                                        + ")"
                         );
 
                 optionLabel.setStyle(
@@ -692,169 +1082,209 @@ public class PollsandSurveys {
             }
         }
 
-        // ---------------------------------------------------------
-        // ACTION BUTTONS
-        // ---------------------------------------------------------
-        HBox actionBox = new HBox(10);
-
-        actionBox.setAlignment(Pos.CENTER_RIGHT);
+        // =====================================================
+        // ACTIONS
+        // =====================================================
 
         Button closeButton =
                 new Button("Close Poll");
 
-        closeButton.setPrefWidth(105);
-        closeButton.setPrefHeight(35);
+        closeButton.setPrefWidth(100);
+        closeButton.setPrefHeight(32);
 
         closeButton.setStyle(
-                "-fx-background-color:#56342B;" +
+                "-fx-background-color:" + PRIMARY + ";" +
                 "-fx-text-fill:white;" +
                 "-fx-font-weight:bold;" +
-                "-fx-background-radius:7;" +
+                "-fx-background-radius:6;" +
                 "-fx-cursor:hand;"
         );
-
-        addPopupAnimation(closeButton);
-
-        boolean isActive =
-                "ACTIVE".equalsIgnoreCase(
-                        safe(poll.getStatus())
-                );
-
-        closeButton.setDisable(!isActive);
-
-        closeButton.setOnAction(e -> {
-
-            try {
-
-                pollController.closePoll(
-                        poll.getPollId()
-                );
-
-                loadPolls();
-
-            } catch (Exception ex) {
-
-                showAlert(
-                        Alert.AlertType.ERROR,
-                        "Error",
-                        "Unable to close poll."
-                );
-            }
-        });
 
         Button deleteButton =
                 new Button("Delete");
 
-        deleteButton.setPrefWidth(90);
-        deleteButton.setPrefHeight(35);
+        deleteButton.setPrefWidth(85);
+        deleteButton.setPrefHeight(32);
 
         deleteButton.setStyle(
-                "-fx-background-color:#8B4A3A;" +
+                "-fx-background-color:#DC3545;" +
                 "-fx-text-fill:white;" +
                 "-fx-font-weight:bold;" +
-                "-fx-background-radius:7;" +
+                "-fx-background-radius:6;" +
                 "-fx-cursor:hand;"
         );
 
-        addPopupAnimation(deleteButton);
+        if (!"ACTIVE".equalsIgnoreCase(
+                poll.getStatus())) {
 
-        deleteButton.setOnAction(e -> {
+            closeButton.setDisable(
+                    true
+            );
+        }
 
-            try {
+        closeButton.setOnAction(
+                e -> {
 
-                pollController.deletePoll(
-                        poll.getPollId()
-                );
+                    boolean success =
+                            pollController.closePoll(
+                                    poll.getPollId()
+                            );
 
-                loadPolls();
+                    if (success) {
 
-            } catch (Exception ex) {
+                        showAlert(
+                                Alert.AlertType.INFORMATION,
+                                "Poll Closed",
+                                "Poll has been closed successfully."
+                        );
 
-                showAlert(
-                        Alert.AlertType.ERROR,
-                        "Error",
-                        "Unable to delete poll."
-                );
-            }
-        });
+                        loadPolls();
 
-        actionBox.getChildren().addAll(
+                    } else {
+
+                        showAlert(
+                                Alert.AlertType.ERROR,
+                                "Error",
+                                "Unable to close poll."
+                        );
+                    }
+                }
+        );
+
+        deleteButton.setOnAction(
+                e -> {
+
+                    boolean success =
+                            pollController.deletePoll(
+                                    poll.getPollId()
+                            );
+
+                    if (success) {
+
+                        showAlert(
+                                Alert.AlertType.INFORMATION,
+                                "Deleted",
+                                "Poll deleted successfully."
+                        );
+
+                        loadPolls();
+
+                    } else {
+
+                        showAlert(
+                                Alert.AlertType.ERROR,
+                                "Error",
+                                "Unable to delete poll."
+                        );
+                    }
+                }
+        );
+
+        HBox actions =
+                new HBox(8);
+
+        actions.setAlignment(
+                Pos.CENTER_RIGHT
+        );
+
+        actions.getChildren().addAll(
                 closeButton,
                 deleteButton
         );
 
         card.getChildren().addAll(
-                question,
-                tags,
+                titleRow,
                 description,
                 details,
                 optionsBox,
-                actionBox
+                actions
         );
 
         return card;
     }
 
-    // =============================================================
+    // =========================================================
     // CREATE POLL POPUP
-    // =============================================================
+    // =========================================================
+
     private void openCreatePollPopup() {
 
-        StackPane root =
-                (StackPane) pollsScene.getRoot();
+        if (pollsScene == null) {
+            return;
+        }
 
-        StackPane overlay = new StackPane();
+        // =====================================================
+        // OVERLAY
+        // =====================================================
+
+        StackPane overlay =
+                new StackPane();
+
+        overlay.setPickOnBounds(
+                true
+        );
 
         overlay.setStyle(
                 "-fx-background-color:rgba(0,0,0,0.40);"
         );
 
-        VBox popup = new VBox(12);
+        // =====================================================
+        // POPUP
+        // =====================================================
 
-        popup.setPadding(new Insets(22));
+        VBox popup =
+                new VBox(9);
+
+        popup.setPadding(
+                new Insets(20)
+        );
 
         popup.setPrefWidth(500);
-        popup.setPrefHeight(650);
-
         popup.setMaxWidth(500);
+
+        popup.setPrefHeight(650);
         popup.setMaxHeight(650);
 
         popup.setStyle(
                 "-fx-background-color:white;" +
                 "-fx-background-radius:15;" +
-                "-fx-border-color:#DDDDDD;" +
+                "-fx-border-color:" + BORDER + ";" +
                 "-fx-border-radius:15;"
         );
 
-        // =========================================================
-        // POPUP TITLE
-        // =========================================================
-        Label popupTitle =
-                new Label("Create New Poll");
+        // =====================================================
+        // TITLE
+        // =====================================================
 
-        popupTitle.setStyle(
-                "-fx-font-size:22px;" +
-                "-fx-font-weight:bold;" +
-                "-fx-text-fill:#24456D;"
-        );
-
-        Label popupSubtitle =
+        Label title =
                 new Label(
-                        "Create a poll or survey for society members."
+                        "Create New Poll"
                 );
 
-        popupSubtitle.setWrapText(true);
+        title.setStyle(
+                "-fx-font-size:22px;" +
+                "-fx-font-weight:bold;" +
+                "-fx-text-fill:" + PRIMARY + ";"
+        );
 
-        popupSubtitle.setStyle(
-                "-fx-font-size:13px;" +
+        Label subtitle =
+                new Label(
+                        "Create a poll or survey for society residents"
+                );
+
+        subtitle.setStyle(
+                "-fx-font-size:12px;" +
                 "-fx-text-fill:#777777;"
         );
 
-        // =========================================================
+        // =====================================================
         // TYPE
-        // =========================================================
+        // =====================================================
+
         Label typeLabel =
-                createFormLabel("Type");
+                createFormLabel(
+                        "Poll Type"
+                );
 
         ComboBox<String> typeCombo =
                 new ComboBox<>();
@@ -864,15 +1294,26 @@ public class PollsandSurveys {
                 "Survey"
         );
 
-        typeCombo.setValue("Poll");
+        typeCombo.setValue(
+                "Poll"
+        );
 
-        typeCombo.setPrefWidth(450);
+        typeCombo.setMaxWidth(
+                Double.MAX_VALUE
+        );
 
-        // =========================================================
+        typeCombo.setPrefHeight(
+                35
+        );
+
+        // =====================================================
         // QUESTION
-        // =========================================================
+        // =====================================================
+
         Label questionLabel =
-                createFormLabel("Question");
+                createFormLabel(
+                        "Question"
+                );
 
         TextField questionField =
                 new TextField();
@@ -881,69 +1322,146 @@ public class PollsandSurveys {
                 "Enter your question"
         );
 
-        questionField.setPrefHeight(38);
+        questionField.setPrefHeight(
+                35
+        );
 
-        // =========================================================
+        // =====================================================
         // DESCRIPTION
-        // =========================================================
+        // =====================================================
+
         Label descriptionLabel =
-                createFormLabel("Description");
+                createFormLabel(
+                        "Description"
+                );
 
         TextArea descriptionArea =
                 new TextArea();
 
         descriptionArea.setPromptText(
-                "Enter poll description"
+                "Enter description"
         );
 
-        descriptionArea.setPrefRowCount(3);
+        descriptionArea.setPrefRowCount(
+                2
+        );
 
-        descriptionArea.setWrapText(true);
+        descriptionArea.setWrapText(
+                true
+        );
 
-        // =========================================================
-        // OPTIONS
-        // =========================================================
-        Label optionsLabel =
-                createFormLabel("Options");
+        // =====================================================
+        // OPTION 1
+        // =====================================================
 
-        TextField option1 =
-                new TextField();
-
-        option1.setPromptText("Option 1");
-
-        TextField option2 =
-                new TextField();
-
-        option2.setPromptText("Option 2");
-
-        TextField option3 =
-                new TextField();
-
-        option3.setPromptText("Option 3 (optional)");
-
-        TextField option4 =
-                new TextField();
-
-        option4.setPromptText("Option 4 (optional)");
-
-        // =========================================================
-        // END DATE
-        // =========================================================
-        Label endDateLabel =
-                createFormLabel("End Date");
-
-        DatePicker endDatePicker =
-                new DatePicker(
-                        LocalDate.now().plusDays(7)
+        Label option1Label =
+                createFormLabel(
+                        "Option 1"
                 );
 
-        endDatePicker.setPrefWidth(450);
+        TextField option1Field =
+                new TextField();
 
-        // =========================================================
-        // AUDIENCE
-        // =========================================================
+        option1Field.setPromptText(
+                "Example: Yes"
+        );
+
+        option1Field.setPrefHeight(
+                35
+        );
+
+        // =====================================================
+        // OPTION 2
+        // =====================================================
+
+        Label option2Label =
+                createFormLabel(
+                        "Option 2"
+                );
+
+        TextField option2Field =
+                new TextField();
+
+        option2Field.setPromptText(
+                "Example: No"
+        );
+
+        option2Field.setPrefHeight(
+                35
+        );
+
+        // =====================================================
+        // OPTION 3
+        // =====================================================
+
+        Label option3Label =
+                createFormLabel(
+                        "Option 3"
+                );
+
+        TextField option3Field =
+                new TextField();
+
+        option3Field.setPromptText(
+                "Optional"
+        );
+
+        option3Field.setPrefHeight(
+                35
+        );
+
+        // =====================================================
+        // OPTION 4
+        // =====================================================
+
+        Label option4Label =
+                createFormLabel(
+                        "Option 4"
+                );
+
+        TextField option4Field =
+                new TextField();
+
+        option4Field.setPromptText(
+                "Optional"
+        );
+
+        option4Field.setPrefHeight(
+                35
+        );
+
+        // =====================================================
+        // END DATE
+        // =====================================================
+
+        Label endDateLabel =
+                createFormLabel(
+                        "End Date"
+                );
+
+        DatePicker endDatePicker =
+                new DatePicker();
+
+        endDatePicker.setValue(
+                LocalDate.now().plusDays(7)
+        );
+
+        endDatePicker.setPrefHeight(
+                35
+        );
+
+        endDatePicker.setMaxWidth(
+                Double.MAX_VALUE
+        );
+
+        // =====================================================
+        // TARGET AUDIENCE
+        // =====================================================
+
         Label audienceLabel =
-                createFormLabel("Audience");
+                createFormLabel(
+                        "Target Audience"
+                );
 
         ComboBox<String> audienceCombo =
                 new ComboBox<>();
@@ -956,65 +1474,84 @@ public class PollsandSurveys {
         );
 
         audienceCombo.setValue(
-                "All Society Members"
+                "All Residents"
         );
 
-        audienceCombo.setPrefWidth(450);
+        audienceCombo.setPrefHeight(
+                35
+        );
 
-        // =========================================================
+        audienceCombo.setMaxWidth(
+                Double.MAX_VALUE
+        );
+
+        // =====================================================
         // BUTTONS
-        // =========================================================
-        HBox buttonBox = new HBox(10);
+        // =====================================================
+
+        Button cancelButton =
+                new Button(
+                        "Cancel"
+                );
+
+        cancelButton.setPrefWidth(
+                100
+        );
+
+        cancelButton.setPrefHeight(
+                38
+        );
+
+        cancelButton.setStyle(
+                "-fx-background-color:#E5E7EB;" +
+                "-fx-text-fill:#333333;" +
+                "-fx-font-weight:bold;" +
+                "-fx-background-radius:8;" +
+                "-fx-cursor:hand;"
+        );
+
+        Button createButton =
+                new Button(
+                        "Create Poll"
+                );
+
+        createButton.setPrefWidth(
+                120
+        );
+
+        createButton.setPrefHeight(
+                38
+        );
+
+        createButton.setStyle(
+                "-fx-background-color:" + PRIMARY + ";" +
+                "-fx-text-fill:white;" +
+                "-fx-font-weight:bold;" +
+                "-fx-background-radius:8;" +
+                "-fx-cursor:hand;"
+        );
+
+        HBox buttonBox =
+                new HBox(10);
 
         buttonBox.setAlignment(
                 Pos.CENTER_RIGHT
         );
 
-        Button popupCancelButton =
-                new Button("Cancel");
-
-        popupCancelButton.setPrefWidth(100);
-        popupCancelButton.setPrefHeight(38);
-
-        popupCancelButton.setStyle(
-                "-fx-background-color:#DDDDDD;" +
-                "-fx-text-fill:#333333;" +
-                "-fx-font-weight:bold;" +
-                "-fx-background-radius:7;" +
-                "-fx-cursor:hand;"
-        );
-
-        addPopupAnimation(popupCancelButton);
-
-        Button popupCreateButton =
-                new Button("Create Poll");
-
-        popupCreateButton.setPrefWidth(120);
-        popupCreateButton.setPrefHeight(38);
-
-        popupCreateButton.setStyle(
-                "-fx-background-color:#56342B;" +
-                "-fx-text-fill:white;" +
-                "-fx-font-weight:bold;" +
-                "-fx-background-radius:7;" +
-                "-fx-cursor:hand;"
-        );
-
-        addPopupAnimation(popupCreateButton);
-
         buttonBox.getChildren().addAll(
-                popupCancelButton,
-                popupCreateButton
+                cancelButton,
+                createButton
         );
 
-        // =========================================================
+        // =====================================================
         // POPUP CONTENT
-        // =========================================================
-        VBox form = new VBox(10);
+        // =====================================================
 
-        form.getChildren().addAll(
-                popupTitle,
-                popupSubtitle,
+        popup.getChildren().addAll(
+
+                title,
+
+                subtitle,
 
                 typeLabel,
                 typeCombo,
@@ -1025,11 +1562,17 @@ public class PollsandSurveys {
                 descriptionLabel,
                 descriptionArea,
 
-                optionsLabel,
-                option1,
-                option2,
-                option3,
-                option4,
+                option1Label,
+                option1Field,
+
+                option2Label,
+                option2Field,
+
+                option3Label,
+                option3Field,
+
+                option4Label,
+                option4Field,
 
                 endDateLabel,
                 endDatePicker,
@@ -1040,17 +1583,60 @@ public class PollsandSurveys {
                 buttonBox
         );
 
+        // =====================================================
+        // POPUP SCROLL
+        // =====================================================
+
         ScrollPane popupScroll =
-                new ScrollPane(form);
+                new ScrollPane();
 
-        popupScroll.setFitToWidth(true);
+        popupScroll.setContent(
+                popup
+        );
 
-        popupScroll.setPrefWidth(520);
-        popupScroll.setPrefHeight(680);
+        popupScroll.setFitToWidth(
+                true
+        );
+
+        popupScroll.setPrefWidth(
+                520
+        );
+
+        popupScroll.setPrefHeight(
+                680
+        );
+
+        popupScroll.setMaxWidth(
+                520
+        );
+
+        popupScroll.setMaxHeight(
+                680
+        );
+
+        // Invisible popup scrollbars too
+        popupScroll.setHbarPolicy(
+                ScrollPane.ScrollBarPolicy.NEVER
+        );
+
+        popupScroll.setVbarPolicy(
+                ScrollPane.ScrollBarPolicy.NEVER
+        );
+
+        popupScroll.setPannable(
+                true
+        );
 
         popupScroll.setStyle(
-                "-fx-background-color:transparent;"
+                "-fx-background-color:transparent;" +
+                "-fx-background:transparent;" +
+                "-fx-border-color:transparent;" +
+                "-fx-padding:0;"
         );
+
+        // =====================================================
+        // ADD TO OVERLAY
+        // =====================================================
 
         overlay.getChildren().add(
                 popupScroll
@@ -1061,452 +1647,267 @@ public class PollsandSurveys {
                 Pos.CENTER
         );
 
-        root.getChildren().add(overlay);
+        StackPane root =
+                (StackPane) pollsScene.getRoot();
 
-        // =========================================================
-        // POPUP ANIMATION
-        // =========================================================
-        popupScroll.setOpacity(0);
-        popupScroll.setTranslateY(30);
-        popupScroll.setScaleX(0.95);
-        popupScroll.setScaleY(0.95);
-
-        FadeTransition fade =
-                new FadeTransition(
-                        Duration.millis(250),
-                        popupScroll
-                );
-
-        fade.setFromValue(0);
-        fade.setToValue(1);
-
-        TranslateTransition translate =
-                new TranslateTransition(
-                        Duration.millis(300),
-                        popupScroll
-                );
-
-        translate.setFromY(30);
-        translate.setToY(0);
-
-        ScaleTransition scale =
-                new ScaleTransition(
-                        Duration.millis(300),
-                        popupScroll
-                );
-
-        scale.setFromX(0.95);
-        scale.setFromY(0.95);
-        scale.setToX(1);
-        scale.setToY(1);
-
-        ParallelTransition popupAnimation =
-                new ParallelTransition(
-                        fade,
-                        translate,
-                        scale
-                );
-
-        popupAnimation.play();
-
-        // =========================================================
-        // CANCEL
-        // =========================================================
-        popupCancelButton.setOnAction(e ->
-                root.getChildren().remove(overlay)
+        root.getChildren().add(
+                overlay
         );
 
-        // =========================================================
-        // CREATE
-        // =========================================================
-        popupCreateButton.setOnAction(e -> {
+        // =====================================================
+        // CANCEL
+        // =====================================================
 
-            String type =
-                    typeCombo.getValue();
-
-            String question =
-                    questionField.getText();
-
-            String description =
-                    descriptionArea.getText();
-
-            LocalDate endDate =
-                    endDatePicker.getValue();
-
-            String audience =
-                    audienceCombo.getValue();
-
-            if (type == null ||
-                    type.trim().isEmpty()) {
-
-                showAlert(
-                        Alert.AlertType.WARNING,
-                        "Validation",
-                        "Please select poll type."
-                );
-
-                return;
-            }
-
-            if (question == null ||
-                    question.trim().isEmpty()) {
-
-                showAlert(
-                        Alert.AlertType.WARNING,
-                        "Validation",
-                        "Please enter a question."
-                );
-
-                return;
-            }
-
-            List<String> options =
-                    new ArrayList<>();
-
-            if (!option1.getText().trim().isEmpty()) {
-
-                options.add(
-                        option1.getText().trim()
-                );
-            }
-
-            if (!option2.getText().trim().isEmpty()) {
-
-                options.add(
-                        option2.getText().trim()
-                );
-            }
-
-            if (!option3.getText().trim().isEmpty()) {
-
-                options.add(
-                        option3.getText().trim()
-                );
-            }
-
-            if (!option4.getText().trim().isEmpty()) {
-
-                options.add(
-                        option4.getText().trim()
-                );
-            }
-
-            if (options.size() < 2) {
-
-                showAlert(
-                        Alert.AlertType.WARNING,
-                        "Validation",
-                        "Please enter at least two options."
-                );
-
-                return;
-            }
-
-            if (endDate == null) {
-
-                showAlert(
-                        Alert.AlertType.WARNING,
-                        "Validation",
-                        "Please select an end date."
-                );
-
-                return;
-            }
-
-            if (endDate.isBefore(LocalDate.now())) {
-
-                showAlert(
-                        Alert.AlertType.WARNING,
-                        "Validation",
-                        "End date cannot be before today."
-                );
-
-                return;
-            }
-
-            if (audience == null ||
-                    audience.trim().isEmpty()) {
-
-                showAlert(
-                        Alert.AlertType.WARNING,
-                        "Validation",
-                        "Please select audience."
-                );
-
-                return;
-            }
-
-            try {
-
-                pollController.createPoll(
-                        question.trim(),
-                        type,
-                        description == null
-                                ? ""
-                                : description.trim(),
-                        endDate.toString(),
-                        audience,
-                        options
-                );
-
-                root.getChildren().remove(
+        cancelButton.setOnAction(
+                e -> root.getChildren().remove(
                         overlay
-                );
+                )
+        );
 
-                loadPolls();
+        // =====================================================
+        // CREATE
+        // =====================================================
 
-                showAlert(
-                        Alert.AlertType.INFORMATION,
-                        "Success",
-                        "Poll created successfully."
-                );
+        createButton.setOnAction(
+                e -> {
 
-            } catch (Exception ex) {
+                    String type =
+                            typeCombo.getValue();
 
-                showAlert(
-                        Alert.AlertType.ERROR,
-                        "Error",
-                        "Unable to create poll."
-                );
-            }
-        });
+                    String question =
+                            questionField
+                                    .getText()
+                                    .trim();
+
+                    String description =
+                            descriptionArea
+                                    .getText()
+                                    .trim();
+
+                    String option1 =
+                            option1Field
+                                    .getText()
+                                    .trim();
+
+                    String option2 =
+                            option2Field
+                                    .getText()
+                                    .trim();
+
+                    String option3 =
+                            option3Field
+                                    .getText()
+                                    .trim();
+
+                    String option4 =
+                            option4Field
+                                    .getText()
+                                    .trim();
+
+                    LocalDate endDate =
+                            endDatePicker.getValue();
+
+                    String audience =
+                            audienceCombo.getValue();
+
+                    // =================================================
+                    // VALIDATION
+                    // =================================================
+
+                    if (type == null
+                            || question.isEmpty()
+                            || option1.isEmpty()
+                            || option2.isEmpty()
+                            || endDate == null
+                            || audience == null) {
+
+                        showAlert(
+                                Alert.AlertType.WARNING,
+                                "Missing Information",
+                                "Please fill all required fields."
+                        );
+
+                        return;
+                    }
+
+                    if (endDate.isBefore(
+                            LocalDate.now())) {
+
+                        showAlert(
+                                Alert.AlertType.WARNING,
+                                "Invalid Date",
+                                "End date cannot be before today."
+                        );
+
+                        return;
+                    }
+
+                    List<String> options =
+                            new ArrayList<>();
+
+                    options.add(option1);
+                    options.add(option2);
+
+                    if (!option3.isEmpty()) {
+
+                        options.add(option3);
+                    }
+
+                    if (!option4.isEmpty()) {
+
+                        options.add(option4);
+                    }
+
+                    // =================================================
+                    // SAVE
+                    // =================================================
+
+                    boolean saved =
+                            pollController.createPoll(
+                                    question,
+                                    type,
+                                    description,
+                                    endDate.toString(),
+                                    audience,
+                                    options
+                            );
+
+                    if (saved) {
+
+                        showAlert(
+                                Alert.AlertType.INFORMATION,
+                                "Success",
+                                "Poll created and saved to Firestore successfully."
+                        );
+
+                        // CLOSE POPUP
+                        root.getChildren().remove(
+                                overlay
+                        );
+
+                        // REFRESH UI FROM FIRESTORE
+                        loadPolls();
+
+                    } else {
+
+                        showAlert(
+                                Alert.AlertType.ERROR,
+                                "Save Failed",
+                                "Unable to save poll. Please check logged-in email and Firestore connection."
+                        );
+                    }
+                }
+        );
     }
 
-    // =============================================================
+    // =========================================================
     // FORM LABEL
-    // =============================================================
+    // =========================================================
+
     private Label createFormLabel(
-            String text
-    ) {
+            String text) {
 
         Label label =
-                new Label(text);
+                new Label(
+                        text
+                );
 
         label.setStyle(
                 "-fx-font-size:13px;" +
                 "-fx-font-weight:bold;" +
-                "-fx-text-fill:#444444;"
+                "-fx-text-fill:" + TEXT + ";"
         );
 
         return label;
     }
 
-    // =============================================================
+    // =========================================================
     // NO POLLS
-    // =============================================================
-    private void showNoPolls() {
+    // =========================================================
 
-        VBox box = new VBox(8);
+    private void showNoPolls(
+            String message) {
 
-        box.setAlignment(
-                Pos.CENTER
-        );
-
-        box.setPadding(
-                new Insets(50)
-        );
-
-        Label icon =
-                new Label("📋");
-
-        icon.setStyle(
-                "-fx-font-size:35px;"
-        );
-
-        Label message =
+        Label label =
                 new Label(
-                        "No polls or surveys found."
+                        message
                 );
 
-        message.setStyle(
-                "-fx-font-size:16px;" +
-                "-fx-text-fill:#777777;"
+        label.setStyle(
+                "-fx-font-size:15px;" +
+                "-fx-font-weight:bold;" +
+                "-fx-text-fill:#777777;" +
+                "-fx-padding:20;"
         );
 
-        box.getChildren().addAll(
-                icon,
-                message
+        pollList.getChildren().add(
+                label
         );
-
-        pollList.getChildren().add(box);
     }
 
-    // =============================================================
+    // =========================================================
     // FORMAT DATE
-    // =============================================================
-    private String formatDate(
-            Object date
-    ) {
+    // =========================================================
 
-        if (date == null) {
-            return "-";
-        }
+    private String formatDate(
+            String date) {
 
         try {
 
-            if (date instanceof LocalDate) {
+            if (date == null
+                    || date.trim().isEmpty()) {
 
-                return dateFormatter.format(
-                        (LocalDate) date
-                );
+                return "";
             }
 
-            String value =
-                    date.toString();
-
-            try {
-
-                LocalDate parsed =
-                        LocalDate.parse(value);
-
-                return dateFormatter.format(
-                        parsed
-                );
-
-            } catch (Exception ignored) {
-
-                return value;
-            }
+            return LocalDate
+                    .parse(date)
+                    .format(
+                            dateFormatter
+                    );
 
         } catch (Exception e) {
 
-            return "-";
+            return safe(date);
         }
     }
 
-    // =============================================================
-    // SAFE STRING
-    // =============================================================
+    // =========================================================
+    // SAFE
+    // =========================================================
+
     private String safe(
-            String value
-    ) {
+            String value) {
 
         return value == null
                 ? ""
                 : value;
     }
 
-    // =============================================================
+    // =========================================================
     // ALERT
-    // =============================================================
+    // =========================================================
+
     private void showAlert(
             Alert.AlertType type,
             String title,
-            String message
-    ) {
+            String message) {
 
         Alert alert =
                 new Alert(type);
 
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-
-        alert.showAndWait();
-    }
-
-    // =============================================================
-    // DOWN → UP + FADE ANIMATION
-    // =============================================================
-    private void animateContent(
-            javafx.scene.Node node,
-            double fromY,
-            double delayMillis
-    ) {
-
-        node.setOpacity(0);
-        node.setTranslateY(fromY);
-
-        FadeTransition fade =
-                new FadeTransition(
-                        Duration.millis(500),
-                        node
-                );
-
-        fade.setFromValue(0);
-        fade.setToValue(1);
-
-        TranslateTransition translate =
-                new TranslateTransition(
-                        Duration.millis(500),
-                        node
-                );
-
-        translate.setFromY(fromY);
-        translate.setToY(0);
-
-        ParallelTransition animation =
-                new ParallelTransition(
-                        fade,
-                        translate
-                );
-
-        animation.setDelay(
-                Duration.millis(delayMillis)
+        alert.setTitle(
+                title
         );
 
-        animation.play();
-    }
+        alert.setHeaderText(
+                null
+        );
 
-    // =============================================================
-    // BUTTON POPUP / SCALE ANIMATION
-    // =============================================================
-    private void addPopupAnimation(
-            Button button
-    ) {
+        alert.setContentText(
+                message
+        );
 
-        ScaleTransition scaleUp =
-                new ScaleTransition(
-                        Duration.millis(120),
-                        button
-                );
-
-        scaleUp.setToX(1.05);
-        scaleUp.setToY(1.05);
-
-        ScaleTransition scaleDown =
-                new ScaleTransition(
-                        Duration.millis(120),
-                        button
-                );
-
-        scaleDown.setToX(1.0);
-        scaleDown.setToY(1.0);
-
-        ScaleTransition press =
-                new ScaleTransition(
-                        Duration.millis(80),
-                        button
-                );
-
-        press.setToX(0.97);
-        press.setToY(0.97);
-
-        button.setOnMouseEntered(e -> {
-            scaleDown.stop();
-            scaleUp.playFromStart();
-        });
-
-        button.setOnMouseExited(e -> {
-            scaleUp.stop();
-            scaleDown.playFromStart();
-        });
-
-        button.setOnMousePressed(e -> {
-            press.stop();
-            press.playFromStart();
-        });
-
-        button.setOnMouseReleased(e -> {
-
-            if (button.isHover()) {
-
-                scaleUp.playFromStart();
-
-            } else {
-
-                scaleDown.playFromStart();
-            }
-        });
+        alert.showAndWait();
     }
 }
