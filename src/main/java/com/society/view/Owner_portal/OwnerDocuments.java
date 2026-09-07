@@ -1,6 +1,8 @@
 package com.society.view.Owner_portal;
 
 import java.io.File;
+import java.awt.Desktop;
+import java.net.URI;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
@@ -769,6 +771,69 @@ public class OwnerDocuments {
         );
 
         // =====================================================
+        // PREVIEW BUTTON
+        // =====================================================
+
+        Button previewButton =
+                new Button(
+                        "Preview"
+                );
+
+        previewButton.setPrefWidth(
+                90
+        );
+
+        previewButton.setPrefHeight(
+                34
+        );
+
+        previewButton.setStyle(
+                "-fx-background-color:white;" +
+                "-fx-border-color:#4e342e;" +
+                "-fx-border-radius:7;" +
+                "-fx-background-radius:7;" +
+                "-fx-text-fill:#4e342e;" +
+                "-fx-font-weight:bold;" +
+                "-fx-cursor:hand;"
+        );
+
+
+        // =====================================================
+        // PREVIEW ACTION
+        // =====================================================
+
+        previewButton.setOnAction(e -> {
+
+            File selectedFile = null;
+
+            switch (documentKey) {
+
+                case "aadhaar":
+                    selectedFile = aadhaarFile;
+                    break;
+
+                case "pan":
+                    selectedFile = panFile;
+                    break;
+
+                case "ownership":
+                    selectedFile = ownershipFile;
+                    break;
+
+                case "address":
+                    selectedFile = addressFile;
+                    break;
+            }
+
+            previewDocument(
+                    selectedFile,
+                    existingUrl,
+                    documentName
+            );
+        });
+
+
+        // =====================================================
         // CHOOSE BUTTON
         // =====================================================
 
@@ -937,11 +1002,91 @@ public class OwnerDocuments {
                 information,
                 fileName,
                 spacer,
+                previewButton,
                 chooseButton
         );
 
         return row;
     }
+
+    // =========================================================
+    // DOCUMENT PREVIEW
+    // =========================================================
+
+    private static void previewDocument(
+            File selectedFile,
+            String existingUrl,
+            String documentName) {
+
+        try {
+
+            // Preview newly selected local file first.
+            if (selectedFile != null &&
+                    selectedFile.exists()) {
+
+                if (Desktop.isDesktopSupported()) {
+
+                    Desktop.getDesktop().open(
+                            selectedFile
+                    );
+
+                    return;
+                }
+
+                showError(
+                        "Preview Error",
+                        "Preview is not supported on this system."
+                );
+
+                return;
+            }
+
+
+            // Preview previously uploaded document.
+            if (existingUrl != null &&
+                    !existingUrl.trim().isEmpty()) {
+
+                if (Desktop.isDesktopSupported()) {
+
+                    Desktop.getDesktop().browse(
+                            new URI(
+                                    existingUrl.trim()
+                            )
+                    );
+
+                    return;
+                }
+
+                showError(
+                        "Preview Error",
+                        "Preview is not supported on this system."
+                );
+
+                return;
+            }
+
+
+            // No document available.
+            showWarning(
+                    "No Document",
+                    "Please select the " +
+                            documentName +
+                            " PDF first."
+            );
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            showError(
+                    "Preview Failed",
+                    "Unable to preview the " +
+                            documentName +
+                            "."
+            );
+        }
+    }
+
 
     // =========================================================
     // CLOUDINARY UPLOAD

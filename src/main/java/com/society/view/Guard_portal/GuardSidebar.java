@@ -99,6 +99,7 @@ public class GuardSidebar {
 
         guardPanel.setStyle(
                 "-fx-text-fill: lightgray;" +
+                "-fx-font-family: 'Bodoni MT';" +
                 "-fx-font-size: 14px;" +
                 "-fx-padding: 5px;"
         );
@@ -292,6 +293,7 @@ public class GuardSidebar {
 
         button.setStyle(
                 "-fx-background-color: #4e342e;" +
+                "-fx-font-family: 'Bodoni MT';" +
                 "-fx-font-weight: bold;" +
                 "-fx-text-fill: white;" +
                 "-fx-font-size: 14px;" +

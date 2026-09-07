@@ -46,10 +46,10 @@
             <version>3.31.0</version>
         </dependency>
         <dependency>
-    <groupId>com.google.zxing</groupId>
-    <artifactId>core</artifactId>
-    <version>3.5.3</version>
-</dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>core</artifactId>
+            <version>3.5.3</version>
+        </dependency>
 
     <dependency>
         <groupId>com.google.zxing</groupId>
@@ -69,6 +69,6 @@
     </dependency>
 
 
-</dependencies>
+    </dependencies>
 
 </project>

@@ -52,6 +52,7 @@ public class GuardDashboard {
     // SAME SIDEBAR WILL BE REUSED
     // =========================================================
 
+       
     private static GuardSidebar sharedSidebar;
 
 
@@ -1160,6 +1161,7 @@ public class GuardDashboard {
 
         // =====================================================
         // MAIN AREA
+        // =========================================================
         // HEADER FIXED
         // =====================================================
 

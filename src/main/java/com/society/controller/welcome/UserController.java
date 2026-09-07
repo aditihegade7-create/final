@@ -15,8 +15,51 @@ public class UserController {
     }
 
     // =====================================================
+    // CREATE FIREBASE AUTHENTICATION ACCOUNT
+    // =====================================================
+    public boolean createFirebaseAccount(
+            String email,
+            String password) {
+
+        try {
+
+            if (email == null ||
+                    email.trim().isEmpty()) {
+
+                System.out.println(
+                        "Firebase account email cannot be empty.");
+
+                return false;
+            }
+
+            if (password == null ||
+                    password.isEmpty()) {
+
+                System.out.println(
+                        "Firebase account password cannot be empty.");
+
+                return false;
+            }
+
+            return dao.signUp(
+                    email.trim().toLowerCase(),
+                    password);
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "Error while creating Firebase Authentication account:");
+
+            e.printStackTrace();
+
+            return false;
+        }
+    }
+
+    // =====================================================
     // ADD USER
     // =====================================================
+
     // public boolean
 
     // addUser(
@@ -544,6 +587,7 @@ public class UserController {
 
         return dao.getResidentByFlatNo(flatNo);
     }
+
     // =====================================================
     // DELETE USER
     // =====================================================

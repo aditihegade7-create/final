@@ -19,7 +19,7 @@ public class Parking {
     // Your assigned parking slot
     private final String myParkingSlot = "P-03";
 
-    public Scene getParkingScene(Stage stage) {
+    public Scene getParkingScene(Stage stage, String loginEmail) {
 
         BorderPane borderPane = new BorderPane();
 

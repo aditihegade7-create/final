@@ -672,6 +672,7 @@ content.setBackground(
                 Pos.CENTER_LEFT
         );
 
+
         StackPane detailsIcon =
                 new StackPane();
 
@@ -706,6 +707,7 @@ content.setBackground(
 
         detailsTitle.setStyle(
                 "-fx-font-size:18px;" +
+                "-fx-font-family: 'Bodoni MT';" +
                 "-fx-font-weight:bold;" +
                 "-fx-text-fill:#171717;"
         );
@@ -1014,7 +1016,6 @@ content.setBackground(
 
         // =====================================================
         // SEND EMERGENCY ALERT
-        // FIRESTORE FUNCTIONALITY
         // =====================================================
 
         sendAlertButton.setOnAction(e -> {
@@ -1210,6 +1211,7 @@ content.setBackground(
         });
 
         // =====================================================
+        // RESOLVE EMERGENCY ALERT
         // RESOLVE EMERGENCY
         // FIRESTORE FUNCTIONALITY
         // =====================================================
@@ -1277,6 +1279,7 @@ content.setBackground(
         });
 
         // =====================================================
+        // CLEAR BUTTON
         // CLEAR
         // =====================================================
 
@@ -1578,6 +1581,7 @@ content.setBackground(
     }
 
     // =====================================================
+    // CARD FEEDBACK ANIMATION
     // CARD ANIMATION
     // =====================================================
 

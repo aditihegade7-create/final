@@ -163,7 +163,7 @@ public class GuardProfile {
 
         headerMain.setFont(
                 Font.font(
-                        "System",
+                        "Bodoni MT",
                         FontWeight.BOLD,
                         24
                 )

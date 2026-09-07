@@ -235,8 +235,31 @@ public class ResidentController {
             );
 
 
+            // =================================================
+            // SOCIETY FROM OWNER
+            // =================================================
+
+            ResidentModel owner =
+                    residentDao.getOwnerByEmail(
+                            ownerEmail
+                                    .trim()
+                                    .toLowerCase()
+                    );
+
+            if (owner == null ||
+                    owner.getSociety() == null ||
+                    owner.getSociety().trim().isEmpty()) {
+
+                System.out.println(
+                        "Owner society not found for: "
+                                + ownerEmail
+                );
+
+                return false;
+            }
+
             tenant.setSociety(
-                    ""
+                    owner.getSociety().trim()
             );
 
 
