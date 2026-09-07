@@ -1,3 +1,4 @@
+
 package com.society.dao.Secretary_dao;
 
 import java.util.ArrayList;
@@ -9,136 +10,95 @@ import java.util.UUID;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QuerySnapshot;
-
 import com.society.config.FirebaseConfig;
 import com.society.model.Secretary_model.Guard;
 
 public class GuardDaoImpl implements GuardDao {
 
-    // =====================================================
+    // ============================================================
     // FIRESTORE
-    // =====================================================
+    // ============================================================
 
-    private final Firestore db =
-            FirebaseConfig.getFirestore();
+    private final Firestore db = FirebaseConfig.getFirestore();
 
-    // =====================================================
+    // ============================================================
     // COLLECTION
-    // =====================================================
+    // ============================================================
 
     private static final String COLLECTION = "Guards";
 
-    // =====================================================
+    // ============================================================
     // ADD GUARD
-    // =====================================================
+    // ============================================================
 
     @Override
     public boolean addGuard(Guard guard) {
 
         try {
 
-            // =================================================
+            // ====================================================
             // NULL CHECK
-            // =================================================
+            // ====================================================
 
             if (guard == null) {
-
-                System.out.println(
-                        "GUARD DAO ERROR: Guard is null."
-                );
-
+                System.out.println("GUARD DAO ERROR: Guard is null.");
                 return false;
             }
 
-            // =================================================
+            // ====================================================
             // VALIDATION
-            // =================================================
+            // ====================================================
 
             if (isEmpty(guard.getName())) {
-
-                System.out.println(
-                        "GUARD DAO ERROR: Name is empty."
-                );
-
+                System.out.println("GUARD DAO ERROR: Name is empty.");
                 return false;
             }
 
-            if (isEmpty(guard.getMobile())) {
-
-                System.out.println(
-                        "GUARD DAO ERROR: Mobile is empty."
-                );
-
+            if (isEmpty(guard.getPhone())) {
+                System.out.println("GUARD DAO ERROR: Phone is empty.");
                 return false;
             }
 
             if (isEmpty(guard.getShift())) {
-
-                System.out.println(
-                        "GUARD DAO ERROR: Shift is empty."
-                );
-
+                System.out.println("GUARD DAO ERROR: Shift is empty.");
                 return false;
             }
 
             if (isEmpty(guard.getEmail())) {
-
-                System.out.println(
-                        "GUARD DAO ERROR: Email is empty."
-                );
-
+                System.out.println("GUARD DAO ERROR: Email is empty.");
                 return false;
             }
 
             if (isEmpty(guard.getStatus())) {
-
-                System.out.println(
-                        "GUARD DAO ERROR: Status is empty."
-                );
-
+                System.out.println("GUARD DAO ERROR: Status is empty.");
                 return false;
             }
 
             if (isEmpty(guard.getAssignedGate())) {
-
                 System.out.println(
                         "GUARD DAO ERROR: Assigned Gate is empty."
                 );
-
                 return false;
             }
-
-            // =================================================
-            // SOCIETY IS REQUIRED
-            // =================================================
 
             if (isEmpty(guard.getSociety())) {
-
-                System.out.println(
-                        "GUARD DAO ERROR: Society is empty."
-                );
-
+                System.out.println("GUARD DAO ERROR: Society is empty.");
                 return false;
             }
 
-            // =================================================
+            // ====================================================
             // CLEAN VALUES
-            // =================================================
+            // ====================================================
 
-            String name =
-                    cleanValue(guard.getName());
+            String name = cleanValue(guard.getName());
 
-            String mobile =
-                    cleanValue(guard.getMobile());
+            String phone = cleanValue(guard.getPhone());
 
-            String shift =
-                    cleanValue(guard.getShift());
+            String shift = cleanValue(guard.getShift());
 
-            String email =
-                    cleanEmail(guard.getEmail());
+            String email = cleanEmail(guard.getEmail());
 
-            String status =
-                    cleanValue(guard.getStatus());
+            String status = cleanValue(guard.getStatus());
 
             String assignedGate =
                     cleanValue(guard.getAssignedGate());
@@ -146,9 +106,9 @@ public class GuardDaoImpl implements GuardDao {
             String society =
                     cleanValue(guard.getSociety());
 
-            // =================================================
+            // ====================================================
             // CHECK EMAIL
-            // =================================================
+            // ====================================================
 
             Guard existingGuard =
                     getGuardByEmail(email);
@@ -166,85 +126,56 @@ public class GuardDaoImpl implements GuardDao {
                 return false;
             }
 
-            // =================================================
+            // ====================================================
             // GENERATE DOCUMENT ID
-            // =================================================
+            // ====================================================
 
             String guardId =
                     UUID.randomUUID().toString();
 
-            // =================================================
+            // ====================================================
             // FIRESTORE DATA
-            // =================================================
+            // ====================================================
 
             Map<String, Object> data =
                     new HashMap<>();
 
-            data.put(
-                    "id",
-                    guardId
-            );
+            data.put("id", guardId);
 
-            data.put(
-                    "name",
-                    name
-            );
+            data.put("name", name);
 
-            data.put(
-                    "mobile",
-                    mobile
-            );
+            // IMPORTANT:
+            // Firestore field name = phone
+            data.put("phone", phone);
 
-            data.put(
-                    "shift",
-                    shift
-            );
+            data.put("shift", shift);
 
-            data.put(
-                    "email",
-                    email
-            );
+            data.put("email", email);
 
-            data.put(
-                    "status",
-                    status
-            );
+            data.put("status", status);
 
-            data.put(
-                    "assignedGate",
-                    assignedGate
-            );
+            data.put("assignedGate", assignedGate);
 
-            // =================================================
-            // VERY IMPORTANT
-            // SOCIETY
-            // =================================================
+            data.put("society", society);
 
-            data.put(
-                    "society",
-                    society
-            );
+            // ====================================================
+            // SET ID IN GUARD OBJECT
+            // ====================================================
 
-            // =================================================
-            // SET ID IN OBJECT
-            // =================================================
+            guard.setId(guardId);
 
-            guard.setId(
-                    guardId
-            );
-
-            // =================================================
+            // ====================================================
             // SAVE TO FIRESTORE
-            // =================================================
+            // ====================================================
 
             db.collection(COLLECTION)
                     .document(guardId)
                     .set(data)
                     .get();
 
-            // =================================================
+            // ====================================================
             // SUCCESS LOG
-            // =================================================
+            // ====================================================
 
             System.out.println(
                     "=========================================="
@@ -255,48 +186,39 @@ public class GuardDaoImpl implements GuardDao {
             );
 
             System.out.println(
-                    "Collection : "
-                            + COLLECTION
+                    "Collection : " + COLLECTION
             );
 
             System.out.println(
-                    "Document ID: "
-                            + guardId
+                    "Document ID: " + guardId
             );
 
             System.out.println(
-                    "Name       : "
-                            + name
+                    "Name       : " + name
             );
 
             System.out.println(
-                    "Mobile     : "
-                            + mobile
+                    "Phone      : " + phone
             );
 
             System.out.println(
-                    "Shift      : "
-                            + shift
+                    "Shift      : " + shift
             );
 
             System.out.println(
-                    "Email      : "
-                            + email
+                    "Email      : " + email
             );
 
             System.out.println(
-                    "Status     : "
-                            + status
+                    "Status     : " + status
             );
 
             System.out.println(
-                    "Gate       : "
-                            + assignedGate
+                    "Gate       : " + assignedGate
             );
 
             System.out.println(
-                    "Society    : "
-                            + society
+                    "Society    : " + society
             );
 
             System.out.println(
@@ -325,9 +247,9 @@ public class GuardDaoImpl implements GuardDao {
         }
     }
 
-    // =====================================================
+    // ============================================================
     // FETCH ALL GUARDS
-    // =====================================================
+    // ============================================================
 
     @Override
     public List<Guard> getAllGuards() {
@@ -346,21 +268,16 @@ public class GuardDaoImpl implements GuardDao {
                     snapshot.getDocuments()) {
 
                 Guard guard =
-                        document.toObject(
-                                Guard.class
-                        );
+                        document.toObject(Guard.class);
 
                 if (guard != null) {
 
-                    // IMPORTANT:
-                    // Firestore document ID
+                    // Store Firestore document ID
                     guard.setId(
                             document.getId()
                     );
 
-                    guards.add(
-                            guard
-                    );
+                    guards.add(guard);
                 }
             }
 
@@ -393,35 +310,9 @@ public class GuardDaoImpl implements GuardDao {
         return guards;
     }
 
-    // =====================================================
+    // ============================================================
     // FETCH GUARDS BY SOCIETY
-    // =====================================================
-    //
-    // THIS IS VERY IMPORTANT FOR RESIDENT
-    //
-    // Example:
-    //
-    // society = "stanza"
-    //
-    // Firestore:
-    //
-    // Guards
-    //    |
-    //    |-- Sayali
-    //    |     society = stanza       ✅
-    //    |
-    //    |-- Rahul
-    //    |     society = Sunrise      ❌
-    //    |
-    //    |-- Priya
-    //          society = stanza       ✅
-    //
-    // Result:
-    //
-    // Sayali
-    // Priya
-    //
-    // =====================================================
+    // ============================================================
 
     @Override
     public List<Guard> getGuardsBySociety(
@@ -432,9 +323,9 @@ public class GuardDaoImpl implements GuardDao {
 
         try {
 
-            // =================================================
+            // ====================================================
             // VALIDATION
-            // =================================================
+            // ====================================================
 
             if (isEmpty(society)) {
 
@@ -445,16 +336,16 @@ public class GuardDaoImpl implements GuardDao {
                 return guards;
             }
 
-            // =================================================
+            // ====================================================
             // CLEAN SOCIETY
-            // =================================================
+            // ====================================================
 
             String cleanSociety =
                     cleanValue(society);
 
-            // =================================================
+            // ====================================================
             // DEBUG
-            // =================================================
+            // ====================================================
 
             System.out.println(
                     "=========================================="
@@ -465,17 +356,16 @@ public class GuardDaoImpl implements GuardDao {
             );
 
             System.out.println(
-                    "Society = "
-                            + cleanSociety
+                    "Society = " + cleanSociety
             );
 
             System.out.println(
                     "=========================================="
             );
 
-            // =================================================
+            // ====================================================
             // FIRESTORE QUERY
-            // =================================================
+            // ====================================================
 
             QuerySnapshot snapshot =
                     db.collection(COLLECTION)
@@ -486,42 +376,38 @@ public class GuardDaoImpl implements GuardDao {
                             .get()
                             .get();
 
-            // =================================================
+            // ====================================================
             // CONVERT DOCUMENTS
-            // =================================================
+            // ====================================================
 
             for (DocumentSnapshot document :
                     snapshot.getDocuments()) {
 
                 Guard guard =
-                        document.toObject(
-                                Guard.class
-                        );
+                        document.toObject(Guard.class);
 
                 if (guard != null) {
 
-                    // IMPORTANT
-                    // Set Firestore document ID
                     guard.setId(
                             document.getId()
                     );
 
-                    guards.add(
-                            guard
-                    );
+                    guards.add(guard);
 
                     System.out.println(
                             "Guard Found : "
                                     + guard.getName()
+                                    + " | Phone : "
+                                    + guard.getPhone()
                                     + " | Society : "
                                     + guard.getSociety()
                     );
                 }
             }
 
-            // =================================================
+            // ====================================================
             // RESULT
-            // =================================================
+            // ====================================================
 
             System.out.println(
                     "=========================================="
@@ -532,13 +418,11 @@ public class GuardDaoImpl implements GuardDao {
             );
 
             System.out.println(
-                    "Society : "
-                            + cleanSociety
+                    "Society : " + cleanSociety
             );
 
             System.out.println(
-                    "Count   : "
-                            + guards.size()
+                    "Count   : " + guards.size()
             );
 
             System.out.println(
@@ -552,8 +436,7 @@ public class GuardDaoImpl implements GuardDao {
             );
 
             System.out.println(
-                    "GUARD DAO ERROR: "
-                            + "getGuardsBySociety()"
+                    "GUARD DAO ERROR: getGuardsBySociety()"
             );
 
             System.out.println(
@@ -566,9 +449,9 @@ public class GuardDaoImpl implements GuardDao {
         return guards;
     }
 
-    // =====================================================
+    // ============================================================
     // GET GUARD BY EMAIL
-    // =====================================================
+    // ============================================================
 
     @Override
     public Guard getGuardByEmail(
@@ -576,25 +459,24 @@ public class GuardDaoImpl implements GuardDao {
 
         try {
 
-            // =================================================
+            // ====================================================
             // VALIDATION
-            // =================================================
+            // ====================================================
 
             if (isEmpty(email)) {
-
                 return null;
             }
 
-            // =================================================
+            // ====================================================
             // CLEAN EMAIL
-            // =================================================
+            // ====================================================
 
             String cleanEmail =
                     cleanEmail(email);
 
-            // =================================================
+            // ====================================================
             // FIRESTORE QUERY
-            // =================================================
+            // ====================================================
 
             QuerySnapshot snapshot =
                     db.collection(COLLECTION)
@@ -606,22 +488,18 @@ public class GuardDaoImpl implements GuardDao {
                             .get()
                             .get();
 
-            // =================================================
+            // ====================================================
             // GET DOCUMENT
-            // =================================================
+            // ====================================================
 
             for (DocumentSnapshot document :
                     snapshot.getDocuments()) {
 
                 Guard guard =
-                        document.toObject(
-                                Guard.class
-                        );
+                        document.toObject(Guard.class);
 
                 if (guard != null) {
 
-                    // IMPORTANT
-                    // Store Firestore document ID
                     guard.setId(
                             document.getId()
                     );
@@ -633,8 +511,7 @@ public class GuardDaoImpl implements GuardDao {
         } catch (Exception e) {
 
             System.out.println(
-                    "GUARD DAO ERROR: "
-                            + "getGuardByEmail()"
+                    "GUARD DAO ERROR: getGuardByEmail()"
             );
 
             e.printStackTrace();
@@ -643,9 +520,9 @@ public class GuardDaoImpl implements GuardDao {
         return null;
     }
 
-    // =====================================================
+    // ============================================================
     // UPDATE GUARD
-    // =====================================================
+    // ============================================================
 
     @Override
     public boolean updateGuard(
@@ -656,9 +533,9 @@ public class GuardDaoImpl implements GuardDao {
 
         try {
 
-            // =================================================
+            // ====================================================
             // VALIDATION
-            // =================================================
+            // ====================================================
 
             if (isEmpty(id)) {
 
@@ -696,9 +573,9 @@ public class GuardDaoImpl implements GuardDao {
                 return false;
             }
 
-            // =================================================
+            // ====================================================
             // CLEAN VALUES
-            // =================================================
+            // ====================================================
 
             String cleanId =
                     cleanValue(id);
@@ -712,9 +589,9 @@ public class GuardDaoImpl implements GuardDao {
             String cleanAssignedGate =
                     cleanValue(assignedGate);
 
-            // =================================================
+            // ====================================================
             // UPDATE DATA
-            // =================================================
+            // ====================================================
 
             Map<String, Object> updates =
                     new HashMap<>();
@@ -734,18 +611,18 @@ public class GuardDaoImpl implements GuardDao {
                     cleanAssignedGate
             );
 
-            // =================================================
+            // ====================================================
             // UPDATE FIRESTORE
-            // =================================================
+            // ====================================================
 
             db.collection(COLLECTION)
                     .document(cleanId)
                     .update(updates)
                     .get();
 
-            // =================================================
+            // ====================================================
             // SUCCESS
-            // =================================================
+            // ====================================================
 
             System.out.println(
                     "=========================================="
@@ -756,23 +633,19 @@ public class GuardDaoImpl implements GuardDao {
             );
 
             System.out.println(
-                    "Guard ID : "
-                            + cleanId
+                    "Guard ID : " + cleanId
             );
 
             System.out.println(
-                    "Shift    : "
-                            + cleanShift
+                    "Shift    : " + cleanShift
             );
 
             System.out.println(
-                    "Status   : "
-                            + cleanStatus
+                    "Status   : " + cleanStatus
             );
 
             System.out.println(
-                    "Gate     : "
-                            + cleanAssignedGate
+                    "Gate     : " + cleanAssignedGate
             );
 
             System.out.println(
@@ -801,9 +674,9 @@ public class GuardDaoImpl implements GuardDao {
         }
     }
 
-    // =====================================================
+    // ============================================================
     // CHECK EMPTY
-    // =====================================================
+    // ============================================================
 
     private boolean isEmpty(
             String value) {
@@ -812,30 +685,28 @@ public class GuardDaoImpl implements GuardDao {
                 || value.trim().isEmpty();
     }
 
-    // =====================================================
+    // ============================================================
     // CLEAN VALUE
-    // =====================================================
+    // ============================================================
 
     private String cleanValue(
             String value) {
 
         if (value == null) {
-
             return "";
         }
 
         return value.trim();
     }
 
-    // =====================================================
+    // ============================================================
     // CLEAN EMAIL
-    // =====================================================
+    // ============================================================
 
     private String cleanEmail(
             String email) {
 
         if (email == null) {
-
             return "";
         }
 

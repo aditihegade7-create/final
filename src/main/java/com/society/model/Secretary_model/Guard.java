@@ -1,3 +1,4 @@
+
 package com.society.model.Secretary_model;
 
 public class Guard {
@@ -8,7 +9,7 @@ public class Guard {
 
     private String id;
     private String name;
-    private String mobile;
+    private String phone;
     private String shift;
     private String email;
     private String status;
@@ -30,14 +31,14 @@ public class Guard {
 
     public Guard(
             String name,
-            String mobile,
+            String phone,
             String shift,
             String email,
             String status,
             String assignedGate) {
 
         this.name = name;
-        this.mobile = mobile;
+        this.phone = phone;
         this.shift = shift;
         this.email = email;
         this.status = status;
@@ -51,7 +52,7 @@ public class Guard {
 
     public Guard(
             String name,
-            String mobile,
+            String phone,
             String shift,
             String email,
             String status,
@@ -59,7 +60,7 @@ public class Guard {
             String society) {
 
         this.name = name;
-        this.mobile = mobile;
+        this.phone = phone;
         this.shift = shift;
         this.email = email;
         this.status = status;
@@ -92,15 +93,16 @@ public class Guard {
     }
 
     // =====================================================
-    // MOBILE
+    // PHONE
+    // Firestore field: phone
     // =====================================================
 
-    public String getMobile() {
-        return mobile;
+    public String getPhone() {
+        return phone;
     }
 
-    public void setMobile(String mobile) {
-        this.mobile = mobile;
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     // =====================================================
@@ -173,7 +175,7 @@ public class Guard {
         return "Guard{" +
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
-                ", mobile='" + mobile + '\'' +
+                ", phone='" + phone + '\'' +
                 ", shift='" + shift + '\'' +
                 ", email='" + email + '\'' +
                 ", status='" + status + '\'' +
@@ -182,3 +184,4 @@ public class Guard {
                 '}';
     }
 }
+

@@ -3,695 +3,430 @@ package com.society.controller.Secretary_Controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.api.core.ApiFuture;
+import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
-
 import com.society.config.FirebaseConfig;
 import com.society.dao.Welcome.UserDao;
 import com.society.model.Secretary_model.Complaint;
 
 public class ComplaintController {
 
-    private Firestore firestore;
+    private final Firestore firestore;
 
-    // =====================================================
+    private static final String COMPLAINT_COLLECTION = "complaints";
+    private static final String RESIDENT_COLLECTION = "Residents";
+    private static final String SECRETARY_COLLECTION = "Secretaries";
+
+    // ============================================================
     // CONSTRUCTOR
-    // =====================================================
+    // ============================================================
 
     public ComplaintController() {
-
         firestore = FirebaseConfig.getFirestore();
-
-        System.out.println("======================================");
-        System.out.println("COMPLAINT CONTROLLER");
-        System.out.println("Firestore initialized");
-        System.out.println("======================================");
     }
 
-    // =====================================================
+    // ============================================================
+    // NORMALIZE EMAIL
+    // ============================================================
+
+    private String normalizeEmail(String email) {
+
+        if (email == null) {
+            return "";
+        }
+
+        return email.trim().toLowerCase();
+    }
+
+    // ============================================================
+    // NORMALIZE SOCIETY
+    // ============================================================
+
+    private String normalizeSociety(String society) {
+
+        if (society == null) {
+            return "";
+        }
+
+        return society.trim();
+    }
+
+    // ============================================================
+    // GET CURRENT LOGGED-IN SECRETARY EMAIL
+    // ============================================================
+
+    private String getCurrentSecretaryEmail() {
+
+        String email = UserDao.getLoggedInEmail();
+
+        if (email == null || email.trim().isEmpty()) {
+            return null;
+        }
+
+        return normalizeEmail(email);
+    }
+
+    // ============================================================
     // GET CURRENT SECRETARY SOCIETY
-    // =====================================================
-    //
-    // Logged-in Secretary Email
-    //          ↓
-    // Secretaries/{email}
-    //          ↓
-    // society
-    //
-    // =====================================================
+    // ============================================================
 
     private String getCurrentSecretarySociety() {
 
         try {
 
-            // -------------------------------------------------
-            // GET LOGGED-IN SECRETARY EMAIL
-            // -------------------------------------------------
+            String secretaryEmail = getCurrentSecretaryEmail();
 
-            String secretaryEmail =
-                    UserDao.getLoggedInEmail();
-
-            if (secretaryEmail == null ||
-                    secretaryEmail.trim().isEmpty()) {
-
-                System.err.println(
-                        "Logged-in Secretary email is missing."
-                );
-
+            if (secretaryEmail == null || secretaryEmail.isEmpty()) {
+                System.out.println("Secretary email not found.");
                 return null;
             }
 
-            secretaryEmail =
-                    secretaryEmail.trim();
+            // First try document ID = logged-in email
+            DocumentReference secretaryRef = firestore
+                    .collection(SECRETARY_COLLECTION)
+                    .document(secretaryEmail);
 
-            System.out.println("======================================");
-            System.out.println(
-                    "GETTING CURRENT SECRETARY SOCIETY"
-            );
-            System.out.println(
-                    "Secretary Email = "
-                            + secretaryEmail
-            );
-            System.out.println("======================================");
+            DocumentSnapshot secretaryDocument = secretaryRef.get().get();
 
-            // -------------------------------------------------
-            // GET SECRETARY DOCUMENT
-            // -------------------------------------------------
+            if (secretaryDocument.exists()) {
 
-            DocumentSnapshot secretaryDocument =
-                    firestore
-                            .collection("Secretaries")
-                            .document(secretaryEmail)
-                            .get()
-                            .get();
+                String society = secretaryDocument.getString("society");
 
-            if (!secretaryDocument.exists()) {
+                if (society != null && !society.trim().isEmpty()) {
 
-                System.err.println(
-                        "Secretary document NOT FOUND."
-                );
+                    System.out.println(
+                            "Current Secretary Email: " + secretaryEmail
+                    );
 
-                System.err.println(
-                        "Expected path:"
-                );
+                    System.out.println(
+                            "Current Secretary Society: " + society
+                    );
 
-                System.err.println(
-                        "Secretaries/"
-                                + secretaryEmail
-                );
-
-                return null;
+                    return normalizeSociety(society);
+                }
             }
 
-            // -------------------------------------------------
-            // GET SOCIETY
-            // -------------------------------------------------
+            /*
+             * Fallback:
+             * If Secretaries document ID is not email,
+             * search by email field.
+             */
+            QuerySnapshot querySnapshot = firestore
+                    .collection(SECRETARY_COLLECTION)
+                    .whereEqualTo("email", secretaryEmail)
+                    .limit(1)
+                    .get()
+                    .get();
 
-            String society =
-                    secretaryDocument.getString("society");
+            if (!querySnapshot.isEmpty()) {
 
-            if (society == null ||
-                    society.trim().isEmpty()) {
+                DocumentSnapshot document = querySnapshot.getDocuments().get(0);
 
-                System.err.println(
-                        "Society not found for Secretary."
-                );
+                String society = document.getString("society");
 
-                return null;
+                if (society != null && !society.trim().isEmpty()) {
+
+                    System.out.println(
+                            "Current Secretary Email: " + secretaryEmail
+                    );
+
+                    System.out.println(
+                            "Current Secretary Society: " + society
+                    );
+
+                    return normalizeSociety(society);
+                }
             }
 
-            society =
-                    society.trim();
-
             System.out.println(
-                    "Secretary Society = "
-                            + society
+                    "Society not found for Secretary: " + secretaryEmail
             );
-
-            return society;
 
         } catch (Exception e) {
 
-            System.err.println(
-                    "ERROR GETTING SECRETARY SOCIETY"
+            System.out.println(
+                    "Error while getting Secretary society: "
+                            + e.getMessage()
             );
 
             e.printStackTrace();
-
-            return null;
         }
+
+        return null;
     }
 
-    // =====================================================
-    // GET ALL COMPLAINTS
-    // =====================================================
-    //
-    // IMPORTANT:
-    //
-    // This method returns complaints ONLY from
-    // the currently logged-in Secretary's society.
-    //
-    // Firestore collection group query is used WITHOUT
-    // whereEqualTo(), therefore NO FIRESTORE INDEX IS
-    // REQUIRED.
-    //
-    // Data structure:
-    //
-    // complaints
-    //    / residentEmail
-    //       / complaints
-    //          / complaintId
-    //
-    // Society filtering is done in Java.
-    //
-    // =====================================================
+    // ============================================================
+    // GET RESIDENT SOCIETY USING RESIDENT EMAIL
+    // ============================================================
+
+    private String getResidentSociety(String residentEmail) {
+
+        try {
+
+            String normalizedEmail = normalizeEmail(residentEmail);
+
+            if (normalizedEmail.isEmpty()) {
+                return null;
+            }
+
+            /*
+             * ----------------------------------------------------
+             * FIRST:
+             * Search Residents collection using email field
+             * ----------------------------------------------------
+             */
+
+            QuerySnapshot querySnapshot = firestore
+                    .collection(RESIDENT_COLLECTION)
+                    .whereEqualTo("email", normalizedEmail)
+                    .limit(1)
+                    .get()
+                    .get();
+
+            if (!querySnapshot.isEmpty()) {
+
+                DocumentSnapshot residentDocument =
+                        querySnapshot.getDocuments().get(0);
+
+                String society =
+                        residentDocument.getString("society");
+
+                if (society != null && !society.trim().isEmpty()) {
+
+                    return normalizeSociety(society);
+                }
+            }
+
+            /*
+             * ----------------------------------------------------
+             * FALLBACK:
+             * Sometimes resident document ID itself is email
+             * ----------------------------------------------------
+             */
+
+            DocumentSnapshot directDocument = firestore
+                    .collection(RESIDENT_COLLECTION)
+                    .document(normalizedEmail)
+                    .get()
+                    .get();
+
+            if (directDocument.exists()) {
+
+                String society =
+                        directDocument.getString("society");
+
+                if (society != null && !society.trim().isEmpty()) {
+
+                    return normalizeSociety(society);
+                }
+            }
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "Error while getting resident society for "
+                            + residentEmail
+                            + " : "
+                            + e.getMessage()
+            );
+        }
+
+        return null;
+    }
+
+    // ============================================================
+    // GET ALL COMPLAINTS OF CURRENT SECRETARY'S SOCIETY
+    // ============================================================
 
     public List<Complaint> getAllComplaints() {
 
-        List<Complaint> complaints =
-                new ArrayList<>();
+        List<Complaint> complaints = new ArrayList<>();
 
         try {
 
-            System.out.println("======================================");
-            System.out.println(
-                    "FETCHING COMPLAINTS FOR SECRETARY SOCIETY"
-            );
-            System.out.println("======================================");
+            // ----------------------------------------------------
+            // Get logged-in Secretary's society dynamically
+            // ----------------------------------------------------
 
-            // -------------------------------------------------
-            // GET SECRETARY SOCIETY
-            // -------------------------------------------------
-
-            String society =
+            String secretarySociety =
                     getCurrentSecretarySociety();
 
-            if (society == null ||
-                    society.trim().isEmpty()) {
+            if (secretarySociety == null
+                    || secretarySociety.trim().isEmpty()) {
 
-                System.err.println(
-                        "Cannot fetch complaints."
-                );
-
-                System.err.println(
-                        "Secretary society is missing."
+                System.out.println(
+                        "Secretary society not found."
                 );
 
                 return complaints;
             }
 
-            society =
-                    society.trim();
+            secretarySociety =
+                    normalizeSociety(secretarySociety);
 
             System.out.println(
-                    "Fetching complaints for Society = "
-                            + society
+                    "Fetching complaints for society: "
+                            + secretarySociety
             );
 
-            // =================================================
-            // FETCH ALL COMPLAINTS
-            // =================================================
-            //
-            // IMPORTANT:
-            //
-            // DO NOT use:
-            //
-            // .whereEqualTo("society", society)
-            //
-            // because that requires a COLLECTION_GROUP
-            // index.
-            //
-            // Instead, fetch all complaint documents and
-            // filter society in Java.
-            //
-            // =================================================
+            // ----------------------------------------------------
+            // Get all nested complaint documents
+            // ----------------------------------------------------
 
-            QuerySnapshot snapshot =
+            ApiFuture<QuerySnapshot> future =
                     firestore
-                            .collectionGroup("complaints")
-                            .get()
+                            .collectionGroup(COMPLAINT_COLLECTION)
                             .get();
 
-            System.out.println(
-                    "TOTAL COMPLAINT DOCUMENTS FOUND = "
-                            + snapshot.size()
-            );
+            QuerySnapshot snapshot = future.get();
 
-            // =================================================
-            // LOOP THROUGH ALL COMPLAINTS
-            // =================================================
+            // ----------------------------------------------------
+            // Check every complaint
+            // ----------------------------------------------------
 
-            for (DocumentSnapshot document :
-                    snapshot.getDocuments()) {
+            for (QueryDocumentSnapshot document
+                    : snapshot.getDocuments()) {
 
-                if (document == null ||
-                        !document.exists()) {
+                try {
 
-                    continue;
-                }
+                    /*
+                     * ------------------------------------------------
+                     * Get complaint email
+                     * ------------------------------------------------
+                     *
+                     * Example:
+                     *
+                     * complaints/
+                     *    vaishnavi@gmail.com/
+                     *       complaints/
+                     *          complaintId
+                     *
+                     * Email can come from document field.
+                     */
 
-                // -------------------------------------------------
-                // GET COMPLAINT SOCIETY
-                // -------------------------------------------------
+                    String complaintEmail =
+                            document.getString("email");
 
-                String complaintSociety =
-                        document.getString("society");
+                    /*
+                     * If email field is missing,
+                     * get it from parent document ID.
+                     */
 
-                if (complaintSociety == null ||
-                        complaintSociety.trim().isEmpty()) {
+                    if (complaintEmail == null
+                            || complaintEmail.trim().isEmpty()) {
+
+                        DocumentReference complaintReference =
+                                document.getReference();
+
+                        DocumentReference emailDocument =
+                                complaintReference
+                                        .getParent()
+                                        .getParent();
+
+                        if (emailDocument != null) {
+
+                            complaintEmail =
+                                    emailDocument.getId();
+                        }
+                    }
+
+                    if (complaintEmail == null
+                            || complaintEmail.trim().isEmpty()) {
+
+                        continue;
+                    }
+
+                    complaintEmail =
+                            normalizeEmail(complaintEmail);
+
+                    // ------------------------------------------------
+                    // Get resident society using complaint email
+                    // ------------------------------------------------
+
+                    String residentSociety =
+                            getResidentSociety(complaintEmail);
+
+                    if (residentSociety == null
+                            || residentSociety.trim().isEmpty()) {
+
+                        System.out.println(
+                                "Society not found for complaint email: "
+                                        + complaintEmail
+                        );
+
+                        continue;
+                    }
+
+                    residentSociety =
+                            normalizeSociety(residentSociety);
+
+                    // ------------------------------------------------
+                    // Society comparison
+                    // ------------------------------------------------
+
+                    if (!residentSociety.equalsIgnoreCase(
+                            secretarySociety)) {
+
+                        System.out.println(
+                                "Skipping complaint from another society: "
+                                        + complaintEmail
+                                        + " | Society: "
+                                        + residentSociety
+                        );
+
+                        continue;
+                    }
+
+                    // ------------------------------------------------
+                    // Complaint belongs to Secretary's society
+                    // ------------------------------------------------
+
+                    Complaint complaint =
+                            convertDocumentToComplaint(
+                                    document,
+                                    complaintEmail,
+                                    residentSociety
+                            );
+
+                    complaints.add(complaint);
+
+                } catch (Exception complaintException) {
 
                     System.out.println(
-                            "Skipping complaint because society is missing."
-                    );
-
-                    System.out.println(
-                            "Complaint ID = "
+                            "Error processing complaint document: "
                                     + document.getId()
                     );
 
-                    continue;
-                }
-
-                complaintSociety =
-                        complaintSociety.trim();
-
-                // =================================================
-                // SOCIETY FILTER
-                // =================================================
-                //
-                // Only complaints belonging to the current
-                // Secretary's society will be added.
-                //
-                // =================================================
-
-                if (!complaintSociety.equalsIgnoreCase(
-                        society
-                )) {
-
-                    System.out.println(
-                            "Skipping complaint from another society."
-                    );
-
-                    System.out.println(
-                            "Complaint Society = "
-                                    + complaintSociety
-                    );
-
-                    System.out.println(
-                            "Secretary Society = "
-                                    + society
-                    );
-
-                    continue;
-                }
-
-                // -------------------------------------------------
-                // GET EMAIL
-                // -------------------------------------------------
-
-                String email =
-                        document.getString("email");
-
-                // -------------------------------------------------
-                // FALLBACK EMAIL FROM PATH
-                // -------------------------------------------------
-
-                if (email == null ||
-                        email.trim().isEmpty()) {
-
-                    try {
-
-                        DocumentReference emailDocument =
-                                document
-                                        .getReference()
-                                        .getParent()
-                                        .getParent();
-
-                        if (emailDocument != null) {
-
-                            email =
-                                    emailDocument.getId();
-                        }
-
-                    } catch (Exception ex) {
-
-                        System.err.println(
-                                "Unable to get email from complaint path."
-                        );
-
-                        email = "";
-                    }
-                }
-
-                email =
-                        email == null
-                                ? ""
-                                : email.trim();
-
-                System.out.println("--------------------------------------");
-
-                System.out.println(
-                        "Complaint Document ID = "
-                                + document.getId()
-                );
-
-                System.out.println(
-                        "Resident Email = "
-                                + email
-                );
-
-                System.out.println(
-                        "Complaint Society = "
-                                + complaintSociety
-                );
-
-                System.out.println(
-                        "Secretary Society = "
-                                + society
-                );
-
-                // =================================================
-                // CONVERT DOCUMENT
-                // =================================================
-
-                Complaint complaint =
-                        convertDocumentToComplaint(
-                                document,
-                                email
-                        );
-
-                if (complaint != null) {
-
-                    complaints.add(
-                            complaint
-                    );
+                    complaintException.printStackTrace();
                 }
             }
 
-            System.out.println("======================================");
-
             System.out.println(
-                    "TOTAL SOCIETY COMPLAINTS FETCHED = "
+                    "Total complaints for Secretary society: "
                             + complaints.size()
             );
 
-            System.out.println(
-                    "Secretary Society = "
-                            + society
-            );
-
-            System.out.println("======================================");
-
-            return complaints;
-
         } catch (Exception e) {
 
-            System.err.println(
-                    "ERROR FETCHING SOCIETY COMPLAINTS"
+            System.out.println(
+                    "Error while fetching complaints: "
+                            + e.getMessage()
             );
 
             e.printStackTrace();
-
-            return complaints;
         }
+
+        return complaints;
     }
 
-    // =====================================================
-    // GET COMPLAINTS BY SOCIETY
-    // =====================================================
-    //
-    // This method also avoids Firestore index requirement.
-    //
-    // It fetches all complaints and filters society
-    // in Java.
-    //
-    // =====================================================
-
-    public List<Complaint> getComplaintsBySociety(
-            String society) {
-
-        List<Complaint> complaints =
-                new ArrayList<>();
-
-        try {
-
-            if (society == null ||
-                    society.trim().isEmpty()) {
-
-                System.err.println(
-                        "Society is empty."
-                );
-
-                return complaints;
-            }
-
-            society =
-                    society.trim();
-
-            System.out.println("======================================");
-            System.out.println(
-                    "FETCHING COMPLAINTS BY SOCIETY"
-            );
-
-            System.out.println(
-                    "Requested Society = "
-                            + society
-            );
-
-            System.out.println("======================================");
-
-            // =================================================
-            // FETCH ALL COMPLAINTS
-            // =================================================
-
-            QuerySnapshot snapshot =
-                    firestore
-                            .collectionGroup("complaints")
-                            .get()
-                            .get();
-
-            System.out.println(
-                    "Total complaint documents = "
-                            + snapshot.size()
-            );
-
-            // =================================================
-            // FILTER SOCIETY IN JAVA
-            // =================================================
-
-            for (DocumentSnapshot document :
-                    snapshot.getDocuments()) {
-
-                if (document == null ||
-                        !document.exists()) {
-
-                    continue;
-                }
-
-                String complaintSociety =
-                        document.getString("society");
-
-                if (complaintSociety == null ||
-                        complaintSociety.trim().isEmpty()) {
-
-                    continue;
-                }
-
-                complaintSociety =
-                        complaintSociety.trim();
-
-                // -------------------------------------------------
-                // SOCIETY MATCH
-                // -------------------------------------------------
-
-                if (!complaintSociety.equalsIgnoreCase(
-                        society
-                )) {
-
-                    continue;
-                }
-
-                // -------------------------------------------------
-                // GET EMAIL
-                // -------------------------------------------------
-
-                String email =
-                        document.getString("email");
-
-                // -------------------------------------------------
-                // FALLBACK EMAIL
-                // -------------------------------------------------
-
-                if (email == null ||
-                        email.trim().isEmpty()) {
-
-                    try {
-
-                        DocumentReference emailDocument =
-                                document
-                                        .getReference()
-                                        .getParent()
-                                        .getParent();
-
-                        if (emailDocument != null) {
-
-                            email =
-                                    emailDocument.getId();
-                        }
-
-                    } catch (Exception ex) {
-
-                        email = "";
-                    }
-                }
-
-                email =
-                        email == null
-                                ? ""
-                                : email.trim();
-
-                Complaint complaint =
-                        convertDocumentToComplaint(
-                                document,
-                                email
-                        );
-
-                if (complaint != null) {
-
-                    complaints.add(
-                            complaint
-                    );
-                }
-            }
-
-            System.out.println(
-                    "Complaints found for society "
-                            + society
-                            + " = "
-                            + complaints.size()
-            );
-
-            return complaints;
-
-        } catch (Exception e) {
-
-            System.err.println(
-                    "ERROR FETCHING COMPLAINTS BY SOCIETY"
-            );
-
-            e.printStackTrace();
-
-            return complaints;
-        }
-    }
-
-    // =====================================================
-    // GET COMPLAINTS BY EMAIL
-    // =====================================================
-    //
-    // This method fetches complaints for one resident.
-    //
-    // =====================================================
-
-    public List<Complaint> getComplaintsByEmail(
-            String email) {
-
-        List<Complaint> complaints =
-                new ArrayList<>();
-
-        try {
-
-            if (email == null ||
-                    email.trim().isEmpty()) {
-
-                System.err.println(
-                        "Resident email is empty."
-                );
-
-                return complaints;
-            }
-
-            email =
-                    email.trim();
-
-            System.out.println("======================================");
-            System.out.println(
-                    "FETCHING COMPLAINTS FOR EMAIL"
-            );
-
-            System.out.println(
-                    "Resident Email = "
-                            + email
-            );
-
-            System.out.println("======================================");
-
-            QuerySnapshot snapshot =
-                    firestore
-                            .collection("complaints")
-                            .document(email)
-                            .collection("complaints")
-                            .get()
-                            .get();
-
-            System.out.println(
-                    "Complaints found for "
-                            + email
-                            + " = "
-                            + snapshot.size()
-            );
-
-            for (DocumentSnapshot document :
-                    snapshot.getDocuments()) {
-
-                if (document == null ||
-                        !document.exists()) {
-
-                    continue;
-                }
-
-                Complaint complaint =
-                        convertDocumentToComplaint(
-                                document,
-                                email
-                        );
-
-                if (complaint != null) {
-
-                    complaints.add(
-                            complaint
-                    );
-                }
-            }
-
-            return complaints;
-
-        } catch (Exception e) {
-
-            System.err.println(
-                    "ERROR FETCHING COMPLAINTS BY EMAIL"
-            );
-
-            e.printStackTrace();
-
-            return complaints;
-        }
-    }
-
-    // =====================================================
+    // ============================================================
     // GET COMPLAINTS BY STATUS
-    // =====================================================
-    //
-    // IMPORTANT:
-    //
-    // First gets ONLY current Secretary society
-    // complaints.
-    //
-    // Then applies status filter.
-    //
-    // =====================================================
+    // ============================================================
 
     public List<Complaint> getAllComplaintsByStatus(
             String status) {
@@ -701,39 +436,13 @@ public class ComplaintController {
 
         try {
 
+            List<Complaint> allComplaints =
+                    getAllComplaints();
+
             String requiredStatus =
                     normalizeStatus(status);
 
-            System.out.println("======================================");
-            System.out.println(
-                    "FILTERING SOCIETY COMPLAINTS"
-            );
-
-            System.out.println(
-                    "Required Status = "
-                            + requiredStatus
-            );
-
-            System.out.println("======================================");
-
-            // -------------------------------------------------
-            // GET SOCIETY COMPLAINTS
-            // -------------------------------------------------
-
-            List<Complaint> societyComplaints =
-                    getAllComplaints();
-
-            // =================================================
-            // FILTER STATUS
-            // =================================================
-
-            for (Complaint complaint :
-                    societyComplaints) {
-
-                if (complaint == null) {
-
-                    continue;
-                }
+            for (Complaint complaint : allComplaints) {
 
                 String complaintStatus =
                         normalizeStatus(
@@ -741,256 +450,205 @@ public class ComplaintController {
                         );
 
                 if (complaintStatus.equalsIgnoreCase(
-                        requiredStatus
-                )) {
+                        requiredStatus)) {
 
-                    filteredComplaints.add(
-                            complaint
-                    );
+                    filteredComplaints.add(complaint);
                 }
             }
 
-            System.out.println(
-                    "Filtered society complaints = "
-                            + filteredComplaints.size()
-            );
-
-            return filteredComplaints;
-
         } catch (Exception e) {
 
-            System.err.println(
-                    "ERROR FILTERING SOCIETY COMPLAINTS"
+            System.out.println(
+                    "Error while filtering complaints by status: "
+                            + e.getMessage()
             );
 
             e.printStackTrace();
-
-            return filteredComplaints;
         }
+
+        return filteredComplaints;
     }
 
-    // =====================================================
+    // ============================================================
+    // GET COMPLAINTS BY EMAIL
+    // ============================================================
+
+    public List<Complaint> getComplaintsByEmail(
+            String email) {
+
+        List<Complaint> complaints =
+                new ArrayList<>();
+
+        try {
+
+            String normalizedEmail =
+                    normalizeEmail(email);
+
+            if (normalizedEmail.isEmpty()) {
+                return complaints;
+            }
+
+            CollectionReference complaintCollection =
+                    firestore
+                            .collection(COMPLAINT_COLLECTION)
+                            .document(normalizedEmail)
+                            .collection(COMPLAINT_COLLECTION);
+
+            QuerySnapshot snapshot =
+                    complaintCollection.get().get();
+
+            String residentSociety =
+                    getResidentSociety(normalizedEmail);
+
+            for (QueryDocumentSnapshot document
+                    : snapshot.getDocuments()) {
+
+                Complaint complaint =
+                        convertDocumentToComplaint(
+                                document,
+                                normalizedEmail,
+                                residentSociety
+                        );
+
+                complaints.add(complaint);
+            }
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "Error while fetching complaints by email: "
+                            + e.getMessage()
+            );
+
+            e.printStackTrace();
+        }
+
+        return complaints;
+    }
+
+    // ============================================================
     // UPDATE COMPLAINT STATUS
-    // =====================================================
-    //
-    // Exact path:
-    //
-    // complaints
-    //    / email
-    //       / complaints
-    //          / complaintId
-    //
-    // Security:
-    //
-    // Secretary Society
-    //        ==
-    // Complaint Society
-    //
-    // Only then status will be updated.
-    //
-    // =====================================================
+    // ============================================================
 
     public boolean updateComplaintStatus(
-            String email,
+            String complaintEmail,
             String complaintId,
             String newStatus) {
 
         try {
 
-            // -------------------------------------------------
-            // VALIDATE EMAIL
-            // -------------------------------------------------
+            if (complaintEmail == null
+                    || complaintEmail.trim().isEmpty()) {
 
-            if (email == null ||
-                    email.trim().isEmpty()) {
-
-                System.err.println(
-                        "Email missing."
+                System.out.println(
+                        "Complaint email is missing."
                 );
 
                 return false;
             }
 
-            // -------------------------------------------------
-            // VALIDATE COMPLAINT ID
-            // -------------------------------------------------
+            if (complaintId == null
+                    || complaintId.trim().isEmpty()) {
 
-            if (complaintId == null ||
-                    complaintId.trim().isEmpty()) {
-
-                System.err.println(
-                        "Complaint ID missing."
+                System.out.println(
+                        "Complaint ID is missing."
                 );
 
                 return false;
             }
-
-            // -------------------------------------------------
-            // VALIDATE STATUS
-            // -------------------------------------------------
-
-            if (newStatus == null ||
-                    newStatus.trim().isEmpty()) {
-
-                System.err.println(
-                        "New status missing."
-                );
-
-                return false;
-            }
-
-            email =
-                    email.trim();
-
-            complaintId =
-                    complaintId.trim();
-
-            newStatus =
-                    normalizeStatus(
-                            newStatus
-                    );
-
-            System.out.println("======================================");
-            System.out.println(
-                    "UPDATING COMPLAINT STATUS"
-            );
-
-            System.out.println(
-                    "Email = "
-                            + email
-            );
-
-            System.out.println(
-                    "Complaint ID = "
-                            + complaintId
-            );
-
-            System.out.println(
-                    "New Status = "
-                            + newStatus
-            );
-
-            System.out.println("======================================");
-
-            // =================================================
-            // GET CURRENT SECRETARY SOCIETY
-            // =================================================
 
             String secretarySociety =
                     getCurrentSecretarySociety();
 
-            if (secretarySociety == null ||
-                    secretarySociety.trim().isEmpty()) {
+            if (secretarySociety == null
+                    || secretarySociety.trim().isEmpty()) {
 
-                System.err.println(
-                        "Secretary society missing."
+                System.out.println(
+                        "Secretary society not found."
                 );
 
                 return false;
             }
 
-            secretarySociety =
-                    secretarySociety.trim();
+            String normalizedComplaintEmail =
+                    normalizeEmail(complaintEmail);
 
-            // =================================================
-            // COMPLAINT REFERENCE
-            // =================================================
+            // ----------------------------------------------------
+            // Get complaint
+            // ----------------------------------------------------
 
             DocumentReference complaintReference =
                     firestore
-                            .collection("complaints")
-                            .document(email)
-                            .collection("complaints")
+                            .collection(COMPLAINT_COLLECTION)
+                            .document(normalizedComplaintEmail)
+                            .collection(COMPLAINT_COLLECTION)
                             .document(complaintId);
 
-            // =================================================
-            // GET COMPLAINT DOCUMENT
-            // =================================================
+            DocumentSnapshot complaintDocument =
+                    complaintReference.get().get();
 
-            DocumentSnapshot document =
-                    complaintReference
-                            .get()
-                            .get();
+            if (!complaintDocument.exists()) {
 
-            if (!document.exists()) {
-
-                System.err.println(
-                        "Complaint document NOT FOUND."
-                );
-
-                System.err.println(
-                        "Expected path:"
-                );
-
-                System.err.println(
-                        "complaints/"
-                                + email
-                                + "/complaints/"
+                System.out.println(
+                        "Complaint not found: "
                                 + complaintId
                 );
 
                 return false;
             }
 
-            // =================================================
-            // SECURITY CHECK
-            // =================================================
-            //
-            // Secretary can update ONLY complaints
-            // belonging to their own society.
-            //
-            // =================================================
+            // ----------------------------------------------------
+            // Find resident's society from email
+            // ----------------------------------------------------
 
-            String complaintSociety =
-                    document.getString("society");
+            String residentSociety =
+                    getResidentSociety(
+                            normalizedComplaintEmail
+                    );
 
-            if (complaintSociety == null ||
-                    complaintSociety.trim().isEmpty()) {
+            if (residentSociety == null
+                    || residentSociety.trim().isEmpty()) {
 
-                System.err.println(
-                        "Complaint society is missing."
+                System.out.println(
+                        "Resident society not found."
                 );
 
                 return false;
             }
 
-            complaintSociety =
-                    complaintSociety.trim();
+            // ----------------------------------------------------
+            // Security check
+            // ----------------------------------------------------
 
-            // -------------------------------------------------
-            // COMPARE SOCIETY
-            // -------------------------------------------------
+            if (!residentSociety.equalsIgnoreCase(
+                    secretarySociety)) {
 
-            if (!complaintSociety.equalsIgnoreCase(
-                    secretarySociety
-            )) {
-
-                System.err.println(
-                        "ACCESS DENIED."
+                System.out.println(
+                        "Unauthorized complaint status update."
                 );
 
-                System.err.println(
-                        "Secretary Society = "
+                System.out.println(
+                        "Secretary Society: "
                                 + secretarySociety
                 );
 
-                System.err.println(
-                        "Complaint Society = "
-                                + complaintSociety
+                System.out.println(
+                        "Complaint Society: "
+                                + residentSociety
                 );
 
                 return false;
             }
 
-            // =================================================
-            // UPDATE STATUS
-            // =================================================
+            // ----------------------------------------------------
+            // Update status
+            // ----------------------------------------------------
+
+            String normalizedStatus =
+                    normalizeStatus(newStatus);
 
             complaintReference
-                    .update(
-                            "status",
-                            newStatus
-                    )
+                    .update("status", normalizedStatus)
                     .get();
 
             System.out.println(
@@ -1001,8 +659,9 @@ public class ComplaintController {
 
         } catch (Exception e) {
 
-            System.err.println(
-                    "ERROR UPDATING COMPLAINT STATUS"
+            System.out.println(
+                    "Error while updating complaint status: "
+                            + e.getMessage()
             );
 
             e.printStackTrace();
@@ -1011,272 +670,186 @@ public class ComplaintController {
         }
     }
 
-    // =====================================================
-    // CONVERT FIRESTORE DOCUMENT
-    // =====================================================
+    // ============================================================
+    // CONVERT FIRESTORE DOCUMENT TO COMPLAINT MODEL
+    // ============================================================
 
     private Complaint convertDocumentToComplaint(
             DocumentSnapshot document,
-            String email) {
+            String email,
+            String society) {
 
-        try {
+        String id =
+                document.getString("id");
 
-            if (document == null ||
-                    !document.exists()) {
-
-                return null;
-            }
-
-            Complaint complaint =
-                    new Complaint();
-
-            // =================================================
-            // ID
-            // =================================================
-
-            String id =
-                    document.getString("id");
-
-            if (id == null ||
-                    id.trim().isEmpty()) {
-
-                id =
-                        document.getId();
-            }
-
-            complaint.setId(id);
-
-            // =================================================
-            // EMAIL
-            // =================================================
-
-            String firestoreEmail =
-                    document.getString("email");
-
-            if (firestoreEmail == null ||
-                    firestoreEmail.trim().isEmpty()) {
-
-                firestoreEmail =
-                        email;
-            }
-
-            complaint.setEmail(
-                    firestoreEmail
-            );
-
-            // =================================================
-            // TITLE
-            // =================================================
-
-            complaint.setTitle(
-                    getString(
-                            document,
-                            "title"
-                    )
-            );
-
-            // =================================================
-            // CATEGORY
-            // =================================================
-
-            complaint.setCategory(
-                    getString(
-                            document,
-                            "category"
-                    )
-            );
-
-            // =================================================
-            // DESCRIPTION
-            // =================================================
-
-            complaint.setDescription(
-                    getString(
-                            document,
-                            "description"
-                    )
-            );
-
-            // =================================================
-            // FLAT NUMBER
-            // =================================================
-
-            complaint.setFlatNumber(
-                    getString(
-                            document,
-                            "flatNumber"
-                    )
-            );
-
-            // =================================================
-            // PREFERRED DATE
-            // =================================================
-
-            complaint.setPreferredDate(
-                    getString(
-                            document,
-                            "preferredDate"
-                    )
-            );
-
-            // =================================================
-            // STATUS
-            // =================================================
-
-            complaint.setStatus(
-                    normalizeStatus(
-                            getString(
-                                    document,
-                                    "status"
-                            )
-                    )
-            );
-
-            // =================================================
-            // SOCIETY
-            // =================================================
-
-            String society =
-                    getString(
-                            document,
-                            "society"
-                    );
-
-            complaint.setSociety(
-                    society
-            );
-
-            // =================================================
-            // DEBUG
-            // =================================================
-
-            System.out.println(
-                    "Complaint fetched successfully:"
-            );
-
-            System.out.println(
-                    "Email = "
-                            + complaint.getEmail()
-            );
-
-            System.out.println(
-                    "ID = "
-                            + complaint.getId()
-            );
-
-            System.out.println(
-                    "Title = "
-                            + complaint.getTitle()
-            );
-
-            System.out.println(
-                    "Category = "
-                            + complaint.getCategory()
-            );
-
-            System.out.println(
-                    "Description = "
-                            + complaint.getDescription()
-            );
-
-            System.out.println(
-                    "Flat = "
-                            + complaint.getFlatNumber()
-            );
-
-            System.out.println(
-                    "Preferred Date = "
-                            + complaint.getPreferredDate()
-            );
-
-            System.out.println(
-                    "Status = "
-                            + complaint.getStatus()
-            );
-
-            System.out.println(
-                    "Society = "
-                            + complaint.getSociety()
-            );
-
-            return complaint;
-
-        } catch (Exception e) {
-
-            System.err.println(
-                    "ERROR CONVERTING COMPLAINT"
-            );
-
-            e.printStackTrace();
-
-            return null;
+        if (id == null || id.trim().isEmpty()) {
+            id = document.getId();
         }
+
+        String complaintEmail =
+                document.getString("email");
+
+        if (complaintEmail == null
+                || complaintEmail.trim().isEmpty()) {
+
+            complaintEmail = email;
+        }
+
+        String title =
+                document.getString("title");
+
+        String category =
+                document.getString("category");
+
+        String description =
+                document.getString("description");
+
+        String flatNumber =
+                document.getString("flatNumber");
+
+        String preferredDate =
+                document.getString("preferredDate");
+
+        String status =
+                document.getString("status");
+
+        String imageFileName =
+                document.getString("imageFileName");
+
+        Complaint complaint =
+                new Complaint();
+
+        complaint.setId(id);
+        complaint.setEmail(
+                normalizeEmail(complaintEmail)
+        );
+
+        complaint.setTitle(
+                title != null ? title : ""
+        );
+
+        complaint.setCategory(
+                category != null ? category : ""
+        );
+
+        complaint.setDescription(
+                description != null ? description : ""
+        );
+
+        complaint.setFlatNumber(
+                flatNumber != null ? flatNumber : ""
+        );
+
+        complaint.setPreferredDate(
+                preferredDate != null ? preferredDate : ""
+        );
+
+        complaint.setStatus(
+                normalizeStatus(status)
+        );
+
+        complaint.setImageFileName(
+                imageFileName != null
+                        ? imageFileName
+                        : ""
+        );
+
+        complaint.setSociety(
+                society != null
+                        ? society
+                        : ""
+        );
+
+        if (document.contains("createdAt")) {
+
+            complaint.setCreatedAt(
+                    document.getTimestamp("createdAt")
+            );
+        }
+
+        return complaint;
     }
 
-    // =====================================================
-    // GET STRING
-    // =====================================================
-
-    private String getString(
-            DocumentSnapshot document,
-            String field) {
-
-        try {
-
-            String value =
-                    document.getString(field);
-
-            if (value == null) {
-
-                return "";
-            }
-
-            return value;
-
-        } catch (Exception e) {
-
-            return "";
-        }
-    }
-
-    // =====================================================
+    // ============================================================
     // NORMALIZE STATUS
-    // =====================================================
+    // ============================================================
 
-    private String normalizeStatus(
-            String status) {
+    private String normalizeStatus(String status) {
 
-        if (status == null ||
-                status.trim().isEmpty()) {
+        if (status == null
+                || status.trim().isEmpty()) {
 
             return "IN PROGRESS";
         }
 
-        String value =
+        String normalized =
                 status.trim()
-                        .toUpperCase();
+                        .toUpperCase()
+                        .replace("_", " ");
 
-        switch (value) {
+        switch (normalized) {
 
             case "OPEN":
-
                 return "IN PROGRESS";
 
             case "IN PROGRESS":
-
                 return "IN PROGRESS";
 
             case "RESOLVED":
-
                 return "RESOLVED";
 
             case "CLOSED":
-
                 return "CLOSED";
 
             default:
-
-                return "IN PROGRESS";
+                return normalized;
         }
+    }
+
+    // ============================================================
+    // OPTIONAL: GET COMPLAINTS BY SOCIETY
+    // ============================================================
+
+    public List<Complaint> getComplaintsBySociety(
+            String society) {
+
+        List<Complaint> complaints =
+                new ArrayList<>();
+
+        try {
+
+            if (society == null
+                    || society.trim().isEmpty()) {
+
+                return complaints;
+            }
+
+            String requiredSociety =
+                    normalizeSociety(society);
+
+            List<Complaint> allComplaints =
+                    getAllComplaints();
+
+            for (Complaint complaint : allComplaints) {
+
+                if (complaint.getSociety() != null
+                        && complaint.getSociety()
+                        .equalsIgnoreCase(requiredSociety)) {
+
+                    complaints.add(complaint);
+                }
+            }
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "Error while getting complaints by society: "
+                            + e.getMessage()
+            );
+
+            e.printStackTrace();
+        }
+
+        return complaints;
     }
 }
