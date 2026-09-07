@@ -1,4 +1,7 @@
+
 package com.society.view.Owner_portal;
+
+import java.io.File;
 
 import com.society.controller.ImageUploadController;
 import com.society.controller.Owner_Controller.ResidentController;
@@ -6,20 +9,24 @@ import com.society.model.Owner_model.ResidentModel;
 import com.society.view.ScreenSize;
 import com.society.view.Welcome.LogInPage;
 
+import javafx.animation.FadeTransition;
+import javafx.animation.ScaleTransition;
+import javafx.animation.TranslateTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-
 import javafx.scene.Scene;
-
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TextField;
-
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -27,19 +34,13 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-
 import javafx.scene.paint.Color;
-
 import javafx.scene.shape.Circle;
-
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-
-import java.io.File;
-
+import javafx.util.Duration;
 
 /**
  * =========================================================
@@ -57,8 +58,7 @@ import java.io.File;
  * 7. Cancel editing
  * 8. Logout
  *
- * Edit Profile is implemented as a Scene inside this same
- * class. No additional OwnerEditProfile.java file is needed.
+ * UI + Animation added without changing backend functionality.
  *
  */
 public class OwnerProfile {
@@ -69,7 +69,6 @@ public class OwnerProfile {
 
     private static final ResidentController residentController =
             new ResidentController();
-
 
     // =========================================================
     // CREATE PROFILE SCENE
@@ -88,14 +87,11 @@ public class OwnerProfile {
                         ? ""
                         : ownerEmail.trim().toLowerCase();
 
-
         // =====================================================
         // ROOT
         // =====================================================
 
-        BorderPane root =
-                new BorderPane();
-
+        BorderPane root = new BorderPane();
 
         // =====================================================
         // SIDEBAR
@@ -111,7 +107,6 @@ public class OwnerProfile {
                 sidebar.getSidebar()
         );
 
-
         // =====================================================
         // LOAD OWNER FROM FIRESTORE
         // =====================================================
@@ -126,34 +121,215 @@ public class OwnerProfile {
                     );
         }
 
-
         // =====================================================
         // MAIN CONTENT
         // =====================================================
 
         VBox mainContent =
-                new VBox(16);
+                new VBox(20);
 
         mainContent.setPadding(
                 new Insets(
-                        22,
-                        28,
-                        20,
-                        28
+                        30,
+                        40,
+                        30,
+                        40
                 )
         );
 
-        mainContent.setStyle(
-                "-fx-background-color:#e8ddd5;"
+        mainContent.setSpacing(20);
+
+        mainContent.setAlignment(
+                Pos.TOP_LEFT
         );
 
+        // =====================================================
+        // BACKGROUND IMAGE
+        // =====================================================
+
+        try {
+
+            Image image =
+                    new Image(
+                            OwnerProfile.class
+                                    .getResource(
+                                            "/background-Dashboard5.jpeg"
+                                    )
+                                    .toExternalForm()
+                    );
+
+            BackgroundImage backgroundImage =
+                    new BackgroundImage(
+                            image,
+                            BackgroundRepeat.NO_REPEAT,
+                            BackgroundRepeat.NO_REPEAT,
+                            BackgroundPosition.CENTER,
+                            new BackgroundSize(
+                                    100,
+                                    100,
+                                    true,
+                                    true,
+                                    false,
+                                    true
+                            )
+                    );
+
+            mainContent.setBackground(
+                    new Background(
+                            backgroundImage
+                    )
+            );
+
+        } catch (Exception e) {
+
+            mainContent.setStyle(
+                    "-fx-background-color:#e8ddd5;"
+            );
+        }
+
+        // =====================================================
+        // HEADER
+        // =====================================================
+
+        // =====================================================
+// HEADER
+// =====================================================
+
+HBox header =
+        new HBox();
+
+header.setPrefHeight(80);
+
+header.setPadding(
+        new Insets(
+                15,
+                25,
+                15,
+                25
+        )
+);
+
+header.setAlignment(
+        Pos.CENTER_LEFT
+);
+
+header.setStyle(
+        "-fx-background-color:#4e342e;"
+);
+
+// =====================================================
+// HEADER TEXT
+// =====================================================
+
+VBox headerText =
+        new VBox(4);
+
+Label greeting =
+        new Label(
+                "Owner Profile"
+        );
+
+greeting.setStyle(
+        "-fx-font-family:'Bodoni MT';" +
+        "-fx-font-size:24px;" +
+        "-fx-font-weight:bold;" +
+        "-fx-text-fill:white;"
+);
+
+Label description =
+        new Label(
+                "View and manage owner details"
+        );
+
+description.setStyle(
+        "-fx-font-size:14px;" +
+        "-fx-text-fill:white;"
+);
+
+headerText.getChildren().addAll(
+        greeting,
+        description
+);
+
+// =====================================================
+// HEADER SPACER
+// =====================================================
+
+Region headerSpacer =
+        new Region();
+
+HBox.setHgrow(
+        headerSpacer,
+        Priority.ALWAYS
+);
+
+// =====================================================
+// DATE
+// =====================================================
+
+Label day =
+        new Label();
+
+Label date =
+        new Label();
+
+java.time.LocalDate today =
+        java.time.LocalDate.now();
+
+day.setText(
+        today.format(
+                java.time.format.DateTimeFormatter
+                        .ofPattern("EEEE")
+        )
+);
+
+date.setText(
+        today.format(
+                java.time.format.DateTimeFormatter
+                        .ofPattern("dd MMMM yyyy")
+        )
+);
+
+day.setStyle(
+        "-fx-text-fill:white;" +
+        "-fx-font-size:13px;"
+);
+
+date.setStyle(
+        "-fx-text-fill:white;" +
+        "-fx-font-size:12px;"
+);
+
+VBox dateBox =
+        new VBox(3);
+
+dateBox.setAlignment(
+        Pos.CENTER_RIGHT
+);
+
+dateBox.getChildren().addAll(
+        day,
+        date
+);
+
+// =====================================================
+// HEADER CHILDREN
+// =====================================================
+
+header.getChildren().addAll(
+        headerText,
+        headerSpacer,
+        dateBox
+);
 
         // =====================================================
         // PAGE HEADING
         // =====================================================
 
         Label heading =
-                new Label("PROFILE");
+                new Label(
+                        "PROFILE"
+                );
 
         heading.setFont(
                 Font.font(
@@ -167,19 +343,20 @@ public class OwnerProfile {
                 Color.web("#593a32")
         );
 
-
         // =====================================================
         // TITLE
         // =====================================================
 
         Label title =
-                new Label("My Profile");
+                new Label(
+                        "Owner Profile"
+                );
 
         title.setFont(
                 Font.font(
                         "System",
                         FontWeight.BOLD,
-                        24
+                        27
                 )
         );
 
@@ -187,10 +364,9 @@ public class OwnerProfile {
                 Color.web("#3E2723")
         );
 
-
         Label subtitle =
                 new Label(
-                        "Manage your personal and account information"
+                        "View and manage your personal details"
                 );
 
         subtitle.setFont(
@@ -204,18 +380,18 @@ public class OwnerProfile {
                 Color.web("#795548")
         );
 
-
         VBox titleBox =
-                new VBox(4);
+                new VBox(
+                        4
+                );
 
         titleBox.getChildren().addAll(
                 title,
                 subtitle
         );
 
-
         // =====================================================
-        // OWNER DATA
+        // OWNER DATA DEFAULT VALUES
         // =====================================================
 
         String nameText =
@@ -245,7 +421,6 @@ public class OwnerProfile {
         String profileImageUrl =
                 null;
 
-
         // =====================================================
         // LOAD OWNER DATA
         // =====================================================
@@ -259,7 +434,6 @@ public class OwnerProfile {
                         owner.getName().trim();
             }
 
-
             if (owner.getEmail() != null &&
                     !owner.getEmail().trim().isEmpty()) {
 
@@ -269,14 +443,12 @@ public class OwnerProfile {
                                 .toLowerCase();
             }
 
-
             if (owner.getPhone() != null &&
                     !owner.getPhone().trim().isEmpty()) {
 
                 phoneText =
                         owner.getPhone().trim();
             }
-
 
             if (owner.getFlat() != null &&
                     !owner.getFlat().trim().isEmpty()) {
@@ -285,14 +457,12 @@ public class OwnerProfile {
                         owner.getFlat().trim();
             }
 
-
             if (owner.getSociety() != null &&
                     !owner.getSociety().trim().isEmpty()) {
 
                 societyText =
                         owner.getSociety().trim();
             }
-
 
             if (owner.getStatus() != null &&
                     !owner.getStatus().trim().isEmpty()) {
@@ -301,7 +471,6 @@ public class OwnerProfile {
                         owner.getStatus().trim();
             }
 
-
             if (owner.getResidentType() != null &&
                     !owner.getResidentType().trim().isEmpty()) {
 
@@ -309,14 +478,12 @@ public class OwnerProfile {
                         owner.getResidentType().trim();
             }
 
-
             if (owner.getOwnerId() != null &&
                     !owner.getOwnerId().trim().isEmpty()) {
 
                 ownerIdText =
                         owner.getOwnerId().trim();
             }
-
 
             if (owner.getProfileImageUrl() != null &&
                     !owner.getProfileImageUrl()
@@ -328,12 +495,8 @@ public class OwnerProfile {
             }
         }
 
-
         // =====================================================
-        // IMPORTANT
-        //
-        // These values are final because they are used inside
-        // JavaFX lambda expressions.
+        // FINAL VALUES FOR LAMBDA
         // =====================================================
 
         final String finalNameText =
@@ -351,7 +514,6 @@ public class OwnerProfile {
         final String finalSocietyText =
                 societyText;
 
-
         // =====================================================
         // LEFT PROFILE CARD
         // =====================================================
@@ -359,9 +521,17 @@ public class OwnerProfile {
         VBox profileCard =
                 new VBox(16);
 
-        profileCard.setPrefWidth(320);
-        profileCard.setMinWidth(320);
-        profileCard.setPrefHeight(545);
+        profileCard.setPrefWidth(
+                320
+        );
+
+        profileCard.setMinWidth(
+                320
+        );
+
+        profileCard.setPrefHeight(
+                545
+        );
 
         profileCard.setPadding(
                 new Insets(28)
@@ -377,7 +547,6 @@ public class OwnerProfile {
                 "-fx-border-color:#D8CDC5;" +
                 "-fx-border-radius:14;"
         );
-
 
         // =====================================================
         // PROFILE PHOTO CONTAINER
@@ -396,7 +565,6 @@ public class OwnerProfile {
                 135
         );
 
-
         Circle photoBackground =
                 new Circle(
                         67.5,
@@ -407,20 +575,12 @@ public class OwnerProfile {
                 photoBackground
         );
 
-
         // =====================================================
         // LOAD PROFILE IMAGE
-        //
-        // Priority:
-        //
-        // 1. Cloudinary URL
-        // 2. Local fallback
-        // 3. Initials
         // =====================================================
 
         Image profileImage =
                 null;
-
 
         try {
 
@@ -443,7 +603,6 @@ public class OwnerProfile {
             profileImage =
                     null;
         }
-
 
         // =====================================================
         // LOCAL FALLBACK IMAGE
@@ -475,7 +634,6 @@ public class OwnerProfile {
             }
         }
 
-
         // =====================================================
         // DISPLAY IMAGE
         // =====================================================
@@ -488,12 +646,21 @@ public class OwnerProfile {
                             profileImage
                     );
 
-            imageView.setFitWidth(135);
-            imageView.setFitHeight(135);
+            imageView.setFitWidth(
+                    135
+            );
 
-            imageView.setPreserveRatio(false);
-            imageView.setSmooth(true);
+            imageView.setFitHeight(
+                    135
+            );
 
+            imageView.setPreserveRatio(
+                    false
+            );
+
+            imageView.setSmooth(
+                    true
+            );
 
             Circle clip =
                     new Circle(
@@ -505,7 +672,6 @@ public class OwnerProfile {
             imageView.setClip(
                     clip
             );
-
 
             photoContainer.getChildren().add(
                     imageView
@@ -554,7 +720,6 @@ public class OwnerProfile {
             );
         }
 
-
         // =====================================================
         // CHANGE PHOTO BUTTON
         // =====================================================
@@ -583,7 +748,6 @@ public class OwnerProfile {
                 "-fx-cursor:hand;"
         );
 
-
         // =====================================================
         // CHANGE PHOTO ACTION
         // =====================================================
@@ -600,14 +764,12 @@ public class OwnerProfile {
                 return;
             }
 
-
             FileChooser fileChooser =
                     new FileChooser();
 
             fileChooser.setTitle(
                     "Select Profile Photo"
             );
-
 
             FileChooser.ExtensionFilter imageFilter =
                     new FileChooser.ExtensionFilter(
@@ -618,24 +780,20 @@ public class OwnerProfile {
                             "*.webp"
                     );
 
-
             fileChooser
                     .getExtensionFilters()
                     .add(
                             imageFilter
                     );
 
-
             File file =
                     fileChooser.showOpenDialog(
                             stage
                     );
 
-
             if (file == null) {
                 return;
             }
-
 
             try {
 
@@ -646,12 +804,10 @@ public class OwnerProfile {
                 ImageUploadController uploader =
                         new ImageUploadController();
 
-
                 String cloudinaryUrl =
                         uploader.imageUpload(
                                 file
                         );
-
 
                 if (cloudinaryUrl == null ||
                         cloudinaryUrl.trim().isEmpty()) {
@@ -664,7 +820,6 @@ public class OwnerProfile {
                     return;
                 }
 
-
                 // =================================================
                 // SAVE CLOUDINARY URL TO FIRESTORE
                 // =================================================
@@ -676,7 +831,6 @@ public class OwnerProfile {
                                         cloudinaryUrl
                                 );
 
-
                 if (!saved) {
 
                     showError(
@@ -687,12 +841,10 @@ public class OwnerProfile {
                     return;
                 }
 
-
                 showInformation(
                         "Profile Photo Updated",
                         "Your profile photo has been updated successfully."
                 );
-
 
                 // =================================================
                 // RELOAD PROFILE
@@ -707,7 +859,6 @@ public class OwnerProfile {
 
                 stage.show();
 
-
             } catch (Exception ex) {
 
                 ex.printStackTrace();
@@ -719,7 +870,6 @@ public class OwnerProfile {
                 );
             }
         });
-
 
         // =====================================================
         // OWNER NAME
@@ -742,7 +892,6 @@ public class OwnerProfile {
                 Color.web("#3E2723")
         );
 
-
         // =====================================================
         // ROLE
         // =====================================================
@@ -763,7 +912,6 @@ public class OwnerProfile {
         role.setTextFill(
                 Color.web("#789098")
         );
-
 
         // =====================================================
         // SOCIETY
@@ -788,7 +936,6 @@ public class OwnerProfile {
                 Color.web("#593a32")
         );
 
-
         // =====================================================
         // FLAT
         // =====================================================
@@ -812,7 +959,6 @@ public class OwnerProfile {
                 Color.web("#795548")
         );
 
-
         // =====================================================
         // IDENTITY
         // =====================================================
@@ -831,14 +977,12 @@ public class OwnerProfile {
                 flat
         );
 
-
         // =====================================================
         // PROFILE SEPARATOR
         // =====================================================
 
         Separator profileSeparator =
                 new Separator();
-
 
         // =====================================================
         // EDIT PROFILE BUTTON
@@ -866,15 +1010,8 @@ public class OwnerProfile {
                 "-fx-cursor:hand;"
         );
 
-
         // =====================================================
         // EDIT PROFILE ACTION
-        //
-        // IMPORTANT:
-        // This NO LONGER opens a Dialog.
-        //
-        // It switches to another Scene inside the same
-        // OwnerProfile.java file.
         // =====================================================
 
         editProfile.setOnAction(e -> {
@@ -888,7 +1025,6 @@ public class OwnerProfile {
 
             stage.show();
         });
-
 
         // =====================================================
         // LOGOUT BUTTON
@@ -916,7 +1052,6 @@ public class OwnerProfile {
                 "-fx-cursor:hand;"
         );
 
-
         // =====================================================
         // LOGOUT ACTION
         // =====================================================
@@ -935,7 +1070,6 @@ public class OwnerProfile {
             stage.show();
         });
 
-
         // =====================================================
         // PROFILE BUTTONS
         // =====================================================
@@ -953,7 +1087,6 @@ public class OwnerProfile {
                 logoutButton
         );
 
-
         // =====================================================
         // PROFILE CARD
         // =====================================================
@@ -964,7 +1097,6 @@ public class OwnerProfile {
                 profileSeparator,
                 profileButtons
         );
-
 
         // =====================================================
         // RIGHT INFORMATION CARD
@@ -996,7 +1128,6 @@ public class OwnerProfile {
                 "-fx-border-radius:14;"
         );
 
-
         // =====================================================
         // PERSONAL INFORMATION
         // =====================================================
@@ -1009,13 +1140,11 @@ public class OwnerProfile {
         Separator personalSeparator =
                 new Separator();
 
-
         HBox nameRow =
                 createInfoRow(
                         "Full Name",
                         finalNameText
                 );
-
 
         HBox phoneRow =
                 createInfoRow(
@@ -1023,20 +1152,17 @@ public class OwnerProfile {
                         finalPhoneText
                 );
 
-
         HBox emailRow =
                 createInfoRow(
                         "Email",
                         finalEmailText
                 );
 
-
         HBox flatRow =
                 createInfoRow(
                         "Flat / Unit",
                         finalFlatText
                 );
-
 
         VBox personalSection =
                 new VBox(7);
@@ -1050,7 +1176,6 @@ public class OwnerProfile {
                 flatRow
         );
 
-
         // =====================================================
         // ACCOUNT INFORMATION
         // =====================================================
@@ -1063,13 +1188,11 @@ public class OwnerProfile {
         Separator accountSeparator =
                 new Separator();
 
-
         HBox statusRow =
                 createInfoRow(
                         "Account Status",
                         statusText
                 );
-
 
         HBox accountTypeRow =
                 createInfoRow(
@@ -1077,20 +1200,17 @@ public class OwnerProfile {
                         accountTypeText
                 );
 
-
         HBox societyRow =
                 createInfoRow(
                         "Society",
                         finalSocietyText
                 );
 
-
         HBox ownerIdRow =
                 createInfoRow(
                         "Owner ID",
                         ownerIdText
                 );
-
 
         VBox accountSection =
                 new VBox(7);
@@ -1104,7 +1224,6 @@ public class OwnerProfile {
                 ownerIdRow
         );
 
-
         // =====================================================
         // SECURITY
         // =====================================================
@@ -1116,7 +1235,6 @@ public class OwnerProfile {
 
         Separator securitySeparator =
                 new Separator();
-
 
         Label passwordLabel =
                 new Label(
@@ -1135,7 +1253,6 @@ public class OwnerProfile {
                 Color.web("#607D8B")
         );
 
-
         Label passwordValue =
                 new Label(
                         "••••••••••••"
@@ -1153,7 +1270,6 @@ public class OwnerProfile {
                 Color.web("#263238")
         );
 
-
         VBox passwordInfo =
                 new VBox(4);
 
@@ -1161,7 +1277,6 @@ public class OwnerProfile {
                 passwordLabel,
                 passwordValue
         );
-
 
         Button changePasswordButton =
                 new Button(
@@ -1187,7 +1302,6 @@ public class OwnerProfile {
                 "-fx-cursor:hand;"
         );
 
-
         changePasswordButton.setOnAction(e -> {
 
             showInformation(
@@ -1196,14 +1310,12 @@ public class OwnerProfile {
             );
         });
 
-
         HBox securityContent =
                 new HBox();
 
         securityContent.setAlignment(
                 Pos.CENTER_LEFT
         );
-
 
         Region securitySpacer =
                 new Region();
@@ -1213,13 +1325,11 @@ public class OwnerProfile {
                 Priority.ALWAYS
         );
 
-
         securityContent.getChildren().addAll(
                 passwordInfo,
                 securitySpacer,
                 changePasswordButton
         );
-
 
         VBox securitySection =
                 new VBox(7);
@@ -1230,7 +1340,6 @@ public class OwnerProfile {
                 securityContent
         );
 
-
         // =====================================================
         // INFORMATION CARD
         // =====================================================
@@ -1240,7 +1349,6 @@ public class OwnerProfile {
                 accountSection,
                 securitySection
         );
-
 
         // =====================================================
         // PROFILE CONTENT
@@ -1258,7 +1366,6 @@ public class OwnerProfile {
                 informationCard
         );
 
-
         // =====================================================
         // MAIN CONTENT
         // =====================================================
@@ -1269,37 +1376,87 @@ public class OwnerProfile {
                 profileContent
         );
 
-
         root.setCenter(
                 mainContent
         );
 
+        // =====================================================
+        // PAGE ANIMATIONS
+        // =====================================================
+
+      
+        animateProfileCard(
+                profileCard
+        );
+
+        animateInformationCard(
+                informationCard
+        );
+
+        animateButton(
+                changePhotoButton
+        );
+
+        animateButton(
+                editProfile
+        );
+
+        animateButton(
+                logoutButton
+        );
+
+        animateButton(
+                changePasswordButton
+        );
+
+        // =====================================================
+        // MAIN AREA
+        // =====================================================
+
+        BorderPane mainarea =
+                new BorderPane();
+
+        mainarea.setTop(
+                header
+        );
+
+        mainarea.setCenter(
+                mainContent
+        );
+
+        root.setCenter(
+                mainarea
+        );
 
         // =====================================================
         // SCENE
         // =====================================================
 
-        return new Scene(
-                root,
-                ScreenSize.getWidth(),
-                ScreenSize.getHeight()
-        );
-    }
+        Scene scene =
+                new Scene(
+                        root,
+                        ScreenSize.getWidth(),
+                        ScreenSize.getHeight()
+                );
 
+        stage.setScene(
+                scene
+        );
+
+        stage.setMaximized(
+                true
+        );
+
+        return scene;
+    }
 
     // =========================================================
     // EDIT PROFILE SCENE
-    //
-    // SAME CLASS
-    // SAME STAGE
-    // NO DIALOG
-    // NO NEW FILE
     // =========================================================
 
     private static Scene createEditScene(
             Stage stage,
             String ownerEmail) {
-
 
         // =====================================================
         // NORMALIZE EMAIL
@@ -1310,14 +1467,12 @@ public class OwnerProfile {
                         ? ""
                         : ownerEmail.trim().toLowerCase();
 
-
         // =====================================================
         // ROOT
         // =====================================================
 
         BorderPane root =
                 new BorderPane();
-
 
         // =====================================================
         // SIDEBAR
@@ -1333,7 +1488,6 @@ public class OwnerProfile {
                 sidebar.getSidebar()
         );
 
-
         // =====================================================
         // LOAD CURRENT OWNER DATA
         // =====================================================
@@ -1348,7 +1502,6 @@ public class OwnerProfile {
                             finalOwnerEmail
                     );
         }
-
 
         // =====================================================
         // CURRENT VALUES
@@ -1366,7 +1519,6 @@ public class OwnerProfile {
         String currentSociety =
                 "";
 
-
         if (owner != null) {
 
             if (owner.getName() != null) {
@@ -1375,13 +1527,11 @@ public class OwnerProfile {
                         owner.getName().trim();
             }
 
-
             if (owner.getPhone() != null) {
 
                 currentPhone =
                         owner.getPhone().trim();
             }
-
 
             if (owner.getFlat() != null) {
 
@@ -1389,14 +1539,12 @@ public class OwnerProfile {
                         owner.getFlat().trim();
             }
 
-
             if (owner.getSociety() != null) {
 
                 currentSociety =
                         owner.getSociety().trim();
             }
         }
-
 
         // =====================================================
         // MAIN CONTENT
@@ -1414,17 +1562,58 @@ public class OwnerProfile {
                 )
         );
 
-        mainContent.setStyle(
-                "-fx-background-color:#e8ddd5;"
-        );
+        // =====================================================
+        // BACKGROUND
+        // =====================================================
 
+        try {
+
+            Image image =
+                    new Image(
+                            OwnerProfile.class
+                                    .getResource(
+                                            "/background-Dashboard5.jpeg"
+                                    )
+                                    .toExternalForm()
+                    );
+
+            BackgroundImage backgroundImage =
+                    new BackgroundImage(
+                            image,
+                            BackgroundRepeat.NO_REPEAT,
+                            BackgroundRepeat.NO_REPEAT,
+                            BackgroundPosition.CENTER,
+                            new BackgroundSize(
+                                    100,
+                                    100,
+                                    true,
+                                    true,
+                                    false,
+                                    true
+                            )
+                    );
+
+            mainContent.setBackground(
+                    new Background(
+                            backgroundImage
+                    )
+            );
+
+        } catch (Exception e) {
+
+            mainContent.setStyle(
+                    "-fx-background-color:#e8ddd5;"
+            );
+        }
 
         // =====================================================
         // HEADING
         // =====================================================
 
         Label heading =
-                new Label("PROFILE");
+                new Label(
+                        "PROFILE"
+                );
 
         heading.setFont(
                 Font.font(
@@ -1438,13 +1627,14 @@ public class OwnerProfile {
                 Color.web("#593a32")
         );
 
-
         // =====================================================
         // TITLE
         // =====================================================
 
         Label title =
-                new Label("Edit Profile");
+                new Label(
+                        "Edit Profile"
+                );
 
         title.setFont(
                 Font.font(
@@ -1457,7 +1647,6 @@ public class OwnerProfile {
         title.setTextFill(
                 Color.web("#3E2723")
         );
-
 
         Label subtitle =
                 new Label(
@@ -1475,15 +1664,15 @@ public class OwnerProfile {
                 Color.web("#795548")
         );
 
-
         VBox titleBox =
-                new VBox(4);
+                new VBox(
+                        4
+                );
 
         titleBox.getChildren().addAll(
                 title,
                 subtitle
         );
-
 
         // =====================================================
         // EDIT CARD
@@ -1507,7 +1696,6 @@ public class OwnerProfile {
                 "-fx-border-radius:14;"
         );
 
-
         // =====================================================
         // SECTION TITLE
         // =====================================================
@@ -1517,10 +1705,8 @@ public class OwnerProfile {
                         "Personal Information"
                 );
 
-
         Separator separator =
                 new Separator();
-
 
         // =====================================================
         // TEXT FIELDS
@@ -1533,14 +1719,12 @@ public class OwnerProfile {
                         )
                 );
 
-
         TextField phoneField =
                 new TextField(
                         cleanFieldValue(
                                 currentPhone
                         )
                 );
-
 
         TextField flatField =
                 new TextField(
@@ -1549,7 +1733,6 @@ public class OwnerProfile {
                         )
                 );
 
-
         TextField societyField =
                 new TextField(
                         cleanFieldValue(
@@ -1557,12 +1740,10 @@ public class OwnerProfile {
                         )
                 );
 
-
         TextField emailField =
                 new TextField(
                         finalOwnerEmail
                 );
-
 
         // =====================================================
         // EMAIL CANNOT BE CHANGED
@@ -1576,31 +1757,31 @@ public class OwnerProfile {
                 false
         );
 
-
         // =====================================================
         // FIELD HEIGHTS
         // =====================================================
 
-        nameField.setPrefHeight(
-                40
-        );
+        nameField.setPrefHeight(40);
+        phoneField.setPrefHeight(40);
+        flatField.setPrefHeight(40);
+        societyField.setPrefHeight(40);
+        emailField.setPrefHeight(40);
 
-        phoneField.setPrefHeight(
-                40
-        );
+        // =====================================================
+        // FIELD STYLE
+        // =====================================================
 
-        flatField.setPrefHeight(
-                40
-        );
+        String fieldStyle =
+                "-fx-background-color:white;" +
+                "-fx-border-color:#CBD5D8;" +
+                "-fx-border-radius:6;" +
+                "-fx-background-radius:6;";
 
-        societyField.setPrefHeight(
-                40
-        );
-
-        emailField.setPrefHeight(
-                40
-        );
-
+        nameField.setStyle(fieldStyle);
+        phoneField.setStyle(fieldStyle);
+        flatField.setStyle(fieldStyle);
+        societyField.setStyle(fieldStyle);
+        emailField.setStyle(fieldStyle);
 
         // =====================================================
         // GRID
@@ -1612,9 +1793,10 @@ public class OwnerProfile {
         grid.setHgap(25);
         grid.setVgap(18);
 
-
         grid.add(
-                createEditLabel("Full Name"),
+                createEditLabel(
+                        "Full Name"
+                ),
                 0,
                 0
         );
@@ -1625,9 +1807,10 @@ public class OwnerProfile {
                 0
         );
 
-
         grid.add(
-                createEditLabel("Phone Number"),
+                createEditLabel(
+                        "Phone Number"
+                ),
                 0,
                 1
         );
@@ -1638,9 +1821,10 @@ public class OwnerProfile {
                 1
         );
 
-
         grid.add(
-                createEditLabel("Flat / Unit"),
+                createEditLabel(
+                        "Flat / Unit"
+                ),
                 0,
                 2
         );
@@ -1651,9 +1835,10 @@ public class OwnerProfile {
                 2
         );
 
-
         grid.add(
-                createEditLabel("Society"),
+                createEditLabel(
+                        "Society"
+                ),
                 0,
                 3
         );
@@ -1664,9 +1849,10 @@ public class OwnerProfile {
                 3
         );
 
-
         grid.add(
-                createEditLabel("Email"),
+                createEditLabel(
+                        "Email"
+                ),
                 0,
                 4
         );
@@ -1676,7 +1862,6 @@ public class OwnerProfile {
                 1,
                 4
         );
-
 
         // =====================================================
         // BUTTONS
@@ -1688,7 +1873,6 @@ public class OwnerProfile {
         buttons.setAlignment(
                 Pos.CENTER_RIGHT
         );
-
 
         Button cancelButton =
                 new Button(
@@ -1713,7 +1897,6 @@ public class OwnerProfile {
                 "-fx-cursor:hand;"
         );
 
-
         Button saveButton =
                 new Button(
                         "Save Changes"
@@ -1736,7 +1919,6 @@ public class OwnerProfile {
                 "-fx-cursor:hand;"
         );
 
-
         // =====================================================
         // CANCEL
         // =====================================================
@@ -1753,40 +1935,31 @@ public class OwnerProfile {
             stage.show();
         });
 
-
         // =====================================================
         // SAVE CHANGES
         // =====================================================
 
         saveButton.setOnAction(e -> {
 
-            // =================================================
-            // READ VALUES
-            // =================================================
-
             String newName =
                     nameField.getText() == null
                             ? ""
                             : nameField.getText().trim();
-
 
             String newPhone =
                     phoneField.getText() == null
                             ? ""
                             : phoneField.getText().trim();
 
-
             String newFlat =
                     flatField.getText() == null
                             ? ""
                             : flatField.getText().trim();
 
-
             String newSociety =
                     societyField.getText() == null
                             ? ""
                             : societyField.getText().trim();
-
 
             // =================================================
             // EMAIL CHECK
@@ -1802,7 +1975,6 @@ public class OwnerProfile {
                 return;
             }
 
-
             // =================================================
             // NAME VALIDATION
             // =================================================
@@ -1817,12 +1989,8 @@ public class OwnerProfile {
                 return;
             }
 
-
             // =================================================
             // PHONE VALIDATION
-            //
-            // Empty phone is allowed because your existing
-            // Firestore data may not contain a phone number.
             // =================================================
 
             if (!newPhone.isEmpty() &&
@@ -1838,7 +2006,6 @@ public class OwnerProfile {
                 return;
             }
 
-
             // =================================================
             // UPDATE FIRESTORE
             // =================================================
@@ -1852,7 +2019,6 @@ public class OwnerProfile {
                             newSociety
                     );
 
-
             // =================================================
             // SUCCESS
             // =================================================
@@ -1864,11 +2030,6 @@ public class OwnerProfile {
                         "Your profile has been updated successfully."
                 );
 
-
-                // =============================================
-                // RETURN TO PROFILE SCENE
-                // =============================================
-
                 stage.setScene(
                         OwnerProfile.createScene(
                                 stage,
@@ -1877,7 +2038,6 @@ public class OwnerProfile {
                 );
 
                 stage.show();
-
 
             } else {
 
@@ -1888,12 +2048,10 @@ public class OwnerProfile {
             }
         });
 
-
         buttons.getChildren().addAll(
                 cancelButton,
                 saveButton
         );
-
 
         // =====================================================
         // EDIT CARD
@@ -1906,7 +2064,6 @@ public class OwnerProfile {
                 buttons
         );
 
-
         // =====================================================
         // MAIN CONTENT
         // =====================================================
@@ -1917,23 +2074,62 @@ public class OwnerProfile {
                 editCard
         );
 
-
         root.setCenter(
                 mainContent
         );
 
-
         // =====================================================
-        // RETURN SCENE
+        // EDIT PAGE ANIMATION
         // =====================================================
 
-        return new Scene(
-                root,
-                ScreenSize.getWidth(),
-                ScreenSize.getHeight()
+        animateEditCard(
+                editCard
         );
-    }
 
+        animateButton(
+                cancelButton
+        );
+
+        animateButton(
+                saveButton
+        );
+
+        // =====================================================
+        // MAIN AREA
+        // =====================================================
+
+        BorderPane mainarea =
+                new BorderPane();
+
+        mainarea.setCenter(
+                mainContent
+        );
+
+        root.setCenter(
+                mainarea
+        );
+
+        // =====================================================
+        // SCENE
+        // =====================================================
+
+        Scene scene =
+                new Scene(
+                        root,
+                        ScreenSize.getWidth(),
+                        ScreenSize.getHeight()
+                );
+
+        stage.setScene(
+                scene
+        );
+
+        stage.setMaximized(
+                true
+        );
+
+        return scene;
+    }
 
     // =========================================================
     // EDIT LABEL
@@ -1943,7 +2139,9 @@ public class OwnerProfile {
             String text) {
 
         Label label =
-                new Label(text);
+                new Label(
+                        text
+                );
 
         label.setPrefWidth(
                 140
@@ -1964,7 +2162,6 @@ public class OwnerProfile {
         return label;
     }
 
-
     // =========================================================
     // CLEAN FIELD VALUE
     // =========================================================
@@ -1982,7 +2179,6 @@ public class OwnerProfile {
         return value.trim();
     }
 
-
     // =========================================================
     // CREATE SECTION TITLE
     // =========================================================
@@ -1991,7 +2187,9 @@ public class OwnerProfile {
             String text) {
 
         Label label =
-                new Label(text);
+                new Label(
+                        text
+                );
 
         label.setFont(
                 Font.font(
@@ -2007,7 +2205,6 @@ public class OwnerProfile {
 
         return label;
     }
-
 
     // =========================================================
     // CREATE INFORMATION ROW
@@ -2038,7 +2235,6 @@ public class OwnerProfile {
                 Color.web("#789098")
         );
 
-
         Label value =
                 new Label(
                         valueText == null ||
@@ -2058,7 +2254,6 @@ public class OwnerProfile {
         value.setTextFill(
                 Color.web("#263238")
         );
-
 
         HBox row =
                 new HBox(15);
@@ -2084,7 +2279,6 @@ public class OwnerProfile {
         return row;
     }
 
-
     // =========================================================
     // GET INITIALS
     // =========================================================
@@ -2098,12 +2292,10 @@ public class OwnerProfile {
             return "ON";
         }
 
-
         String[] parts =
                 fullName
                         .trim()
                         .split("\\s+");
-
 
         if (parts.length == 1) {
 
@@ -2118,7 +2310,6 @@ public class OwnerProfile {
                     .toUpperCase();
         }
 
-
         return (
                 parts[0].substring(0, 1) +
                 parts[parts.length - 1]
@@ -2126,6 +2317,280 @@ public class OwnerProfile {
         ).toUpperCase();
     }
 
+    // =========================================================
+    // HEADER ANIMATION
+    // =========================================================
+
+
+    
+
+    // =========================================================
+    // PROFILE CARD ANIMATION
+    // =========================================================
+
+    private static void animateProfileCard(
+            VBox profileCard) {
+
+        profileCard.setOpacity(
+                0
+        );
+
+        profileCard.setTranslateY(
+                35
+        );
+
+        FadeTransition fade =
+                new FadeTransition(
+                        Duration.millis(700),
+                        profileCard
+                );
+
+        fade.setFromValue(
+                0
+        );
+
+        fade.setToValue(
+                1
+        );
+
+        fade.setDelay(
+                Duration.millis(250)
+        );
+
+        TranslateTransition slide =
+                new TranslateTransition(
+                        Duration.millis(700),
+                        profileCard
+                );
+
+        slide.setFromY(
+                35
+        );
+
+        slide.setToY(
+                0
+        );
+
+        slide.setDelay(
+                Duration.millis(250)
+        );
+
+        ScaleTransition scale =
+                new ScaleTransition(
+                        Duration.millis(700),
+                        profileCard
+                );
+
+        scale.setFromX(
+                0.96
+        );
+
+        scale.setFromY(
+                0.96
+        );
+
+        scale.setToX(
+                1
+        );
+
+        scale.setToY(
+                1
+        );
+
+        scale.setDelay(
+                Duration.millis(250)
+        );
+
+        fade.play();
+        slide.play();
+        scale.play();
+    }
+
+    // =========================================================
+    // INFORMATION CARD ANIMATION
+    // =========================================================
+
+    private static void animateInformationCard(
+            VBox informationCard) {
+
+        informationCard.setOpacity(
+                0
+        );
+
+        informationCard.setTranslateY(
+                35
+        );
+
+        FadeTransition fade =
+                new FadeTransition(
+                        Duration.millis(700),
+                        informationCard
+                );
+
+        fade.setFromValue(
+                0
+        );
+
+        fade.setToValue(
+                1
+        );
+
+        fade.setDelay(
+                Duration.millis(400)
+        );
+
+        TranslateTransition slide =
+                new TranslateTransition(
+                        Duration.millis(700),
+                        informationCard
+                );
+
+        slide.setFromY(
+                35
+        );
+
+        slide.setToY(
+                0
+        );
+
+        slide.setDelay(
+                Duration.millis(400)
+        );
+
+        fade.play();
+        slide.play();
+    }
+
+    // =========================================================
+    // EDIT CARD ANIMATION
+    // =========================================================
+
+    private static void animateEditCard(
+            VBox editCard) {
+
+        editCard.setOpacity(
+                0
+        );
+
+        editCard.setTranslateY(
+                35
+        );
+
+        FadeTransition fade =
+                new FadeTransition(
+                        Duration.millis(700),
+                        editCard
+                );
+
+        fade.setFromValue(
+                0
+        );
+
+        fade.setToValue(
+                1
+        );
+
+        fade.setDelay(
+                Duration.millis(250)
+        );
+
+        TranslateTransition slide =
+                new TranslateTransition(
+                        Duration.millis(700),
+                        editCard
+                );
+
+        slide.setFromY(
+                35
+        );
+
+        slide.setToY(
+                0
+        );
+
+        slide.setDelay(
+                Duration.millis(250)
+        );
+
+        ScaleTransition scale =
+                new ScaleTransition(
+                        Duration.millis(700),
+                        editCard
+                );
+
+        scale.setFromX(
+                0.97
+        );
+
+        scale.setFromY(
+                0.97
+        );
+
+        scale.setToX(
+                1
+        );
+
+        scale.setToY(
+                1
+        );
+
+        scale.setDelay(
+                Duration.millis(250)
+        );
+
+        fade.play();
+        slide.play();
+        scale.play();
+    }
+
+    // =========================================================
+    // BUTTON HOVER ANIMATION
+    // =========================================================
+
+    private static void animateButton(
+            Button button) {
+
+        button.setOnMouseEntered(e -> {
+
+            if (!button.isDisabled()) {
+
+                ScaleTransition scale =
+                        new ScaleTransition(
+                                Duration.millis(120),
+                                button
+                        );
+
+                scale.setToX(
+                        1.05
+                );
+
+                scale.setToY(
+                        1.05
+                );
+
+                scale.play();
+            }
+        });
+
+        button.setOnMouseExited(e -> {
+
+            ScaleTransition scale =
+                    new ScaleTransition(
+                            Duration.millis(120),
+                            button
+                    );
+
+            scale.setToX(
+                    1.0
+            );
+
+            scale.setToY(
+                    1.0
+            );
+
+            scale.play();
+        });
+    }
 
     // =========================================================
     // INFORMATION ALERT
@@ -2155,7 +2620,6 @@ public class OwnerProfile {
         alert.showAndWait();
     }
 
-
     // =========================================================
     // WARNING ALERT
     // =========================================================
@@ -2183,7 +2647,6 @@ public class OwnerProfile {
 
         alert.showAndWait();
     }
-
 
     // =========================================================
     // ERROR ALERT
@@ -2213,3 +2676,4 @@ public class OwnerProfile {
         alert.showAndWait();
     }
 }
+

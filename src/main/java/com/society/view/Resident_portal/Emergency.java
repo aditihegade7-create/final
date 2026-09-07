@@ -9,6 +9,7 @@ import com.society.config.FirebaseConfig;
 import com.society.dao.Resident_dao.EmergencyDao;
 import com.society.view.ScreenSize;
 
+import javafx.animation.FadeTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -19,6 +20,12 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -28,6 +35,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 public class Emergency {
 
@@ -92,8 +100,41 @@ public class Emergency {
 
         panel panelobj = new panel(stage, residentEmail);
 
-        BorderPane root = new BorderPane();
+       BorderPane root = new BorderPane();
 
+        // =========================================================
+        // BACKGROUND IMAGE
+        // =========================================================
+        Image backgroundImage = new Image(
+                getClass()
+                        .getResource("/background-Dashboard5.jpeg")
+                        .toExternalForm()
+        );
+
+        BackgroundSize backgroundSize = new BackgroundSize(
+                100,
+                100,
+                true,
+                true,
+                false,
+                true
+        );
+
+        BackgroundImage bgImage = new BackgroundImage(
+                backgroundImage,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundPosition.CENTER,
+                backgroundSize
+        );
+
+        root.setBackground(
+                new Background(bgImage)
+        );
+
+        // =========================================================
+        // SIDEBAR - STATIC
+        // =========================================================
         root.setLeft(panelobj.getSidebar());
 
         // =========================================================
@@ -161,7 +202,7 @@ public class Emergency {
         );
 
         mainContent.setStyle(
-                "-fx-background-color: #E8DDD5;"
+                "-fx-background-color: transparent;"
         );
 
         // =========================================================
@@ -197,7 +238,7 @@ public class Emergency {
         );
 
         alertTitle.setTextFill(
-                Color.web("#B23A3A")
+                Color.web("#4e342e")
         );
 
         Label alertDescription = new Label(
@@ -209,7 +250,7 @@ public class Emergency {
         );
 
         alertDescription.setTextFill(
-                Color.web("#607D8B")
+                Color.web("#4e342e")
         );
 
         VBox alertHeading = new VBox(5);
@@ -1019,7 +1060,7 @@ public class Emergency {
         );
 
         servicesTitle.setTextFill(
-                Color.WHITE
+                Color.web("#4e342e")
         );
 
         Label servicesSubtitle =
@@ -1035,7 +1076,7 @@ public class Emergency {
         );
 
         servicesSubtitle.setTextFill(
-                Color.WHITE
+                Color.web("4e342e")
         );
 
         VBox servicesHeading =
@@ -1117,10 +1158,29 @@ public class Emergency {
         // ADD ALL CONTENT
         // =========================================================
 
-        mainContent.getChildren().addAll(
+       // =========================================================
+        // ANIMATED CONTENT
+        // =========================================================
+        VBox animatedContent = new VBox(22);
+
+        animatedContent.getChildren().addAll(
                 emergencyAlertCard,
                 detailsCard,
                 servicesSection
+        );
+
+        // =========================================================
+        // ADD HEADER + ANIMATED CONTENT
+        // =========================================================
+        mainContent.getChildren().add(
+                animatedContent
+        );
+
+        // =========================================================
+        // MAIN AREA TRANSPARENT
+        // =========================================================
+        mainArea.setStyle(
+                "-fx-background-color: transparent;"
         );
 
         mainArea.setCenter(
@@ -1130,6 +1190,21 @@ public class Emergency {
         root.setCenter(
                 mainArea
         );
+
+        // =========================================================
+        // PAGE FADE ANIMATION
+        // SIDEBAR + HEADER ARE NOT ANIMATED
+        // =========================================================
+        FadeTransition pageFade =
+                new FadeTransition(
+                        Duration.millis(700),
+                        animatedContent
+                );
+
+        pageFade.setFromValue(0.0);
+        pageFade.setToValue(1.0);
+        pageFade.setCycleCount(1);
+        pageFade.play();
 
         // =========================================================
         // FETCH SAVED ALERT

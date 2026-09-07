@@ -4,73 +4,126 @@ import com.society.dao.Welcome.UserDao;
 import com.society.model.Welcome.User;
 import com.society.view.Welcome.LogInPage;
 
+import javafx.animation.FadeTransition;
+import javafx.animation.ParallelTransition;
+import javafx.animation.ScaleTransition;
+import javafx.animation.TranslateTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 public class panel {
 
-    // Sidebar menu
+    // ---------------------------------------------------------
+    // SIDEBAR
+    // ---------------------------------------------------------
+
     private VBox sidebar;
+    private ScrollPane sidebarScroll;
+
+    // Active button
+    private Button activeButton;
+
+    // Remember active page
+    private static String activePage = "";
+
+    // Sidebar animation only once
+    private static boolean sidebarAnimationDone = false;
+
+    // ---------------------------------------------------------
+    // COLORS
+    // ---------------------------------------------------------
+
+    private final String NORMAL_BG = "#4e342e";
+    private final String NORMAL_TEXT = "white";
+
+    private final String ACTIVE_BG = "#e7c3bb";
+    private final String ACTIVE_TEXT = "#4e342e";
+
+    // ---------------------------------------------------------
+    // CONSTRUCTOR
+    // ---------------------------------------------------------
 
     public panel(Stage stage, String residentEmail) {
 
+        createSidebar(stage, residentEmail);
+    }
+
+    // =========================================================
+    // CREATE SIDEBAR
+    // =========================================================
+
+    private void createSidebar(Stage stage, String residentEmail) {
+
         sidebar = new VBox();
 
-        sidebar.setPrefWidth(280);
-        sidebar.setPrefHeight(750);
-        sidebar.setStyle("-fx-background-color: #593a32");
-        sidebar.setSpacing(14);
         sidebar.setPadding(new Insets(20));
 
-        // ---------------------------------------------------------
+        sidebar.setPrefWidth(280);
+        sidebar.setMinWidth(280);
+        sidebar.setMaxWidth(280);
+
+        sidebar.setPrefHeight(Region.USE_COMPUTED_SIZE);
+
+        sidebar.setAlignment(Pos.TOP_LEFT);
+
+        sidebar.setSpacing(14);
+
+        // Important - sidebar stays at left/top
+        sidebar.setTranslateX(0);
+        sidebar.setTranslateY(0);
+
+        sidebar.setStyle(
+                "-fx-background-color: #4e342e;"
+        );
+
+        // =====================================================
         // LOGO
-        // ---------------------------------------------------------
+        // =====================================================
 
         Label logo = new Label("Society360");
 
         logo.setLineSpacing(10);
+
         logo.setAlignment(Pos.CENTER_LEFT);
 
         logo.setStyle(
                 "-fx-text-fill: white;" +
-                "-fx-font-size: 24px;" +
-                "-fx-font-weight: bold;"
+                "-fx-font-family:'Bodoni MT';" +
+                "-fx-font-size:22px;" +
+                "-fx-font-weight:bold;"
         );
 
-        // ---------------------------------------------------------
+        // =====================================================
         // PANEL LABEL
-        // ---------------------------------------------------------
+        // =====================================================
 
-        Label panel = new Label("Secretary Panel");
+        Label panel = new Label("Resident Panel");
 
         panel.setStyle(
                 "-fx-text-fill: lightgray;" +
-                "-fx-font-size: 14px;" +
-                "-fx-padding: 5px;"
+                "-fx-font-size:14px;" +
+                "-fx-padding:5px;"
         );
 
-        // ---------------------------------------------------------
+        // =====================================================
         // DASHBOARD
-        // ---------------------------------------------------------
+        // =====================================================
 
-        Button dashboardBtn = new Button("Dashboard");
-
-        dashboardBtn.setStyle(
-                "-fx-background-color: #4e342e;" +
-                "-fx-font-weight: bold;" +
-                "-fx-text-fill: white;" +
-                "-fx-font-size: 14px;" +
-                "-fx-alignment: CENTER-LEFT;" +
-                "-fx-pref-width: 240px;" +
-                "-fx-pref-height: 40px;"
-        );
+        Button dashboardBtn =
+                createButton("🏠 Dashboard");
 
         dashboardBtn.setOnAction(event -> {
+
+            setActiveButton(dashboardBtn);
 
             ResidentDashboard residentDashboard =
                     new ResidentDashboard();
@@ -78,107 +131,20 @@ public class panel {
             Scene scene =
                     residentDashboard.getResidentDashboardScene(stage);
 
-            stage.setScene(scene);
-            stage.show();
+            navigate(stage, scene);
         });
 
-        // ---------------------------------------------------------
+        // =====================================================
         // MY BILLS
-        // ---------------------------------------------------------
+        // =====================================================
 
-        Button ownersBtn = new Button("My Bills");
-
-        ownersBtn.setStyle(
-                "-fx-background-color: #4e342e;" +
-                "-fx-font-weight: bold;" +
-                "-fx-text-fill: white;" +
-                "-fx-font-size: 14px;" +
-                "-fx-alignment: CENTER-LEFT;" +
-                "-fx-pref-width: 240px;" +
-                "-fx-pref-height: 40px;"
-        );
+        Button ownersBtn =
+                createButton("💳 My Bills");
 
         ownersBtn.setOnAction(event -> {
 
-            // Get currently logged-in resident email
-            String loginEmail = UserDao.getLoggedInEmail();
+            setActiveButton(ownersBtn);
 
-            if (loginEmail == null || loginEmail.trim().isEmpty()) {
-
-                System.out.println(
-                        "No logged-in resident found."
-                );
-
-                return;
-            }
-
-            loginEmail = loginEmail.trim();
-
-            // Pass logged-in resident email to Mybills
-            Mybills bills = new Mybills(loginEmail);
-
-            stage.setScene(
-                    bills.getBillScene(stage)
-            );
-
-            stage.show();
-        });
-
-        // ---------------------------------------------------------
-        // VISITORS
-        // ---------------------------------------------------------
-
-        Button guardsBtn = new Button("Visitors");
-
-        guardsBtn.setStyle(
-                "-fx-background-color: #4e342e;" +
-                "-fx-font-weight: bold;" +
-                "-fx-text-fill: white;" +
-                "-fx-font-size: 14px;" +
-                "-fx-alignment: CENTER-LEFT;" +
-                "-fx-pref-width: 240px;" +
-                "-fx-pref-height: 40px;"
-        );
-
-        guardsBtn.setOnAction(event -> {
-
-            Visitor visitor = new Visitor();
-
-            Scene visitorScene = visitor.getVisitorScene(stage);
-
-            // getVisitorScene can return null when there is no valid login
-            // session.  In that case it already shows a useful alert; keep the
-            // current dashboard visible instead of passing null to JavaFX.
-            if (visitorScene == null) {
-                return;
-            }
-
-            stage.setScene(
-                    visitorScene
-            );
-
-            stage.show();
-        });
-
-        // ---------------------------------------------------------
-        // AMENITIES BOOKING
-        // ---------------------------------------------------------
-
-        Button noticesBtn = new Button("Amenities Booking");
-
-        noticesBtn.setStyle(
-                "-fx-background-color: #4e342e;" +
-                "-fx-font-weight: bold;" +
-                "-fx-text-fill: white;" +
-                "-fx-font-size: 14px;" +
-                "-fx-alignment: CENTER-LEFT;" +
-                "-fx-pref-width: 240px;" +
-                "-fx-pref-height: 40px;"
-        );
-
-        noticesBtn.setOnAction(event -> {
-
-            // Get logged-in resident email
             String loginEmail =
                     UserDao.getLoggedInEmail();
 
@@ -194,8 +160,67 @@ public class panel {
 
             loginEmail = loginEmail.trim();
 
-            // Fetch resident details from Firestore
-            UserDao dao = new UserDao();
+            Mybills bills =
+                    new Mybills(loginEmail);
+
+            navigate(
+                    stage,
+                    bills.getBillScene(stage)
+            );
+        });
+
+        // =====================================================
+        // VISITORS
+        // =====================================================
+
+        Button guardsBtn =
+                createButton("👥 Visitors");
+
+        guardsBtn.setOnAction(event -> {
+
+            setActiveButton(guardsBtn);
+
+            Visitor visitor =
+                    new Visitor();
+
+            Scene visitorScene =
+                    visitor.getVisitorScene(stage);
+
+            if (visitorScene == null) {
+                return;
+            }
+
+            navigate(stage, visitorScene);
+        });
+
+        // =====================================================
+        // AMENITIES BOOKING
+        // =====================================================
+
+        Button noticesBtn =
+                createButton("📅 Amenities Booking");
+
+        noticesBtn.setOnAction(event -> {
+
+            setActiveButton(noticesBtn);
+
+            String loginEmail =
+                    UserDao.getLoggedInEmail();
+
+            if (loginEmail == null ||
+                    loginEmail.trim().isEmpty()) {
+
+                System.out.println(
+                        "No logged-in resident found."
+                );
+
+                return;
+            }
+
+            loginEmail = loginEmail.trim();
+
+            UserDao dao =
+                    new UserDao();
 
             User resident =
                     dao.getUserByEmail(loginEmail);
@@ -224,7 +249,6 @@ public class panel {
                 flatNo = "";
             }
 
-            // Open Amenities Booking
             AmenitiesBooking amenitiesBooking =
                     new AmenitiesBooking(
                             residentName,
@@ -232,302 +256,578 @@ public class panel {
                             loginEmail
                     );
 
-            stage.setScene(
+            navigate(
+                    stage,
                     amenitiesBooking.getAminityScene(stage)
             );
-
-            stage.show();
         });
 
-        // ---------------------------------------------------------
+        // =====================================================
         // NOTICE
-        // ---------------------------------------------------------
+        // =====================================================
 
-        Button complaintsBtn = new Button("Notice");
-
-        complaintsBtn.setStyle(
-                "-fx-background-color: #4e342e;" +
-                "-fx-font-weight: bold;" +
-                "-fx-text-fill: white;" +
-                "-fx-font-size: 14px;" +
-                "-fx-alignment: CENTER-LEFT;" +
-                "-fx-pref-width: 240px;" +
-                "-fx-pref-height: 40px;"
-        );
+        Button complaintsBtn =
+                createButton("📢 Notice");
 
         complaintsBtn.setOnAction(event -> {
+
+            setActiveButton(complaintsBtn);
 
             Notice community =
                     new Notice(residentEmail);
 
-            stage.setScene(
-                    community.getResidentbtScene(stage, residentEmail)
+            navigate(
+                    stage,
+                    community.getResidentbtScene(
+                            stage,
+                            residentEmail
+                    )
             );
-
-            stage.show();
         });
 
-
-        // ---------------------------------------------------------
+        // =====================================================
         // COMPLAINTS
-        // ---------------------------------------------------------
+        // =====================================================
 
-        Button paymentsBtn = new Button("Complaints");
-
-        paymentsBtn.setStyle(
-                "-fx-background-color: #4e342e;" +
-                "-fx-font-weight: bold;" +
-                "-fx-text-fill: white;" +
-                "-fx-font-size: 14px;" +
-                "-fx-alignment: CENTER-LEFT;" +
-                "-fx-pref-width: 240px;" +
-                "-fx-pref-height: 40px;"
-        );
+        Button paymentsBtn =
+                createButton("❗ Complaints");
 
         paymentsBtn.setOnAction(event -> {
+
+            setActiveButton(paymentsBtn);
 
             Complaint complaint =
                     new Complaint();
 
-            stage.setScene(
+            navigate(
+                    stage,
                     complaint.getComplaintScene(stage)
             );
-
-            stage.show();
         });
-   
 
-//cummunity Button----------///
-        Button cumunityButton = new Button("community");
-        cumunityButton.setStyle(
-                "-fx-background-color: #4e342e;" +
-                "-fx-font-weight: bold;" +
-                "-fx-text-fill: white;" +
-                "-fx-font-size: 14px;" +
-                "-fx-alignment: CENTER-LEFT;" +
-                "-fx-pref-width: 240px;" +
-                "-fx-pref-height: 40px;"
-        );
+        // =====================================================
+        // COMMUNITY
+        // =====================================================
 
-        cumunityButton.setOnAction(event ->{
-            Community community = new Community(residentEmail);
-             stage.setScene(
+        Button cumunityButton =
+                createButton("👥 Community");
+
+        cumunityButton.setOnAction(event -> {
+
+            setActiveButton(cumunityButton);
+
+            Community community =
+                    new Community(residentEmail);
+
+            navigate(
+                    stage,
                     community.getCommunityScene(stage)
             );
+        });
 
-            stage.show();
-        }
-
-        );
-
-        // ---------------------------------------------------------
+        // =====================================================
         // EMERGENCY SOS
-        // ---------------------------------------------------------
+        // =====================================================
 
-        Button sosBtn = new Button("Emergency SOS");
-
-        sosBtn.setStyle(
-                "-fx-background-color: #4e342e;" +
-                "-fx-font-weight: bold;" +
-                "-fx-text-fill: white;" +
-                "-fx-font-size: 14px;" +
-                "-fx-alignment: CENTER-LEFT;" +
-                "-fx-pref-width: 240px;" +
-                "-fx-pref-height: 40px;"
-        );
+        Button sosBtn =
+                createButton("🆘 Emergency SOS");
 
         sosBtn.setOnAction(event -> {
+
+            setActiveButton(sosBtn);
 
             Emergency emergency =
                     new Emergency();
 
-            stage.setScene(
+            navigate(
+                    stage,
                     emergency.getEmergencyScene(
                             stage,
                             residentEmail
                     )
             );
-
-            stage.show();
         });
 
-        // ---------------------------------------------------------
+        // =====================================================
         // POLLS & SURVEYS
-        // ---------------------------------------------------------
+        // =====================================================
 
-        Button eventsBtn = new Button("Polls& Surveys");
-
-        eventsBtn.setStyle(
-                "-fx-background-color: #4e342e;" +
-                "-fx-font-weight: bold;" +
-                "-fx-text-fill: white;" +
-                "-fx-font-size: 14px;" +
-                "-fx-alignment: CENTER-LEFT;" +
-                "-fx-pref-width: 240px;" +
-                "-fx-pref-height: 40px;"
-        );
+        Button eventsBtn =
+                createButton("📊 Polls & Surveys");
 
         eventsBtn.setOnAction(event -> {
 
-            PollsSurveys polls =
-                    new PollsSurveys(stage, residentEmail);
+            setActiveButton(eventsBtn);
 
-            stage.setScene(
+            PollsSurveys polls =
+                    new PollsSurveys(
+                            stage,
+                            residentEmail
+                    );
+
+            navigate(
+                    stage,
                     polls.createScene(
                             stage,
                             residentEmail
                     )
             );
-
-            stage.show();
         });
 
-        // ---------------------------------------------------------
+        // =====================================================
         // DOCUMENTS
-        // ---------------------------------------------------------
+        // =====================================================
 
-        Button reportsBtn = new Button("Documents");
-
-        reportsBtn.setStyle(
-                "-fx-background-color: #4e342e;" +
-                "-fx-font-weight: bold;" +
-                "-fx-text-fill: white;" +
-                "-fx-font-size: 14px;" +
-                "-fx-alignment: CENTER-LEFT;" +
-                "-fx-pref-width: 240px;" +
-                "-fx-pref-height: 40px;"
-        );
+        Button reportsBtn =
+                createButton("📄 Documents");
 
         reportsBtn.setOnAction(event -> {
+
+            setActiveButton(reportsBtn);
 
             Document document =
                     new Document();
 
-            stage.setScene(
+            navigate(
+                    stage,
                     document.getDocumentScene(
                             stage,
                             residentEmail
                     )
             );
-
-            stage.show();
         });
 
-        // ---------------------------------------------------------
+        // =====================================================
         // PROFILE
-        // ---------------------------------------------------------
+        // =====================================================
 
-        Button profileBtn = new Button("Profile");
-
-        profileBtn.setStyle(
-                "-fx-background-color: #4e342e;" +
-                "-fx-font-weight: bold;" +
-                "-fx-text-fill: white;" +
-                "-fx-font-size: 14px;" +
-                "-fx-alignment: CENTER-LEFT;" +
-                "-fx-pref-width: 240px;" +
-                "-fx-pref-height: 40px;"
-        );
+        Button profileBtn =
+                createButton("👤 Profile");
 
         profileBtn.setOnAction(event -> {
+
+            setActiveButton(profileBtn);
 
             ProfilePage profil =
                     new ProfilePage();
 
-            stage.setScene(
+            navigate(
+                    stage,
                     profil.getProfileScene(
                             stage,
                             residentEmail
                     )
             );
-
-            stage.show();
         });
 
-        // ---------------------------------------------------------
+        // =====================================================
         // PARKING
-        // ---------------------------------------------------------
+        // =====================================================
 
-        Button Parkingbtn = new Button("Parking");
-
-        Parkingbtn.setStyle(
-                "-fx-background-color: #4e342e;" +
-                "-fx-font-weight: bold;" +
-                "-fx-text-fill: white;" +
-                "-fx-font-size: 14px;" +
-                "-fx-alignment: CENTER-LEFT;" +
-                "-fx-pref-width: 240px;" +
-                "-fx-pref-height: 40px;"
-        );
+        Button Parkingbtn =
+                createButton("🚗 Parking");
 
         Parkingbtn.setOnAction(event -> {
+
+            setActiveButton(Parkingbtn);
 
             Parking parking =
                     new Parking();
 
-            stage.setScene(
+            navigate(
+                    stage,
                     parking.getParkingScene(stage)
             );
-
-            stage.show();
         });
 
-        // ---------------------------------------------------------
-        // LOGOUT
-        // ---------------------------------------------------------
+       
 
-        Button logoutBtn = new Button("Logout");
-
-        logoutBtn.setStyle(
-                "-fx-background-color: #4e342e;" +
-                "-fx-font-weight: bold;" +
-                "-fx-text-fill: white;" +
-                "-fx-font-size: 14px;" +
-                "-fx-alignment: CENTER-LEFT;" +
-                "-fx-pref-width: 240px;" +
-                "-fx-pref-height: 40px;"
-        );
-
-        logoutBtn.setOnAction(event -> {
-
-            LogInPage loginPage =
-                    new LogInPage();
-
-            stage.setScene(
-                    loginPage.createScene(stage)
-            );
-
-            stage.show();
-        });
-
-        // ---------------------------------------------------------
-        // ADD ALL SIDEBAR COMPONENTS
-        // ---------------------------------------------------------
+        // =====================================================
+        // ADD ALL COMPONENTS
+        // =====================================================
 
         sidebar.getChildren().addAll(
+
                 logo,
                 panel,
+
                 dashboardBtn,
                 ownersBtn,
                 guardsBtn,
                 noticesBtn,
                 complaintsBtn,
                 paymentsBtn,
-                sosBtn,
                 cumunityButton,
+                sosBtn,
                 eventsBtn,
                 reportsBtn,
                 profileBtn,
-                Parkingbtn,
-                logoutBtn
+                Parkingbtn
+               // logoutBtn
+        );
+
+        // =====================================================
+        // RESTORE ACTIVE BUTTON
+        // =====================================================
+
+        restoreActiveButton(
+                dashboardBtn,
+                ownersBtn,
+                guardsBtn,
+                noticesBtn,
+                complaintsBtn,
+                paymentsBtn,
+                cumunityButton,
+                sosBtn,
+                eventsBtn,
+                reportsBtn,
+                profileBtn,
+                Parkingbtn
+              //  logoutBtn
+        );
+
+        // =====================================================
+        // BUTTON HOVER ANIMATION
+        // =====================================================
+
+        animateButton(dashboardBtn);
+        animateButton(ownersBtn);
+        animateButton(guardsBtn);
+        animateButton(noticesBtn);
+        animateButton(complaintsBtn);
+        animateButton(paymentsBtn);
+        animateButton(cumunityButton);
+        animateButton(sosBtn);
+        animateButton(eventsBtn);
+        animateButton(reportsBtn);
+        animateButton(profileBtn);
+        animateButton(Parkingbtn);
+      //  animateButton(logoutBtn);
+
+        // =====================================================
+        // SCROLL PANE
+        // =====================================================
+
+        sidebarScroll =
+                new ScrollPane();
+
+        sidebarScroll.setContent(sidebar);
+
+        sidebarScroll.setPrefWidth(280);
+        sidebarScroll.setMinWidth(280);
+        sidebarScroll.setMaxWidth(280);
+
+        sidebarScroll.setFitToWidth(true);
+        sidebarScroll.setFitToHeight(false);
+
+        sidebarScroll.setPannable(true);
+
+        // Hide horizontal scrollbar
+        sidebarScroll.setHbarPolicy(
+                ScrollPane.ScrollBarPolicy.NEVER
+        );
+
+        // Hide vertical scrollbar
+        sidebarScroll.setVbarPolicy(
+                ScrollPane.ScrollBarPolicy.NEVER
+        );
+
+        sidebarScroll.setStyle(
+                "-fx-background-color:#4e342e;" +
+                "-fx-border-color:transparent;"
+        );
+
+        // =====================================================
+        // SIDEBAR ENTRY ANIMATION
+        // =====================================================
+
+        if (!sidebarAnimationDone) {
+
+            animateButtonEntry(dashboardBtn, 100);
+            animateButtonEntry(ownersBtn, 180);
+            animateButtonEntry(guardsBtn, 260);
+            animateButtonEntry(noticesBtn, 340);
+            animateButtonEntry(complaintsBtn, 420);
+            animateButtonEntry(paymentsBtn, 500);
+            animateButtonEntry(cumunityButton, 580);
+            animateButtonEntry(sosBtn, 660);
+            animateButtonEntry(eventsBtn, 740);
+            animateButtonEntry(reportsBtn, 820);
+            animateButtonEntry(profileBtn, 900);
+            animateButtonEntry(Parkingbtn, 980);
+           // animateButtonEntry(logoutBtn, 1060);
+
+            sidebarAnimationDone = true;
+
+        } else {
+
+            dashboardBtn.setOpacity(1);
+            ownersBtn.setOpacity(1);
+            guardsBtn.setOpacity(1);
+            noticesBtn.setOpacity(1);
+            complaintsBtn.setOpacity(1);
+            paymentsBtn.setOpacity(1);
+            cumunityButton.setOpacity(1);
+            sosBtn.setOpacity(1);
+            eventsBtn.setOpacity(1);
+            reportsBtn.setOpacity(1);
+            profileBtn.setOpacity(1);
+            Parkingbtn.setOpacity(1);
+          //  logoutBtn.setOpacity(1);
+
+            dashboardBtn.setTranslateX(0);
+            ownersBtn.setTranslateX(0);
+            guardsBtn.setTranslateX(0);
+            noticesBtn.setTranslateX(0);
+            complaintsBtn.setTranslateX(0);
+            paymentsBtn.setTranslateX(0);
+            cumunityButton.setTranslateX(0);
+            sosBtn.setTranslateX(0);
+            eventsBtn.setTranslateX(0);
+            reportsBtn.setTranslateX(0);
+            profileBtn.setTranslateX(0);
+            Parkingbtn.setTranslateX(0);
+          //  logoutBtn.setTranslateX(0);
+        }
+    }
+
+    // =========================================================
+    // CREATE BUTTON
+    // =========================================================
+
+    private Button createButton(String text) {
+
+        Button button =
+                new Button(text);
+
+        button.setPrefWidth(250);
+        button.setMinWidth(250);
+        button.setMaxWidth(250);
+
+        button.setPrefHeight(40);
+        button.setMinHeight(40);
+        button.setMaxHeight(40);
+
+        button.setAlignment(Pos.CENTER_LEFT);
+
+        setNormalStyle(button);
+
+        return button;
+    }
+
+    // =========================================================
+    // NORMAL BUTTON STYLE
+    // =========================================================
+
+    private void setNormalStyle(Button button) {
+
+        button.setStyle(
+                "-fx-background-color:" + NORMAL_BG + ";" +
+                "-fx-text-fill:" + NORMAL_TEXT + ";" +
+                "-fx-font-size:16px;" +
+                "-fx-alignment:CENTER-LEFT;" +
+                "-fx-background-radius:7;"
         );
     }
 
-    // ---------------------------------------------------------
-    // GET SIDEBAR
-    // ---------------------------------------------------------
+    // =========================================================
+    // ACTIVE BUTTON STYLE
+    // =========================================================
 
-    public VBox getSidebar() {
-        return sidebar;
+    private void setActiveStyle(Button button) {
+
+        button.setStyle(
+                "-fx-background-color:" + ACTIVE_BG + ";" +
+                "-fx-text-fill:" + ACTIVE_TEXT + ";" +
+                "-fx-font-size:16px;" +
+                "-fx-font-weight:bold;" +
+                "-fx-alignment:CENTER-LEFT;" +
+                "-fx-background-radius:7;"
+        );
+    }
+
+    // =========================================================
+    // SET ACTIVE BUTTON
+    // =========================================================
+
+    private void setActiveButton(Button button) {
+
+        if (activeButton != null &&
+                activeButton != button) {
+
+            setNormalStyle(activeButton);
+        }
+
+        activeButton = button;
+
+        setActiveStyle(button);
+
+        activePage = button.getText();
+    }
+
+    // =========================================================
+    // RESTORE ACTIVE BUTTON
+    // =========================================================
+
+    private void restoreActiveButton(Button... buttons) {
+
+        if (activePage == null ||
+                activePage.isEmpty()) {
+
+            setActiveButton(buttons[0]);
+            return;
+        }
+
+        for (Button button : buttons) {
+
+            if (button.getText().equals(activePage)) {
+
+                activeButton = button;
+
+                setActiveStyle(button);
+
+                return;
+            }
+        }
+
+        setActiveButton(buttons[0]);
+    }
+
+    // =========================================================
+    // HOVER + SCALE ANIMATION
+    // =========================================================
+
+    private void animateButton(Button button) {
+
+        button.setOnMouseEntered(event -> {
+
+            ScaleTransition scale =
+                    new ScaleTransition(
+                            Duration.millis(120),
+                            button
+                    );
+
+            scale.setToX(1.04);
+            scale.setToY(1.04);
+
+            scale.play();
+
+            if (button == activeButton) {
+
+                setActiveStyle(button);
+
+            } else {
+
+                setActiveStyle(button);
+            }
+        });
+
+        button.setOnMouseExited(event -> {
+
+            ScaleTransition scale =
+                    new ScaleTransition(
+                            Duration.millis(120),
+                            button
+                    );
+
+            scale.setToX(1.0);
+            scale.setToY(1.0);
+
+            scale.play();
+
+            if (button == activeButton) {
+
+                setActiveStyle(button);
+
+            } else {
+
+                setNormalStyle(button);
+            }
+        });
+    }
+
+    // =========================================================
+    // BUTTON ENTRY ANIMATION
+    // =========================================================
+
+    private void animateButtonEntry(
+            Button button,
+            int delay
+    ) {
+
+        button.setOpacity(0);
+
+        button.setTranslateX(-20);
+
+        FadeTransition fade =
+                new FadeTransition(
+                        Duration.millis(400),
+                        button
+                );
+
+        fade.setFromValue(0);
+        fade.setToValue(1);
+
+        TranslateTransition slide =
+                new TranslateTransition(
+                        Duration.millis(400),
+                        button
+                );
+
+        slide.setFromX(-20);
+        slide.setToX(0);
+
+        ParallelTransition animation =
+                new ParallelTransition(
+                        fade,
+                        slide
+                );
+
+        animation.setDelay(
+                Duration.millis(delay)
+        );
+
+        animation.play();
+    }
+
+    // =========================================================
+    // NAVIGATION
+    // =========================================================
+
+    private void navigate(
+            Stage stage,
+            Scene newScene
+    ) {
+
+        if (newScene == null) {
+            return;
+        }
+
+        // Keep sidebar on LEFT
+        if (newScene.getRoot() instanceof BorderPane) {
+
+            BorderPane newRoot =
+                    (BorderPane) newScene.getRoot();
+
+            newRoot.setLeft(sidebarScroll);
+        }
+
+        // Keep sidebar fixed
+        sidebarScroll.setTranslateX(0);
+        sidebarScroll.setTranslateY(0);
+        sidebarScroll.setOpacity(1);
+
+        stage.setScene(newScene);
+
+        stage.show();
+    }
+
+    // =========================================================
+    // GET SIDEBAR
+    // =========================================================
+
+    public ScrollPane getSidebar() {
+
+        return sidebarScroll;
     }
 }

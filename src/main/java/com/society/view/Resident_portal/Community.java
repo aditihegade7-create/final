@@ -1,3 +1,4 @@
+
 package com.society.view.Resident_portal;
 
 import com.society.dao.Resident_dao.CommunityGroupDAO;
@@ -6,6 +7,7 @@ import com.society.dao.Resident_dao.CommunityGroupDAO.MemberRecord;
 import com.society.dao.Resident_dao.CommunityGroupDAO.MessageRecord;
 import com.society.view.ScreenSize;
 
+import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -22,6 +24,11 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -32,6 +39,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -61,9 +69,9 @@ public class Community {
     // =========================================================
 
     private static final String BROWN = "#4e342e";
-    private static final String LIGHT_BROWN = "#6d4c41";
+    private static final String LIGHT_BROWN = "#4a3730";
     private static final String BACKGROUND = "#e8ddd5";
-    private static final String GREEN = "#4caf50";
+    private static final String GREEN = "#1b481d";
     private static final String TEXT_DARK = "#263238";
     private static final String TEXT_GREY = "#789098";
 
@@ -154,6 +162,41 @@ public class Community {
 
         BorderPane root = new BorderPane();
 
+        // =====================================================
+        // FULL SCREEN BACKGROUND IMAGE
+        // =====================================================
+
+        Image backgroundImage = new Image(
+                getClass()
+                        .getResource("/background-Dashboard5.jpeg")
+                        .toExternalForm()
+        );
+
+        BackgroundSize backgroundSize = new BackgroundSize(
+                100,
+                100,
+                true,
+                true,
+                false,
+                true
+        );
+
+        BackgroundImage bgImage = new BackgroundImage(
+                backgroundImage,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundPosition.CENTER,
+                backgroundSize
+        );
+
+        root.setBackground(
+                new Background(bgImage)
+        );
+
+        // =====================================================
+        // SIDEBAR - LEFT
+        // =====================================================
+
         try {
 
             panel panelObj =
@@ -174,17 +217,25 @@ public class Community {
             e.printStackTrace();
         }
 
-        root.setTop(
-                createHeader()
-        );
+        // =====================================================
+        // HEADER - 80px
+        // =====================================================
+
+        HBox header = createHeader();
+
+        header.setPrefHeight(80);
+        header.setMinHeight(80);
+        header.setMaxHeight(80);
+
+        // =====================================================
+        // COMMUNITY AREA
+        // =====================================================
 
         BorderPane communityArea =
                 new BorderPane();
 
         communityArea.setStyle(
-                "-fx-background-color: " +
-                        BACKGROUND +
-                        ";"
+                "-fx-background-color: transparent;"
         );
 
         VBox groupsPanel =
@@ -201,6 +252,10 @@ public class Community {
                 createWelcomeScreen()
         );
 
+        // =====================================================
+        // ABOUT PANEL
+        // =====================================================
+
         aboutPanel =
                 createAboutPanel();
 
@@ -211,13 +266,61 @@ public class Community {
                 aboutPanel
         );
 
-        root.setCenter(
+        // =====================================================
+        // MAIN AREA
+        // Header + Community content
+        // =====================================================
+
+        BorderPane mainArea =
+                new BorderPane();
+
+        mainArea.setStyle(
+                "-fx-background-color:transparent; ;"
+        );
+
+        mainArea.setTop(
+                header
+        );
+
+        mainArea.setCenter(
                 communityArea
         );
+
+        // Sidebar remains LEFT
+        // Header is directly beside Sidebar
+
+        root.setCenter(
+                mainArea
+        );
+
+        // =====================================================
+        // CONTENT FADE ANIMATION
+        // Sidebar and Header remain static
+        // =====================================================
+
+        FadeTransition contentFade =
+                new FadeTransition(
+                        Duration.millis(700),
+                        communityArea
+                );
+
+        contentFade.setFromValue(0.0);
+        contentFade.setToValue(1.0);
+        contentFade.setCycleCount(1);
+
+        contentFade.play();
+
+        // =====================================================
+        // LOAD GROUPS
+        // =====================================================
 
         loadGroupsFromFirestore(
                 communityArea
         );
+
+        // =====================================================
+        // SCREEN SIZE
+        // =====================================================
 
         double width = 1200;
         double height = 700;
@@ -337,8 +440,8 @@ public class Community {
         header.setSpacing(20);
 
         header.setStyle(
-                "-fx-background-color: white;" +
-                        "-fx-border-color: #eeeeee;" +
+                "-fx-background-color:#4e342e;" +
+                        "-fx-border-color: #4e342e;" +
                         "-fx-border-width: 0 0 1 0;"
         );
 
@@ -357,7 +460,7 @@ public class Community {
                 )
         );
 
-        title.setTextFill(Color.BLACK);
+        title.setTextFill(Color.WHITE);
 
         Label subtitle =
                 new Label(
@@ -372,7 +475,7 @@ public class Community {
         );
 
         subtitle.setTextFill(
-                Color.web(TEXT_GREY)
+               (Color.WHITE)
         );
 
         titleBox.getChildren().addAll(
@@ -806,21 +909,12 @@ public class Community {
         info.getChildren().addAll(name, details);
         HBox.setHgrow(info, Priority.ALWAYS);
 
-        // =====================================================
-        // CREATOR / MEMBER STATUS
-        // =====================================================
-
         boolean isCreator =
                 group.createdByEmail != null &&
                 group.createdByEmail.equalsIgnoreCase(
                         currentUserEmail
                 );
 
-        /*
-         * Creator is already a member.
-         * Therefore DO NOT show Join/Joined button.
-         * Clicking the row directly opens the community.
-         */
         if (!isCreator) {
 
             Button joinButton = new Button(
@@ -865,7 +959,6 @@ public class Community {
             );
         }
 
-        // Creator and already-joined residents can open directly.
         row.setOnMouseClicked(e -> {
             if (group.joined) {
                 openChat(group, communityArea);
@@ -998,9 +1091,7 @@ public class Community {
         );
 
         box.setStyle(
-                "-fx-background-color: " +
-                        BACKGROUND +
-                        ";"
+                "-fx-background-color: transparent;"
         );
 
         Label icon =
@@ -1089,7 +1180,7 @@ public class Community {
 
         VBox chatPanel = new VBox();
         chatPanel.setStyle(
-                "-fx-background-color: #f5f0ed;"
+                "-fx-background-color: #d4c9c2;"
         );
 
         HBox chatHeader = new HBox(12);
@@ -1098,8 +1189,8 @@ public class Community {
                 new Insets(12, 18, 12, 18)
         );
         chatHeader.setStyle(
-                "-fx-background-color: #976767;" +
-                "-fx-border-color: #947e70;" +
+                "-fx-background-color: #4e342e;" +
+                "-fx-border-color: #4e342e;" +
                 "-fx-border-width: 0 0 1 0;"
         );
 
@@ -1175,7 +1266,7 @@ public class Community {
         pinned.setPadding(new Insets(8, 15, 8, 15));
         pinned.setStyle(
                 "-fx-background-color: #fffaf7;" +
-                "-fx-border-color: #eee3dc;" +
+                "-fx-border-color: #050505;" +
                 "-fx-border-width: 0 0 1 0;"
         );
 
@@ -1204,9 +1295,6 @@ public class Community {
         );
         VBox.setVgrow(messageScroll, Priority.ALWAYS);
 
-        // =====================================================
-        // LOAD REAL FIRESTORE CHAT
-        // =====================================================
         loadMessagesFromFirestore(group);
         startChatAutoRefresh(group);
 
@@ -2072,7 +2160,6 @@ public class Community {
 
             bytes = output.toByteArray();
 
-            // Keep enough room for Base64 + Firestore fields.
             if (bytes.length <= 600 * 1024) {
                 break;
             }
