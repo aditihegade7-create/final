@@ -2,9 +2,15 @@
 package com.society.view.Resident_portal;
 
 import com.society.service.resident_service.RazorpayService;
-import com.society.dao.Resident_dao.MaintenanceDAO;
 import com.society.dao.Resident_dao.ElectricityDAO;
 import com.society.view.ScreenSize;
+import com.society.config.FirebaseConfig;
+
+import com.google.api.core.ApiFuture;
+import com.google.cloud.firestore.CollectionReference;
+import com.google.cloud.firestore.DocumentSnapshot;
+import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.QuerySnapshot;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -57,9 +63,6 @@ public class Mybills {
     // =========================================================
     // DAO
     // =========================================================
-    private final MaintenanceDAO maintenanceDAO =
-            new MaintenanceDAO();
-
     private final ElectricityDAO electricityDAO =
             new ElectricityDAO();
 
@@ -218,7 +221,8 @@ heading.setPadding(new Insets(15, 20, 15, 20));
                 )
         );
 
-        billTitle.setTextFill(Color.web(" #4e342e"));
+        // billTitle.setTextFill(Color.web(" #4E342E"));
+        billTitle.setTextFill(Color.web("#4E342E"));
 
         // =====================================================
         // REFRESH BUTTON
@@ -384,9 +388,7 @@ heading.setPadding(new Insets(15, 20, 15, 20));
 // =========================================================
 
 List<Map<String, Object>> maintenanceBills =
-        maintenanceDAO.getMaintenanceByEmail(
-                loggedInEmail
-        );
+        fetchMaintenanceByEmail(loggedInEmail);
 
 // =========================================================
 // MAINTENANCE DATA
@@ -551,9 +553,7 @@ if (maintenanceBills != null
          *               └── September 2026
          */
         List<Map<String, Object>> electricityBills =
-                electricityDAO.getElectricityBillsByEmail(
-                        loggedInEmail
-                );
+                fetchElectricityByEmail(loggedInEmail);
 
         // =====================================================
         // ELECTRICITY DATA
@@ -996,12 +996,11 @@ if (maintenanceBills != null
                      * The email is always used.
                      */
                     updated =
-                            maintenanceDAO
-                                    .updateMaintenanceStatus(
-                                            loggedInEmail,
-                                            selectedBill.getMonth(),
-                                            "Paid"
-                                    );
+                            updateMaintenanceStatus(
+                                    loggedInEmail,
+                                    selectedBill.getBillId(),
+                                    "Paid"
+                            );
 
                 }
 
@@ -1025,12 +1024,11 @@ if (maintenanceBills != null
                      * month-based document IDs are used.
                      */
                     updated =
-                            electricityDAO
-                                    .updateElectricityStatusByBillId(
-                                            loggedInEmail,
-                                            selectedBill.getBillId(),
-                                            "Paid"
-                                    );
+                            updateElectricityStatus(
+                                    loggedInEmail,
+                                    selectedBill.getBillId(),
+                                    "Paid"
+                            );
                 }
 
                 // =================================================
@@ -1649,6 +1647,553 @@ if (maintenanceBills != null
         );
 
         dialog.showAndWait();
+    }
+
+    // =========================================================
+    // FETCH ELECTRICITY BILLS - ONLY LOGGED-IN RESIDENT
+    // =========================================================
+    private List<Map<String, Object>> fetchElectricityByEmail(
+            String email
+    ) {
+
+        List<Map<String, Object>> bills =
+                new java.util.ArrayList<>();
+
+        if (email == null || email.trim().isEmpty()) {
+            return bills;
+        }
+
+        try {
+
+            Firestore db = FirebaseConfig.getFirestore();
+            String currentEmail = email.trim();
+
+            // ONLY this resident's parent document is opened.
+            DocumentSnapshot parentDocument =
+                    db.collection("electricity")
+                            .document(currentEmail)
+                            .get()
+                            .get();
+
+            // Support capital E collection name if needed.
+            if (!parentDocument.exists()) {
+                parentDocument =
+                        db.collection("Electricity")
+                                .document(currentEmail)
+                                .get()
+                                .get();
+            }
+
+            if (!parentDocument.exists()) {
+                System.out.println(
+                        "Electricity document not found for: "
+                                + currentEmail
+                );
+                return bills;
+            }
+
+            // Extra protection: parent email must match logged-in email.
+            String storedEmail = parentDocument.getString("email");
+
+            if (storedEmail != null
+                    && !storedEmail.trim().isEmpty()
+                    && !storedEmail.trim().equalsIgnoreCase(currentEmail)) {
+                return bills;
+            }
+
+            // ONLY this resident's bills subcollection is read.
+            QuerySnapshot snapshot =
+                    parentDocument.getReference()
+                            .collection("bills")
+                            .get()
+                            .get();
+
+            for (DocumentSnapshot billDocument : snapshot.getDocuments()) {
+
+                Map<String, Object> data = billDocument.getData();
+
+                if (data == null) {
+                    continue;
+                }
+
+                data = new java.util.HashMap<>(data);
+
+                Object billIdObject = data.get("billId");
+
+                String billId;
+
+                if (billIdObject != null
+                        && !String.valueOf(billIdObject).trim().isEmpty()) {
+                    billId = String.valueOf(billIdObject).trim();
+                } else {
+                    billId = billDocument.getId();
+                }
+
+                data.put("billId", billId);
+
+                if (!data.containsKey("status")
+                        || data.get("status") == null
+                        || String.valueOf(data.get("status")).trim().isEmpty()) {
+                    data.put("status", "Pending");
+                }
+
+                bills.add(data);
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            System.err.println(
+                    "Error fetching electricity for: " + email
+            );
+        }
+
+        return bills;
+    }
+
+    // =========================================================
+    // UPDATE ELECTRICITY STATUS - ONLY LOGGED-IN RESIDENT
+    // =========================================================
+    private boolean updateElectricityStatus(
+            String email,
+            String billId,
+            String newStatus
+    ) {
+
+        if (email == null || email.trim().isEmpty()
+                || billId == null || billId.trim().isEmpty()) {
+            return false;
+        }
+
+        try {
+
+            Firestore db = FirebaseConfig.getFirestore();
+            String currentEmail = email.trim();
+
+            DocumentSnapshot parentDocument =
+                    db.collection("electricity")
+                            .document(currentEmail)
+                            .get()
+                            .get();
+
+            if (!parentDocument.exists()) {
+                parentDocument =
+                        db.collection("Electricity")
+                                .document(currentEmail)
+                                .get()
+                                .get();
+            }
+
+            if (!parentDocument.exists()) {
+                return false;
+            }
+
+            String storedEmail = parentDocument.getString("email");
+
+            if (storedEmail != null
+                    && !storedEmail.trim().isEmpty()
+                    && !storedEmail.trim().equalsIgnoreCase(currentEmail)) {
+                return false;
+            }
+
+            CollectionReference billsReference =
+                    parentDocument.getReference().collection("bills");
+
+            // First: Firestore document ID.
+            DocumentSnapshot directDocument =
+                    billsReference.document(billId.trim()).get().get();
+
+            if (directDocument.exists()) {
+                directDocument.getReference()
+                        .update("status", newStatus)
+                        .get();
+                return true;
+            }
+
+            // Second: billId field.
+            QuerySnapshot matched =
+                    billsReference
+                            .whereEqualTo("billId", billId.trim())
+                            .get()
+                            .get();
+
+            if (!matched.isEmpty()) {
+                matched.getDocuments().get(0)
+                        .getReference()
+                        .update("status", newStatus)
+                        .get();
+                return true;
+            }
+
+            // Older month-based document IDs are already covered by
+            // the first case because the month is the document ID.
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            System.err.println(
+                    "Error updating electricity status for: "
+                            + email + " / " + billId
+            );
+        }
+
+        return false;
+    }
+
+    // =========================================================
+    // FETCH MAINTENANCE BILLS - DYNAMIC EMAIL + SOCIETY
+    // =========================================================
+    /*
+     * Existing Firestore structure is NOT changed.
+     *
+     * Maintenance
+     *   ├── aditi@gmail.com
+     *   │     ├── email
+     *   │     ├── society = "stanza"
+     *   │     └── records
+     *   │           └── recordId
+     *   │                 ├── amount
+     *   │                 ├── date
+     *   │                 ├── maintenanceId
+     *   │                 ├── month
+     *   │                 ├── society
+     *   │                 └── status
+     *   ├── raghav@gmail.com
+     *   │     └── ...
+     *   └── ...
+     *
+     * Important:
+     * The logged-in resident does NOT need to already have a
+     * Maintenance/{email} document. We find the resident's society
+     * dynamically, then scan existing Maintenance parent documents
+     * and fetch records belonging to that society.
+     */
+    private List<Map<String, Object>> fetchMaintenanceByEmail(
+            String email
+    ) {
+
+        List<Map<String, Object>> bills =
+                new java.util.ArrayList<>();
+
+        if (email == null || email.trim().isEmpty()) {
+            return bills;
+        }
+
+        try {
+
+            Firestore db = FirebaseConfig.getFirestore();
+            String currentEmail = email.trim();
+
+            // -----------------------------------------------------
+            // 1. GET LOGGED-IN RESIDENT
+            // -----------------------------------------------------
+            DocumentSnapshot residentDocument =
+                    db.collection("Residents")
+                            .document(currentEmail)
+                            .get()
+                            .get();
+
+            // Support lowercase collection name too.
+            if (!residentDocument.exists()) {
+                residentDocument =
+                        db.collection("residents")
+                                .document(currentEmail)
+                                .get()
+                                .get();
+            }
+
+            if (!residentDocument.exists()) {
+                System.out.println(
+                        "Resident document not found for: "
+                                + currentEmail
+                );
+                return bills;
+            }
+
+            // -----------------------------------------------------
+            // 2. GET SOCIETY DYNAMICALLY
+            // -----------------------------------------------------
+            String residentSociety =
+                    residentDocument.getString("society");
+
+            // Support societyName if your resident document uses it.
+            if (residentSociety == null ||
+                    residentSociety.trim().isEmpty()) {
+                residentSociety =
+                        residentDocument.getString("societyName");
+            }
+
+            if (residentSociety == null ||
+                    residentSociety.trim().isEmpty()) {
+                System.out.println(
+                        "Society not found for resident: "
+                                + currentEmail
+                );
+                return bills;
+            }
+
+            residentSociety = residentSociety.trim();
+
+            System.out.println(
+                    "Logged-in Email = " + currentEmail
+                            + " | Society = " + residentSociety
+            );
+
+            // -----------------------------------------------------
+            // 3. FETCH ALL MAINTENANCE PARENT DOCUMENTS
+            // -----------------------------------------------------
+            QuerySnapshot maintenanceSnapshot =
+                    db.collection("Maintenance")
+                            .get()
+                            .get();
+
+            // Support lowercase collection name too.
+            if (maintenanceSnapshot.isEmpty()) {
+                maintenanceSnapshot =
+                        db.collection("maintenance")
+                                .get()
+                                .get();
+            }
+
+            // -----------------------------------------------------
+            // 4. SEARCH EACH MAINTENANCE PARENT
+            // -----------------------------------------------------
+            for (DocumentSnapshot parentDocument :
+                    maintenanceSnapshot.getDocuments()) {
+
+                Map<String, Object> parentData =
+                        parentDocument.getData();
+
+                if (parentData == null) {
+                    continue;
+                }
+
+                String parentSociety =
+                        String.valueOf(
+                                parentData.getOrDefault(
+                                        "society", ""
+                                )
+                        ).trim();
+
+                // Only same society is allowed.
+                if (!residentSociety.equalsIgnoreCase(parentSociety)) {
+                    continue;
+                }
+
+                // -------------------------------------------------
+                // 5. FETCH RECORDS SUBCOLLECTION
+                // -------------------------------------------------
+                CollectionReference recordsReference =
+                        parentDocument.getReference()
+                                .collection("records");
+
+                QuerySnapshot recordsSnapshot =
+                        recordsReference.get()
+                                .get();
+
+                for (DocumentSnapshot recordDocument :
+                        recordsSnapshot.getDocuments()) {
+
+                    Map<String, Object> data =
+                            recordDocument.getData();
+
+                    if (data == null) {
+                        continue;
+                    }
+
+                    data = new java.util.HashMap<>(data);
+
+                    // Final society safety check on each record.
+                    String recordSociety =
+                            String.valueOf(
+                                    data.getOrDefault(
+                                            "society",
+                                            parentSociety
+                                    )
+                            ).trim();
+
+                    if (!residentSociety.equalsIgnoreCase(recordSociety)) {
+                        continue;
+                    }
+
+                    // maintenanceId is preferred; otherwise use record ID.
+                    Object maintenanceIdObject =
+                            data.get("maintenanceId");
+
+                    String billId;
+
+                    if (maintenanceIdObject != null &&
+                            !String.valueOf(maintenanceIdObject)
+                                    .trim().isEmpty()) {
+                        billId = String.valueOf(
+                                maintenanceIdObject
+                        ).trim();
+                    } else {
+                        billId = recordDocument.getId();
+                    }
+
+                    data.put("billId", billId);
+
+                    if (!data.containsKey("status") ||
+                            data.get("status") == null ||
+                            String.valueOf(data.get("status"))
+                                    .trim().isEmpty()) {
+                        data.put("status", "Pending");
+                    }
+
+                    bills.add(data);
+
+                    System.out.println(
+                            "Fetched Maintenance -> "
+                                    + "Parent: " + parentDocument.getId()
+                                    + " | Month: " + data.get("month")
+                                    + " | Amount: " + data.get("amount")
+                                    + " | Status: " + data.get("status")
+                    );
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println(
+                    "ERROR while fetching maintenance for: " + email
+            );
+        }
+
+        return bills;
+    }
+
+    // =========================================================
+    // UPDATE MAINTENANCE STATUS
+    // =========================================================
+    /*
+     * The bill may belong to any Maintenance/{email} document of
+     * the logged-in resident's society, so we search the same-society
+     * parent documents and update the matching record.
+     */
+    private boolean updateMaintenanceStatus(
+            String email,
+            String billId,
+            String newStatus
+    ) {
+
+        if (email == null || email.trim().isEmpty() ||
+                billId == null || billId.trim().isEmpty()) {
+            return false;
+        }
+
+        try {
+
+            Firestore db = FirebaseConfig.getFirestore();
+            String currentEmail = email.trim();
+
+            // Get logged-in resident society.
+            DocumentSnapshot residentDocument =
+                    db.collection("Residents")
+                            .document(currentEmail)
+                            .get()
+                            .get();
+
+            if (!residentDocument.exists()) {
+                residentDocument =
+                        db.collection("residents")
+                                .document(currentEmail)
+                                .get()
+                                .get();
+            }
+
+            if (!residentDocument.exists()) {
+                return false;
+            }
+
+            String residentSociety =
+                    residentDocument.getString("society");
+
+            if (residentSociety == null ||
+                    residentSociety.trim().isEmpty()) {
+                residentSociety =
+                        residentDocument.getString("societyName");
+            }
+
+            if (residentSociety == null ||
+                    residentSociety.trim().isEmpty()) {
+                return false;
+            }
+
+            residentSociety = residentSociety.trim();
+
+            QuerySnapshot maintenanceSnapshot =
+                    db.collection("Maintenance")
+                            .get()
+                            .get();
+
+            if (maintenanceSnapshot.isEmpty()) {
+                maintenanceSnapshot =
+                        db.collection("maintenance")
+                                .get()
+                                .get();
+            }
+
+            for (DocumentSnapshot parentDocument :
+                    maintenanceSnapshot.getDocuments()) {
+
+                String parentSociety =
+                        parentDocument.getString("society");
+
+                if (parentSociety == null ||
+                        !residentSociety.equalsIgnoreCase(
+                                parentSociety.trim()
+                        )) {
+                    continue;
+                }
+
+                CollectionReference recordsReference =
+                        parentDocument.getReference()
+                                .collection("records");
+
+                // First: billId equals Firestore record ID.
+                DocumentSnapshot directDocument =
+                        recordsReference.document(billId.trim())
+                                .get()
+                                .get();
+
+                if (directDocument.exists()) {
+                    directDocument.getReference()
+                            .update("status", newStatus)
+                            .get();
+                    return true;
+                }
+
+                // Second: billId equals maintenanceId field.
+                QuerySnapshot matched =
+                        recordsReference
+                                .whereEqualTo(
+                                        "maintenanceId",
+                                        billId.trim()
+                                )
+                                .get()
+                                .get();
+
+                if (!matched.isEmpty()) {
+                    matched.getDocuments().get(0)
+                            .getReference()
+                            .update("status", newStatus)
+                            .get();
+                    return true;
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println(
+                    "Error updating maintenance status for: "
+                            + email + " / " + billId
+            );
+        }
+
+        return false;
     }
 
     // =========================================================

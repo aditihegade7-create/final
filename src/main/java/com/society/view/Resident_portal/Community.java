@@ -1441,7 +1441,7 @@ public class Community {
         );
 
         bubble.setStyle(
-                "-fx-background-color: #dcf8c6;" +
+                "-fx-background-color: #2b4319;" +
                         "-fx-background-radius: 10 10 2 10;"
         );
 
