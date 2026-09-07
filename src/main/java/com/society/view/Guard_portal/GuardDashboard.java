@@ -37,9 +37,7 @@ public class GuardDashboard {
             Stage stage,
             String guardEmail) {
 
-        // =========================================================
-        // LOAD LOGGED-IN GUARD
-        // =========================================================
+       
 
         GuardModel guard = null;
         String loadedSociety = null;
@@ -182,6 +180,7 @@ public class GuardDashboard {
 
         title.setStyle(
                 "-fx-font-size:24px;" +
+                "-fx-font-family: 'Bodoni MT';" +
                 "-fx-font-weight:bold;" +
                 "-fx-text-fill: white;"
         );
@@ -980,8 +979,6 @@ public class GuardDashboard {
 
         // =========================================================
         // MAIN AREA
-        //
-        // Header is kept outside mainContent so it is not duplicated.
         // =========================================================
 
         BorderPane mainarea =

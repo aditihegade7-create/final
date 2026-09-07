@@ -813,10 +813,6 @@ BorderPane root =
         );
 
 
-        // =====================================================
-        // CLIPBOARD ICON
-        // =====================================================
-
         StackPane detailsIcon =
                 new StackPane();
 
@@ -869,6 +865,7 @@ BorderPane root =
 
         detailsTitle.setStyle(
                 "-fx-font-size:18px;" +
+                "-fx-font-family: 'Bodoni MT';" +
                 "-fx-font-weight:bold;" +
                 "-fx-text-fill:#171717;"
         );
@@ -1291,7 +1288,6 @@ BorderPane root =
 
         // =====================================================
         // SEND EMERGENCY ALERT
-        // FUNCTIONALITY UNCHANGED
         // =====================================================
 
         sendAlertButton.setOnAction(e -> {
@@ -1477,7 +1473,6 @@ BorderPane root =
 
         // =====================================================
         // RESOLVE EMERGENCY ALERT
-        // FUNCTIONALITY UNCHANGED
         // =====================================================
 
         resolveButton.setOnAction(e -> {
@@ -1545,7 +1540,6 @@ BorderPane root =
 
         // =====================================================
         // CLEAR BUTTON
-        // FUNCTIONALITY UNCHANGED
         // =====================================================
 
         clearButton.setOnAction(e -> {
@@ -1625,7 +1619,6 @@ BorderPane root =
 
     // =====================================================
     // PAGE ENTRANCE ANIMATION
-    // SAME STYLE AS MANUAL VISITOR ENTRY
     // =====================================================
 
     private static void playPageAnimation(
@@ -1837,7 +1830,6 @@ BorderPane root =
 
     // =====================================================
     // CARD FEEDBACK ANIMATION
-    // SAME STYLE AS MANUAL VISITOR ENTRY
     // =====================================================
 
     private static void playCardAnimation(

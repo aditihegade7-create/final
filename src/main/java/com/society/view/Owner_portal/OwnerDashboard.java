@@ -56,6 +56,10 @@ public class OwnerDashboard {
     // SCENE
     // ============================================================
 
+    public static Scene createScene(Stage stage) {
+        return createScene(stage, null);
+    }
+
     public static Scene createScene(
             Stage stage,
             String ownerEmail) {
@@ -243,6 +247,12 @@ public class OwnerDashboard {
         // ========================================================
         // NOTICE
         // ========================================================
+
+        /*
+         * Notice remains unchanged for now because no NoticeDao /
+         * NoticeModel was supplied with the current Owner Portal
+         * files. We will connect this in the Notice step.
+         */
         HBox notice =
                 createNotice();
 
@@ -1821,6 +1831,14 @@ public class OwnerDashboard {
 
                 DateTimeFormatter.ofPattern(
                         "d/M/yyyy"
+                ),
+
+                DateTimeFormatter.ofPattern(
+                        "dd-MM-yyyy"
+                ),
+
+                DateTimeFormatter.ofPattern(
+                        "d-M-yyyy"
                 ),
 
                 DateTimeFormatter.ofPattern(

@@ -476,9 +476,9 @@ public class panel {
         // LOGOUT
         // ---------------------------------------------------------
 
-        Button logoutBtn = new Button("Logout");
+        Button aboutUsBtn = new Button("About Us");
 
-        logoutBtn.setStyle(
+        aboutUsBtn.setStyle(
                 "-fx-background-color: #4e342e;" +
                 "-fx-font-weight: bold;" +
                 "-fx-text-fill: white;" +
@@ -488,17 +488,16 @@ public class panel {
                 "-fx-pref-height: 40px;"
         );
 
-        logoutBtn.setOnAction(event -> {
+        aboutUsBtn.setOnAction(event -> {
 
-            LogInPage loginPage =
-                    new LogInPage();
+    AboutUsPage aboutUsPage = new AboutUsPage(residentEmail);
 
-            stage.setScene(
-                    loginPage.createScene(stage)
-            );
+    stage.setScene(
+        aboutUsPage.getAboutUsScene(stage)
+    );
 
-            stage.show();
-        });
+    stage.show();
+});
 
         // ---------------------------------------------------------
         // ADD ALL SIDEBAR COMPONENTS
@@ -519,7 +518,7 @@ public class panel {
                 reportsBtn,
                 profileBtn,
                 Parkingbtn,
-                logoutBtn
+                aboutUsBtn
         );
     }
 

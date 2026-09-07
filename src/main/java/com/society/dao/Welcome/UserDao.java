@@ -715,9 +715,47 @@ public class UserDao {
                             document.toObject(
                                     User.class);
 
+                    if (user == null) {
+                        continue;
+                    }
+
+                    // -------------------------------------------------
+                    // RESIDENT / TENANT COMPATIBILITY
+                    // -------------------------------------------------
+                    // AddTenant stores tenants in the Residents
+                    // collection and identifies them using
+                    // residentType = "Tenant". Older resident records
+                    // may not contain a separate "role" field.
+                    // The login page needs the role to decide which
+                    // portal to open, so treat both Resident and Tenant
+                    // records as the Resident role.
+                    // -------------------------------------------------
+
+                    if (collection.equals("Residents") &&
+                            (user.getRole() == null ||
+                             user.getRole().trim().isEmpty())) {
+
+                        String residentType =
+                                document.getString("residentType");
+
+                        if (residentType != null &&
+                                !residentType.trim().isEmpty()) {
+
+                            if (residentType.equalsIgnoreCase("Tenant") ||
+                                    residentType.equalsIgnoreCase("Resident")) {
+
+                                user.setRole("Resident");
+                            }
+                        }
+                    }
+
                     System.out.println(
                             "User found in "
                                     + collection);
+
+                    System.out.println(
+                            "Resolved Role: "
+                                    + user.getRole());
 
                     return user;
                 }
@@ -846,11 +884,113 @@ public class UserDao {
     public String getUserRole(
             String email) {
 
-        User user =
-                getUserByEmail(email);
+        try {
 
-        if (user != null) {
-            return user.getRole();
+            if (email == null ||
+                    email.trim().isEmpty()) {
+
+                return null;
+            }
+
+            String cleanEmail =
+                    email.trim().toLowerCase();
+
+            // -------------------------------------------------
+            // RESIDENT / TENANT
+            // -------------------------------------------------
+            // Tenant records created from AddTenant are stored as:
+            // Residents/{email}
+            // and use residentType = "Tenant".
+            // -------------------------------------------------
+
+            DocumentSnapshot residentDocument =
+                    db.collection("Residents")
+                            .document(cleanEmail)
+                            .get()
+                            .get();
+
+            if (residentDocument.exists()) {
+
+                String role =
+                        residentDocument.getString("role");
+
+                if (role != null &&
+                        !role.trim().isEmpty()) {
+
+                    return role.trim();
+                }
+
+                String residentType =
+                        residentDocument.getString("residentType");
+
+                if (residentType != null &&
+                        !residentType.trim().isEmpty()) {
+
+                    if (residentType.equalsIgnoreCase("Tenant") ||
+                            residentType.equalsIgnoreCase("Resident")) {
+
+                        System.out.println(
+                                "Tenant/Resident profile found. "
+                                        + "Resolved role: Resident");
+
+                        return "Resident";
+                    }
+                }
+            }
+
+            // -------------------------------------------------
+            // OTHER USER TYPES
+            // -------------------------------------------------
+
+            String[] collections = {
+                    "Owners",
+                    "Secretaries",
+                    "Guards"
+            };
+
+            for (String collection : collections) {
+
+                DocumentSnapshot document =
+                        db.collection(collection)
+                                .document(cleanEmail)
+                                .get()
+                                .get();
+
+                if (document.exists()) {
+
+                    String role =
+                            document.getString("role");
+
+                    if (role != null &&
+                            !role.trim().isEmpty()) {
+
+                        return role.trim();
+                    }
+
+                    if (collection.equals("Owners")) {
+                        return "Owner";
+                    }
+
+                    if (collection.equals("Secretaries")) {
+                        return "Secretary";
+                    }
+
+                    if (collection.equals("Guards")) {
+                        return "Guard";
+                    }
+                }
+            }
+
+            System.out.println(
+                    "No user profile found with email: "
+                            + cleanEmail);
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "Error while getting user role:");
+
+            e.printStackTrace();
         }
 
         return null;

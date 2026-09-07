@@ -116,6 +116,7 @@ public class ManualVisitorEntry {
 
         title.setStyle(
                 "-fx-font-size:24px;" +
+                "-fx-font-family: 'Bodoni MT';" +
                 "-fx-font-weight:bold;" +
                 "-fx-text-fill: white;"
         );

@@ -406,6 +406,7 @@ public class Parking {
 
         title.setStyle(
                 "-fx-font-size:25px;" +
+                "-fx-font-family: 'Bodoni MT';" +
                 "-fx-font-weight:bold;" +
                 "-fx-text-fill:white;"
         );

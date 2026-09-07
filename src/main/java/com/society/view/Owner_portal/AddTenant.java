@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 import com.society.controller.Owner_Controller.ResidentController;
+import com.society.controller.welcome.UserController;
 import com.society.model.Owner_model.ResidentModel;
 
 import javafx.geometry.Insets;
@@ -16,6 +17,7 @@ import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.PasswordField;
 
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
@@ -31,6 +33,9 @@ public class AddTenant {
 
     private static final ResidentController residentController =
             new ResidentController();
+
+    private static final UserController userController =
+            new UserController();
 
     public static Scene createScene(Stage stage, String ownerEmail) {
 
@@ -368,6 +373,28 @@ public class AddTenant {
 
 
         // =====================================================
+        // PASSWORD
+        // =====================================================
+
+        Label passwordLabel =
+                createLabel("Password");
+
+        PasswordField passwordField =
+                createPasswordField("Enter tenant password");
+
+
+        // =====================================================
+        // CONFIRM PASSWORD
+        // =====================================================
+
+        Label confirmPasswordLabel =
+                createLabel("Confirm Password");
+
+        PasswordField confirmPasswordField =
+                createPasswordField("Confirm tenant password");
+
+
+        // =====================================================
         // FORM LAYOUT
         // =====================================================
 
@@ -482,8 +509,20 @@ public class AddTenant {
         );
 
         form.add(
+                passwordLabel,
+                1,
+                8
+        );
+
+        form.add(
                 emergencyField,
                 0,
+                9
+        );
+
+        form.add(
+                passwordField,
+                1,
                 9
         );
 
@@ -520,15 +559,27 @@ public class AddTenant {
 
 
         form.add(
+                confirmPasswordLabel,
+                0,
+                10
+        );
+
+        form.add(
+                confirmPasswordField,
+                0,
+                11
+        );
+
+        form.add(
                 remarksLabel,
                 1,
-                8
+                10
         );
 
         form.add(
                 remarksArea,
                 1,
-                9
+                11
         );
 
 
@@ -602,6 +653,8 @@ public class AddTenant {
 
                     idField.clear();
                     emergencyField.clear();
+                    passwordField.clear();
+                    confirmPasswordField.clear();
 
                     remarksArea.clear();
                 }
@@ -640,6 +693,12 @@ public class AddTenant {
                                 emailField.getText()
                                         .trim()
                                         .toLowerCase();
+
+                        String tenantPassword =
+                                passwordField.getText();
+
+                        String tenantConfirmPassword =
+                                confirmPasswordField.getText();
 
 
                         String tenantFlat =
@@ -739,6 +798,44 @@ public class AddTenant {
                                     Alert.AlertType.WARNING,
                                     "Invalid Email",
                                     "Please enter a valid email address."
+                            );
+
+                            return;
+                        }
+
+
+                        if (tenantPassword == null ||
+                                tenantPassword.isEmpty()) {
+
+                            showAlert(
+                                    Alert.AlertType.WARNING,
+                                    "Missing Information",
+                                    "Please enter tenant password."
+                            );
+
+                            return;
+                        }
+
+
+                        if (tenantPassword.length() < 6) {
+
+                            showAlert(
+                                    Alert.AlertType.WARNING,
+                                    "Invalid Password",
+                                    "Password must contain at least 6 characters."
+                            );
+
+                            return;
+                        }
+
+
+                        if (!tenantPassword.equals(
+                                tenantConfirmPassword)) {
+
+                            showAlert(
+                                    Alert.AlertType.WARNING,
+                                    "Password Mismatch",
+                                    "Password and confirm password do not match."
                             );
 
                             return;
@@ -855,8 +952,36 @@ public class AddTenant {
                         );
 
 
+                        // =================================================
+                        // SOCIETY FROM LOGGED-IN OWNER
+                        // =================================================
+
+                        String normalizedOwnerEmail =
+                                ownerEmail == null
+                                        ? ""
+                                        : ownerEmail.trim().toLowerCase();
+
+                        ResidentModel owner =
+                                residentController.getOwnerByEmail(
+                                        normalizedOwnerEmail
+                                );
+
+                        if (owner == null ||
+                                owner.getSociety() == null ||
+                                owner.getSociety().trim().isEmpty()) {
+
+                            showAlert(
+                                    Alert.AlertType.ERROR,
+                                    "Society Not Found",
+                                    "The owner's society could not be found. " +
+                                            "Tenant was not saved."
+                            );
+
+                            return;
+                        }
+
                         resident.setSociety(
-                                ""
+                                owner.getSociety().trim()
                         );
 
 
@@ -874,7 +999,7 @@ public class AddTenant {
                         // =================================================
 
                         resident.setOwnerEmail(
-                                ownerEmail
+                                normalizedOwnerEmail
                         );
 
 
@@ -978,6 +1103,40 @@ public class AddTenant {
 
 
                         // =================================================
+                        // CREATE FIREBASE AUTHENTICATION ACCOUNT
+                        // =================================================
+
+                        System.out.println(
+                                "Creating Firebase Authentication account..."
+                        );
+
+                        boolean authCreated =
+                                userController.createFirebaseAccount(
+                                        tenantEmail,
+                                        tenantPassword
+                                );
+
+
+                        System.out.println(
+                                "Firebase Authentication result: "
+                                        + authCreated
+                        );
+
+
+                        if (!authCreated) {
+
+                            showAlert(
+                                    Alert.AlertType.ERROR,
+                                    "Authentication Failed",
+                                    "Tenant Firebase Authentication account could not be created.\n\n"
+                                            + "The tenant was not saved to Firestore."
+                            );
+
+                            return;
+                        }
+
+
+                        // =================================================
                         // SAVE TO FIRESTORE
                         // =================================================
 
@@ -1002,7 +1161,8 @@ public class AddTenant {
                             showAlert(
                                     Alert.AlertType.INFORMATION,
                                     "Tenant Added",
-                                    "Tenant has been successfully added."
+                                    "Tenant has been successfully added.\n\n"
+                                            + "Firebase login account has also been created."
                             );
 
 
@@ -1027,6 +1187,8 @@ public class AddTenant {
                             idField.clear();
 
                             emergencyField.clear();
+                            passwordField.clear();
+                            confirmPasswordField.clear();
 
                             remarksArea.clear();
 
@@ -1139,6 +1301,44 @@ public class AddTenant {
 
 
         return label;
+    }
+
+
+    // =========================================================
+    // CREATE PASSWORD FIELD
+    // =========================================================
+
+    private static PasswordField createPasswordField(
+            String prompt) {
+
+        PasswordField field =
+                new PasswordField();
+
+
+        field.setPromptText(
+                prompt
+        );
+
+
+        field.setPrefWidth(
+                320
+        );
+
+
+        field.setPrefHeight(
+                38
+        );
+
+
+        field.setStyle(
+                "-fx-background-color:white;" +
+                "-fx-border-color:#CBD5D8;" +
+                "-fx-border-radius:6;" +
+                "-fx-background-radius:6;"
+        );
+
+
+        return field;
     }
 
 

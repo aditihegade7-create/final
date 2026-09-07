@@ -81,6 +81,7 @@ public class GuardSidebar {
 
         logo.setStyle(
                 "-fx-text-fill: white;" +
+                "-fx-font-family: 'Bodoni MT';" +
                 "-fx-font-size: 24px;" +
                 "-fx-font-weight: bold;"
         );
@@ -95,6 +96,7 @@ public class GuardSidebar {
 
         guardPanel.setStyle(
                 "-fx-text-fill: lightgray;" +
+                "-fx-font-family: 'Bodoni MT';" +
                 "-fx-font-size: 14px;" +
                 "-fx-padding: 5px;"
         );
@@ -303,6 +305,7 @@ reportsButton.setOnAction(e -> {
 
         button.setStyle(
                 "-fx-background-color: #4e342e;" +
+                "-fx-font-family: 'Bodoni MT';" +
                 "-fx-font-weight: bold;" +
                 "-fx-text-fill: white;" +
                 "-fx-font-size: 14px;" +

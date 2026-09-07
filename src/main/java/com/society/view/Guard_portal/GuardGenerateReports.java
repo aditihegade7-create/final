@@ -67,8 +67,6 @@ public class GuardGenerateReports {
 
         // =================================================
         // GUARD DETAILS
-        // These are final because they are used inside
-        // JavaFX lambda expressions.
         // =================================================
 
         final String society;
@@ -152,10 +150,6 @@ public class GuardGenerateReports {
 
         // =================================================
         // MAIN AREA
-        //
-        // Header + content are placed together here.
-        // This prevents the header from stretching across
-        // the sidebar.
         // =================================================
 
         BorderPane mainArea =
@@ -167,7 +161,6 @@ public class GuardGenerateReports {
 
         // =================================================
         // HEADER
-        // Same design as Guard Dashboard
         // =================================================
 
         HBox header =
@@ -200,6 +193,7 @@ public class GuardGenerateReports {
 
         title.setStyle(
                 "-fx-font-size:24px;" +
+                "-fx-font-family: 'Bodoni MT';" +
                 "-fx-font-weight:bold;" +
                 "-fx-text-fill:white;"
         );
@@ -1215,10 +1209,6 @@ public class GuardGenerateReports {
                 buttonRow
         );
 
-        // =================================================
-        // PUT CONTENT INTO MAIN AREA
-        // NO SCROLL PANE
-        // =================================================
 
         mainArea.setCenter(
                 content
