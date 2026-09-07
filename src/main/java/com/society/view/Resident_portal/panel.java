@@ -417,7 +417,7 @@ public class panel {
                                                         + loginEmail);
 
                         // Create Parking object with logged-in email
-                        Parking parking = new Parking();
+                        Parking parking = new Parking(loginEmail);
 
                         // IMPORTANT:
                         // Pass email to Parking page

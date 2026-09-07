@@ -38,14 +38,170 @@ public class ComplaintService {
     // CREATE COMPLAINT
     // =========================================================
 
-    public ComplaintModel createComplaint(
+//     public ComplaintModel createComplaint(
+//             String email,
+//             String flatNumber,
+//             String category,
+//             String title,
+//             Label description,
+//             String selectedFile,
+//             LocalDate preferredDateValue)
+//             throws Exception {
+
+//         // =====================================================
+//         // VALIDATION
+//         // =====================================================
+
+//         if (email == null
+//                 || email.trim().isEmpty()) {
+
+//             throw new IllegalArgumentException(
+//                     "Logged-in email is missing."
+//             );
+//         }
+
+//         if (category == null
+//                 || category.trim().isEmpty()) {
+
+//             throw new IllegalArgumentException(
+//                     "Complaint category is required."
+//             );
+//         }
+
+//         if (title == null
+//                 || title.trim().isEmpty()) {
+
+//             throw new IllegalArgumentException(
+//                     "Complaint title is required."
+//             );
+//         }
+
+//         if (description == null
+//                 || description.getText().trim().isEmpty()) {
+
+//             throw new IllegalArgumentException(
+//                     "Complaint description is required."
+//             );
+//         }
+
+//         if (preferredDateValue == null
+//                 || preferredDateValue.toString().isEmpty()) {
+
+//             throw new IllegalArgumentException(
+//                     "Preferred date is required."
+//             );
+//         }
+
+//         // =====================================================
+//         // CREATE MODEL
+//         // =====================================================
+
+//         ComplaintModel complaint =
+//                 new ComplaintModel();
+
+//         // =====================================================
+//         // ID
+//         // =====================================================
+
+//         complaint.setId(
+//                 UUID.randomUUID().toString()
+//         );
+
+//         // =====================================================
+//         // EMAIL
+//         // =====================================================
+
+//         complaint.setEmail(
+//                 email.trim()
+//         );
+
+//         // =====================================================
+//         // FLAT NUMBER
+//         // =====================================================
+
+//         complaint.setFlatNumber(
+//                 flatNumber == null
+//                         ? ""
+//                         : flatNumber.trim()
+//         );
+
+//         // =====================================================
+//         // CATEGORY
+//         // =====================================================
+
+//         complaint.setCategory(
+//                 category.trim()
+//         );
+
+//         // =====================================================
+//         // TITLE
+//         // =====================================================
+
+//         complaint.setTitle(
+//                 title.trim()
+//         );
+
+//         // =====================================================
+//         // DESCRIPTION
+//         // =====================================================
+
+//         complaint.setDescription(
+//                 description.getText().trim()
+//         );
+
+//         // =====================================================
+//         // IMAGE
+//         // =====================================================
+
+//         complaint.setImageFileName(
+//                 selectedFile == null
+//                         ? ""
+//                         : selectedFile
+//         );
+
+//         // =====================================================
+//         // PREFERRED DATE
+//         // =====================================================
+
+//         complaint.setPreferredDate(
+//         preferredDateValue.toString()
+// );
+
+//         // =====================================================
+//         // DEFAULT STATUS
+//         // =====================================================
+
+//         complaint.setStatus(
+//                 "IN PROGRESS"
+//         );
+
+//         // =====================================================
+//         // CREATED DATE
+//         // =====================================================
+
+//         complaint.setCreatedAt(
+//                 new Date()
+//         );
+
+//         // =====================================================
+//         // SAVE
+//         // =====================================================
+
+//         complaintDAO.saveComplaint(
+//                 complaint
+//         );
+
+//         return complaint;
+//     }
+
+public ComplaintModel createComplaint(
             String email,
             String flatNumber,
             String category,
             String title,
-            Label description,
-            String selectedFile,
-            LocalDate preferredDateValue)
+            String description,
+            String imageFileName,
+            String preferredDate)
             throws Exception {
 
         // =====================================================
@@ -77,15 +233,15 @@ public class ComplaintService {
         }
 
         if (description == null
-                || description.getText().trim().isEmpty()) {
+                || description.trim().isEmpty()) {
 
             throw new IllegalArgumentException(
                     "Complaint description is required."
             );
         }
 
-        if (preferredDateValue == null
-                || preferredDateValue.toString().isEmpty()) {
+        if (preferredDate == null
+                || preferredDate.trim().isEmpty()) {
 
             throw new IllegalArgumentException(
                     "Preferred date is required."
@@ -146,7 +302,7 @@ public class ComplaintService {
         // =====================================================
 
         complaint.setDescription(
-                description.getText().trim()
+                description.trim()
         );
 
         // =====================================================
@@ -154,9 +310,9 @@ public class ComplaintService {
         // =====================================================
 
         complaint.setImageFileName(
-                selectedFile == null
+                imageFileName == null
                         ? ""
-                        : selectedFile
+                        : imageFileName
         );
 
         // =====================================================
@@ -164,8 +320,8 @@ public class ComplaintService {
         // =====================================================
 
         complaint.setPreferredDate(
-        preferredDateValue.toString()
-);
+                preferredDate.trim()
+        );
 
         // =====================================================
         // DEFAULT STATUS

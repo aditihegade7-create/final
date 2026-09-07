@@ -6,480 +6,446 @@ import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QuerySnapshot;
-import com.google.cloud.firestore.WriteResult;
 import com.society.config.FirebaseConfig;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
+/**
+ * Resident-side Maintenance DAO.
+ *
+ * Firebase structure used by this DAO:
+ *
+ * Maintenance
+ *   ├── <secretaryEmail>
+ *   │     ├── email: <secretaryEmail>
+ *   │     ├── society: <society>
+ *   │     └── records
+ *   │           └── <maintenanceDocumentId>
+ *   │                 ├── addedBySecretaryEmail
+ *   │                 ├── amount
+ *   │                 ├── date
+ *   │                 ├── maintenanceId
+ *   │                 ├── month
+ *   │                 ├── society
+ *   │                 └── status
+ *   └── ...
+ */
 public class MaintenanceDAO {
 
     private final Firestore db;
-
-    private static final String COLLECTION = "maintenance";
-    private static final String BILLS = "bills";
 
     public MaintenanceDAO() {
         db = FirebaseConfig.getFirestore();
     }
 
     // =========================================================
-    // ADD MAINTENANCE
-    //
-    // maintenance/{email}/bills/{month}
+    // FETCH MAINTENANCE FOR THE LOGGED-IN RESIDENT
     // =========================================================
+    //
+    // residentEmail is accepted so the method is called with the
+    // logged-in resident identity. The actual maintenance ownership
+    // is by SOCIETY, because the secretary creates one maintenance
+    // record for all residents of that society.
+    //
+    // Parent document = secretary email
+    // Record filter  = resident society
+    //
+    // =========================================================
+    public List<Map<String, Object>> getMaintenanceBySociety(
+            String residentEmail,
+            String residentSociety) {
 
-    public boolean addMaintenance(
-            String email,
-            String residentName,
-            String flatNo,
-            String amount,
-            String date,
-            String month,
-            String status
-    ) {
+        List<Map<String, Object>> result = new ArrayList<>();
 
-        try {
-
-            // -------------------------------------------------
-            // VALIDATION
-            // -------------------------------------------------
-
-            if (email == null || email.trim().isEmpty()) {
-                return false;
-            }
-
-            if (month == null || month.trim().isEmpty()) {
-                return false;
-            }
-
-            email = email.trim();
-            month = month.trim();
-
-            // -------------------------------------------------
-            // RESIDENT DOCUMENT
-            //
-            // maintenance/{email}
-            // -------------------------------------------------
-
-            DocumentReference residentDocument =
-                    db.collection(COLLECTION)
-                            .document(email);
-
-            Map<String, Object> residentData =
-                    new HashMap<>();
-
-            residentData.put(
-                    "email",
-                    email
-            );
-
-            residentData.put(
-                    "residentName",
-                    residentName != null
-                            ? residentName.trim()
-                            : ""
-            );
-
-            residentData.put(
-                    "flatNo",
-                    flatNo != null
-                            ? flatNo.trim()
-                            : ""
-            );
-
-            /*
-             * merge = true
-             *
-             * Existing monthly bills will not be deleted.
-             */
-
-            residentDocument
-                    .set(
-                            residentData,
-                            com.google.cloud.firestore.SetOptions.merge()
-                    )
-                    .get();
-
-            // -------------------------------------------------
-            // MAINTENANCE BILL
-            //
-            // maintenance/{email}/bills/{month}
-            // -------------------------------------------------
-
-            DocumentReference billDocument =
-                    residentDocument
-                            .collection(BILLS)
-                            .document(month);
-
-            Map<String, Object> billData =
-                    new HashMap<>();
-
-            billData.put(
-                    "billId",
-                    month
-            );
-
-            billData.put(
-                    "amount",
-                    amount != null
-                            ? amount.trim()
-                            : ""
-            );
-
-            billData.put(
-                    "date",
-                    date != null
-                            ? date.trim()
-                            : ""
-            );
-
-            billData.put(
-                    "month",
-                    month
-            );
-
-            billData.put(
-                    "status",
-                    status != null && !status.trim().isEmpty()
-                            ? status.trim()
-                            : "Pending"
-            );
-
-            ApiFuture<WriteResult> future =
-                    billDocument.set(billData);
-
-            future.get();
-
-            return true;
-
-        } catch (InterruptedException e) {
-
-            Thread.currentThread().interrupt();
-            e.printStackTrace();
-            return false;
-
-        } catch (ExecutionException e) {
-
-            e.printStackTrace();
-            return false;
+        if (residentEmail == null || residentEmail.trim().isEmpty()) {
+            return result;
         }
-    }
 
-    // =========================================================
-    // GET ALL MAINTENANCE BILLS BY EMAIL
-    //
-    // ONLY logged-in resident's data
-    // =========================================================
+        if (residentSociety == null || residentSociety.trim().isEmpty()) {
+            return result;
+        }
 
-    public List<Map<String, Object>> getMaintenanceByEmail(
-            String email
-    ) {
-
-        List<Map<String, Object>> bills =
-                new ArrayList<>();
+        String targetSociety = residentSociety.trim();
 
         try {
+            CollectionReference maintenanceCollection =
+                    db.collection("Maintenance");
 
-            if (email == null || email.trim().isEmpty()) {
-                return bills;
-            }
+            ApiFuture<QuerySnapshot> secretaryFuture =
+                    maintenanceCollection.get();
 
-            email = email.trim();
+            QuerySnapshot secretarySnapshot =
+                    secretaryFuture.get();
 
-            // -------------------------------------------------
-            // IMPORTANT
-            //
-            // Only this resident's email is used.
-            //
-            // maintenance/{loggedInEmail}/bills
-            // -------------------------------------------------
+            for (DocumentSnapshot secretaryDocument :
+                    secretarySnapshot.getDocuments()) {
 
-            CollectionReference billsCollection =
-                    db.collection(COLLECTION)
-                            .document(email)
-                            .collection(BILLS);
+                String secretaryEmail = secretaryDocument.getId();
 
-            ApiFuture<QuerySnapshot> future =
-                    billsCollection.get();
+                // -------------------------------------------------
+                // First check the society stored on the secretary
+                // document, exactly as in the Firebase structure.
+                // -------------------------------------------------
+                String parentSociety =
+                        stringValue(
+                                secretaryDocument,
+                                "society",
+                                ""
+                        );
 
-            QuerySnapshot querySnapshot =
-                    future.get();
-
-            for (DocumentSnapshot document :
-                    querySnapshot.getDocuments()) {
-
-                Map<String, Object> data =
-                        document.getData();
-
-                if (data == null) {
+                if (parentSociety.isEmpty()
+                        || !parentSociety.equalsIgnoreCase(targetSociety)) {
                     continue;
                 }
 
-                Map<String, Object> bill =
-                        new HashMap<>(data);
+                // -------------------------------------------------
+                // Read records subcollection.
+                // -------------------------------------------------
+                CollectionReference records =
+                        secretaryDocument
+                                .getReference()
+                                .collection("records");
 
-                // Always return billId
-                bill.put(
-                        "billId",
-                        document.getId()
-                );
+                ApiFuture<QuerySnapshot> recordsFuture =
+                        records.get();
 
-                // Always return month
-                if (!bill.containsKey("month")
-                        || bill.get("month") == null
-                        || String.valueOf(
-                        bill.get("month")
-                ).trim().isEmpty()) {
+                QuerySnapshot recordsSnapshot =
+                        recordsFuture.get();
 
-                    bill.put(
-                            "month",
-                            document.getId()
+                for (DocumentSnapshot record :
+                        recordsSnapshot.getDocuments()) {
+
+                    String recordSociety =
+                            stringValue(
+                                    record,
+                                    "society",
+                                    parentSociety
+                            );
+
+                    // -------------------------------------------------
+                    // Second society check. This protects against a
+                    // wrongly stored record under a secretary document.
+                    // -------------------------------------------------
+                    if (!recordSociety.isEmpty()
+                            && !recordSociety.equalsIgnoreCase(targetSociety)) {
+                        continue;
+                    }
+
+                    String maintenanceId =
+                            stringValue(
+                                    record,
+                                    "maintenanceId",
+                                    record.getId()
+                            );
+
+                    if (maintenanceId.isEmpty()) {
+                        maintenanceId = record.getId();
+                    }
+
+                    String amount =
+                            stringValue(record, "amount", "");
+
+                    String date =
+                            stringValue(record, "date", "");
+
+                    String month =
+                            stringValue(record, "month", "");
+
+                    String status =
+                            stringValue(record, "status", "Pending");
+
+                    String addedBySecretaryEmail =
+                            stringValue(
+                                    record,
+                                    "addedBySecretaryEmail",
+                                    secretaryEmail
+                            );
+
+                    Map<String, Object> data =
+                            new HashMap<>();
+
+                    // Firestore document id. This is the exact ID
+                    // required to update records/{maintenanceId}.
+                    data.put("billId", record.getId());
+
+                    data.put(
+                            "maintenanceId",
+                            maintenanceId
                     );
+
+                    data.put("amount", amount);
+                    data.put("date", date);
+                    data.put("month", month);
+                    data.put("status", status);
+                    data.put("society", recordSociety.isEmpty()
+                            ? parentSociety
+                            : recordSociety);
+                    data.put(
+                            "addedBySecretaryEmail",
+                            addedBySecretaryEmail
+                    );
+
+                    // Keep the parent secretary email available to the
+                    // UI/debugging layer, even though payment below can
+                    // also locate the document by billId.
+                    data.put(
+                            "secretaryEmail",
+                            secretaryEmail
+                    );
+
+                    result.add(data);
                 }
-
-                bills.add(bill);
             }
 
-            return bills;
-
         } catch (InterruptedException e) {
-
             Thread.currentThread().interrupt();
             e.printStackTrace();
-            return bills;
 
-        } catch (ExecutionException e) {
-
+        } catch (Exception e) {
             e.printStackTrace();
-            return bills;
         }
+
+        return result;
     }
 
     // =========================================================
-    // GET ONE MAINTENANCE BILL BY MONTH
+    // UPDATE MAINTENANCE STATUS BY FIRESTORE DOCUMENT ID
     // =========================================================
-
-    public Map<String, Object> getMaintenanceByMonth(
-            String email,
-            String month
-    ) {
-
-        try {
-
-            if (email == null || email.trim().isEmpty()) {
-                return null;
-            }
-
-            if (month == null || month.trim().isEmpty()) {
-                return null;
-            }
-
-            email = email.trim();
-            month = month.trim();
-
-            DocumentReference billDocument =
-                    db.collection(COLLECTION)
-                            .document(email)
-                            .collection(BILLS)
-                            .document(month);
-
-            DocumentSnapshot document =
-                    billDocument.get().get();
-
-            if (!document.exists()) {
-                return null;
-            }
-
-            Map<String, Object> data =
-                    document.getData();
-
-            if (data == null) {
-                return null;
-            }
-
-            Map<String, Object> result =
-                    new HashMap<>(data);
-
-            result.put(
-                    "billId",
-                    document.getId()
-            );
-
-            return result;
-
-        } catch (InterruptedException e) {
-
-            Thread.currentThread().interrupt();
-            e.printStackTrace();
-            return null;
-
-        } catch (ExecutionException e) {
-
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    // =========================================================
-    // UPDATE MAINTENANCE STATUS
     //
-    // maintenance/{email}/bills/{billId}
+    // Searches:
+    // Maintenance/<secretaryEmail>/records/<billId>
+    //
+    // This is needed because the resident email is NOT the parent
+    // document ID in the maintenance collection.
     // =========================================================
-
-    public boolean updateMaintenanceStatus(
-            String email,
+    public boolean updateMaintenanceStatusByBillId(
             String billId,
-            String newStatus
-    ) {
+            String newStatus) {
+
+        if (billId == null || billId.trim().isEmpty()) {
+            return false;
+        }
+
+        if (newStatus == null || newStatus.trim().isEmpty()) {
+            return false;
+        }
+
+        String targetBillId = billId.trim();
+        String targetStatus = newStatus.trim();
 
         try {
+            CollectionReference maintenanceCollection =
+                    db.collection("Maintenance");
 
-            if (email == null || email.trim().isEmpty()) {
-                return false;
-            }
+            QuerySnapshot secretarySnapshot =
+                    maintenanceCollection.get().get();
 
-            if (billId == null || billId.trim().isEmpty()) {
-                return false;
-            }
+            for (DocumentSnapshot secretaryDocument :
+                    secretarySnapshot.getDocuments()) {
 
-            if (newStatus == null || newStatus.trim().isEmpty()) {
-                return false;
-            }
+                DocumentReference recordRef =
+                        secretaryDocument
+                                .getReference()
+                                .collection("records")
+                                .document(targetBillId);
 
-            email = email.trim();
-            billId = billId.trim();
-            newStatus = newStatus.trim();
+                DocumentSnapshot record =
+                        recordRef.get().get();
 
-            // -------------------------------------------------
-            // EXACT RESIDENT + EXACT BILL
-            // -------------------------------------------------
+                if (record.exists()) {
 
-            DocumentReference billDocument =
-                    db.collection(COLLECTION)
-                            .document(email)
-                            .collection(BILLS)
-                            .document(billId);
-
-            DocumentSnapshot document =
-                    billDocument.get().get();
-
-            if (!document.exists()) {
-                return false;
-            }
-
-            billDocument
-                    .update(
+                    recordRef.update(
                             "status",
-                            newStatus
-                    )
-                    .get();
+                            targetStatus
+                    ).get();
 
-            return true;
+                    System.out.println(
+                            "Maintenance status updated successfully."
+                    );
+                    System.out.println(
+                            "Secretary Email : " + secretaryDocument.getId()
+                    );
+                    System.out.println(
+                            "Maintenance ID  : " + targetBillId
+                    );
+                    System.out.println(
+                            "New Status      : " + targetStatus
+                    );
 
-        } catch (InterruptedException e) {
+                    return true;
+                }
+            }
 
-            Thread.currentThread().interrupt();
+        } catch (Exception e) {
             e.printStackTrace();
-            return false;
-
-        } catch (ExecutionException e) {
-
-            e.printStackTrace();
-            return false;
         }
+
+        return false;
     }
 
     // =========================================================
-    // DELETE MAINTENANCE BILL
+    // BACKWARD-COMPATIBLE OLD METHOD
     // =========================================================
+    //
+    // Kept so other old resident code does not break at compile time.
+    // New Mybills code should use getMaintenanceBySociety().
+    // =========================================================
+    public List<Map<String, Object>> getMaintenanceByEmail(
+            String email) {
 
-    public boolean deleteMaintenance(
-            String email,
-            String billId
-    ) {
+        List<Map<String, Object>> result = new ArrayList<>();
+
+        if (email == null || email.trim().isEmpty()) {
+            return result;
+        }
 
         try {
-
-            if (email == null || email.trim().isEmpty()) {
-                return false;
-            }
-
-            if (billId == null || billId.trim().isEmpty()) {
-                return false;
-            }
-
-            email = email.trim();
-            billId = billId.trim();
-
-            DocumentReference billDocument =
-                    db.collection(COLLECTION)
-                            .document(email)
-                            .collection(BILLS)
-                            .document(billId);
-
             DocumentSnapshot document =
-                    billDocument.get().get();
+                    db.collection("Maintenance")
+                            .document(email.trim())
+                            .get()
+                            .get();
 
             if (!document.exists()) {
-                return false;
+                return result;
             }
 
-            billDocument
-                    .delete()
-                    .get();
+            String parentSociety =
+                    stringValue(document, "society", "");
 
-            return true;
+            QuerySnapshot records =
+                    document.getReference()
+                            .collection("records")
+                            .get()
+                            .get();
 
-        } catch (InterruptedException e) {
+            for (DocumentSnapshot record : records.getDocuments()) {
 
-            Thread.currentThread().interrupt();
+                Map<String, Object> data =
+                        new HashMap<>();
+
+                data.put("billId", record.getId());
+                data.put(
+                        "maintenanceId",
+                        stringValue(
+                                record,
+                                "maintenanceId",
+                                record.getId()
+                        )
+                );
+                data.put(
+                        "amount",
+                        stringValue(record, "amount", "")
+                );
+                data.put(
+                        "date",
+                        stringValue(record, "date", "")
+                );
+                data.put(
+                        "month",
+                        stringValue(record, "month", "")
+                );
+                data.put(
+                        "society",
+                        stringValue(
+                                record,
+                                "society",
+                                parentSociety
+                        )
+                );
+                data.put(
+                        "status",
+                        stringValue(record, "status", "Pending")
+                );
+                data.put(
+                        "addedBySecretaryEmail",
+                        stringValue(
+                                record,
+                                "addedBySecretaryEmail",
+                                email.trim()
+                        )
+                );
+                data.put("secretaryEmail", email.trim());
+
+                result.add(data);
+            }
+
+        } catch (Exception e) {
             e.printStackTrace();
-            return false;
-
-        } catch (ExecutionException e) {
-
-            e.printStackTrace();
-            return false;
         }
+
+        return result;
     }
 
     // =========================================================
-    // DELETE COMPLETE RESIDENT MAINTENANCE
+    // BACKWARD-COMPATIBLE OLD UPDATE METHOD
     // =========================================================
+    //
+    // Old code used parentEmail + month. Keep it for compatibility,
+    // but the new Mybills implementation does NOT use it.
+    // =========================================================
+    public boolean updateMaintenanceStatus(
+            String parentEmail,
+            String month,
+            String newStatus) {
 
-    public boolean deleteResidentMaintenance(
-            String email
-    ) {
-
-        try {
-
-            if (email == null || email.trim().isEmpty()) {
-                return false;
-            }
-
-            email = email.trim();
-
-            db.collection(COLLECTION)
-                    .document(email)
-                    .delete()
-                    .get();
-
-            return true;
-
-        } catch (InterruptedException e) {
-
-            Thread.currentThread().interrupt();
-            e.printStackTrace();
-            return false;
-
-        } catch (ExecutionException e) {
-
-            e.printStackTrace();
+        if (parentEmail == null || parentEmail.trim().isEmpty()) {
             return false;
         }
+
+        if (month == null || month.trim().isEmpty()) {
+            return false;
+        }
+
+        try {
+            CollectionReference records =
+                    db.collection("Maintenance")
+                            .document(parentEmail.trim())
+                            .collection("records");
+
+            QuerySnapshot snapshot =
+                    records.get().get();
+
+            for (DocumentSnapshot record : snapshot.getDocuments()) {
+
+                String recordMonth =
+                        stringValue(record, "month", "");
+
+                if (recordMonth.equalsIgnoreCase(month.trim())
+                        || record.getId().equals(month.trim())) {
+
+                    record.getReference()
+                            .update("status", newStatus)
+                            .get();
+
+                    return true;
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    // =========================================================
+    // SAFE FIRESTORE STRING READER
+    // =========================================================
+    private String stringValue(
+            DocumentSnapshot document,
+            String field,
+            String defaultValue) {
+
+        Object value = document.get(field);
+
+        if (value == null) {
+            return defaultValue;
+        }
+
+        return String.valueOf(value).trim();
     }
 }
