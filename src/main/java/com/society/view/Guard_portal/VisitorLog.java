@@ -8,6 +8,9 @@ import com.society.controller.Guard_Controller.VisitorController;
 import com.society.model.Guard_model.VisitorModel;
 import com.society.view.ScreenSize;
 
+import javafx.animation.FadeTransition;
+import javafx.animation.ScaleTransition;
+import javafx.animation.TranslateTransition;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -32,6 +35,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 public class VisitorLog {
 
@@ -46,7 +50,6 @@ public class VisitorLog {
     // CREATE SCENE
     // =====================================================
 
-    // Existing entry point kept for compatibility with other portal code.
     public static Scene createScene(Stage stage) {
         return createScene(stage, null, null);
     }
@@ -97,6 +100,9 @@ public class VisitorLog {
         // =====================================================
 
         HBox header = new HBox();
+         header.setPrefHeight(80);
+        header.setMinHeight(80);
+        header.setMaxHeight(80);
 
         header.setPadding(
                 new Insets(25, 35, 25, 35)
@@ -117,6 +123,7 @@ public class VisitorLog {
 
         title.setStyle(
                 "-fx-font-size:24px;" +
+                "-fx-font-family:'Bodoni MT';" +
                 "-fx-font-weight:bold;" +
                 "-fx-text-fill:white;"
         );
@@ -308,7 +315,9 @@ public class VisitorLog {
         refreshButton.setPrefHeight(30);
 
         refreshButton.setTooltip(
-                new javafx.scene.control.Tooltip("Refresh visitors")
+                new javafx.scene.control.Tooltip(
+                        "Refresh visitors"
+                )
         );
 
         refreshButton.setStyle(
@@ -384,7 +393,6 @@ public class VisitorLog {
 
         visitorTable.setPrefHeight(330);
 
-        // Give the QR image enough vertical space.
         visitorTable.setFixedCellSize(70);
 
         visitorTable.setStyle(
@@ -447,14 +455,7 @@ public class VisitorLog {
         qrPassColumn.setPrefWidth(120);
 
         // =====================================================
-        // QR PASS - DISPLAY QR IMAGE FROM qrToken
-        // =====================================================
-        //
-        // Firestore stores qrToken.
-        // VisitorDao maps qrToken -> qrPass.
-        // The QR image is generated from that token.
-        //
-        // No new Firestore field is required.
+        // QR PASS - DISPLAY QR IMAGE
         // =====================================================
 
         qrPassColumn.setCellFactory(column ->
@@ -486,6 +487,7 @@ public class VisitorLog {
 
                             setGraphic(null);
                             setText(null);
+
                             return;
                         }
 
@@ -653,10 +655,6 @@ public class VisitorLog {
                 "-fx-background-radius:6;"
         );
 
-        // =====================================================
-        // ADMIT EXPECTED VISITOR
-        // =====================================================
-
         admitVisitorButton.setOnAction(e -> {
 
             Visitor selectedVisitor =
@@ -664,7 +662,6 @@ public class VisitorLog {
                             .getSelectionModel()
                             .getSelectedItem();
 
-            // No visitor selected
             if (selectedVisitor == null) {
 
                 showMessage(
@@ -675,7 +672,6 @@ public class VisitorLog {
                 return;
             }
 
-            // Only APPROVED visitors can be admitted
             if (!"INVITED".equals(
                     selectedVisitor.getStatus())) {
 
@@ -687,7 +683,6 @@ public class VisitorLog {
                 return;
             }
 
-            // Check Firestore document ID
             if (selectedVisitor.getVisitorId() == null
                     || selectedVisitor.getVisitorId().isEmpty()) {
 
@@ -699,7 +694,6 @@ public class VisitorLog {
                 return;
             }
 
-            // Update Firestore using the actual logged-in guard email
             boolean updated =
                     visitorController.admitVisitor(
                             selectedVisitor.getVisitorId(),
@@ -708,13 +702,6 @@ public class VisitorLog {
 
             if (updated) {
 
-                /*
-                 * Reload from Firestore after admission.
-                 *
-                 * This is important because Firestore creates the actual
-                 * entryTime. Reloading ensures the table displays that
-                 * exact value instead of leaving Entry Time blank.
-                 */
                 loadVisitorsFromFirestore(
                         visitorController
                 );
@@ -783,8 +770,7 @@ public class VisitorLog {
             }
 
             if ("Checked Out".equals(
-                    selectedVisitor.getStatus()
-            )) {
+                    selectedVisitor.getStatus())) {
 
                 showMessage(
                         "Already Checked Out",
@@ -794,7 +780,6 @@ public class VisitorLog {
                 return;
             }
 
-            // A visitor must be inside before being checked out.
             String currentStatus =
                     selectedVisitor.getStatus();
 
@@ -822,17 +807,6 @@ public class VisitorLog {
                 return;
             }
 
-            /*
-             * IMPORTANT:
-             *
-             * The previous code incorrectly called admitVisitor()
-             * here. That changed a visitor back to Inside.
-             *
-             * Use checkOutVisitor() so Firestore receives:
-             *
-             * status    = Checked Out
-             * exitTime  = current time
-             */
             boolean updated =
                     visitorController.checkOutVisitor(
                             selectedVisitor.getVisitorId()
@@ -840,10 +814,6 @@ public class VisitorLog {
 
             if (updated) {
 
-                /*
-                 * Reload from Firestore so the newly generated
-                 * exit/entry values and status are displayed.
-                 */
                 loadVisitorsFromFirestore(
                         visitorController
                 );
@@ -903,7 +873,6 @@ public class VisitorLog {
                             .trim()
                             .toLowerCase();
 
-            // Empty search = show everything
             if (search.isEmpty()) {
 
                 visitorTable.setItems(
@@ -963,7 +932,6 @@ public class VisitorLog {
                     filtered
             );
 
-            // Summary remains based on all visitors.
             updateSummary(
                     visitors,
                     totalValue,
@@ -1031,6 +999,70 @@ public class VisitorLog {
         );
 
         // =====================================================
+        // BUTTON POPUP ANIMATION
+        // =====================================================
+
+        addButtonPopupAnimation(
+                searchButton
+        );
+
+        addButtonPopupAnimation(
+                refreshButton
+        );
+
+        addButtonPopupAnimation(
+                addVisitorButton
+        );
+
+        addButtonPopupAnimation(
+                admitVisitorButton
+        );
+
+        addButtonPopupAnimation(
+                checkOutButton
+        );
+
+        // =====================================================
+        // SUMMARY CARD POPUP ANIMATION
+        // =====================================================
+
+        addCardPopupAnimation(
+                totalCard,
+                0
+        );
+
+        addCardPopupAnimation(
+                insideCard,
+                80
+        );
+
+        addCardPopupAnimation(
+                checkedOutCard,
+                160
+        );
+
+        addCardPopupAnimation(
+                deliveryCard,
+                240
+        );
+
+        // =====================================================
+        // HEADER FIXED
+        // =====================================================
+
+        header.setOpacity(1);
+        header.setTranslateY(0);
+
+        // =====================================================
+        // PAGE DOWN -> UP ANIMATION
+        // HEADER NOT INCLUDED
+        // =====================================================
+
+        playPageAnimation(
+                mainContent
+        );
+
+        // =====================================================
         // SCENE
         // =====================================================
 
@@ -1039,6 +1071,131 @@ public class VisitorLog {
                 ScreenSize.getWidth(),
                 ScreenSize.getHeight()
         );
+    }
+
+    // =====================================================
+    // PAGE DOWN -> UP ANIMATION
+    // =====================================================
+
+    private static void playPageAnimation(
+            VBox mainContent) {
+
+        mainContent.setOpacity(0);
+
+        mainContent.setTranslateY(45);
+
+        FadeTransition fade =
+                new FadeTransition(
+                        Duration.millis(700),
+                        mainContent
+                );
+
+        fade.setFromValue(0);
+
+        fade.setToValue(1);
+
+        TranslateTransition slide =
+                new TranslateTransition(
+                        Duration.millis(700),
+                        mainContent
+                );
+
+        slide.setFromY(45);
+
+        slide.setToY(0);
+
+        fade.play();
+
+        slide.play();
+    }
+
+    // =====================================================
+    // BUTTON POPUP ANIMATION
+    // =====================================================
+
+    private static void addButtonPopupAnimation(
+            Button button) {
+
+        button.setOnMouseEntered(e -> {
+
+            ScaleTransition scale =
+                    new ScaleTransition(
+                            Duration.millis(120),
+                            button
+                    );
+
+            scale.setToX(1.06);
+
+            scale.setToY(1.06);
+
+            scale.play();
+        });
+
+        button.setOnMouseExited(e -> {
+
+            ScaleTransition scale =
+                    new ScaleTransition(
+                            Duration.millis(120),
+                            button
+                    );
+
+            scale.setToX(1);
+
+            scale.setToY(1);
+
+            scale.play();
+        });
+    }
+
+    // =====================================================
+    // CARD POPUP ANIMATION
+    // =====================================================
+
+    private static void addCardPopupAnimation(
+            VBox card,
+            int delay) {
+
+        card.setOpacity(0);
+
+        card.setScaleX(0.85);
+
+        card.setScaleY(0.85);
+
+        FadeTransition fade =
+                new FadeTransition(
+                        Duration.millis(450),
+                        card
+                );
+
+        fade.setFromValue(0);
+
+        fade.setToValue(1);
+
+        fade.setDelay(
+                Duration.millis(delay)
+        );
+
+        ScaleTransition scale =
+                new ScaleTransition(
+                        Duration.millis(450),
+                        card
+                );
+
+        scale.setFromX(0.85);
+
+        scale.setFromY(0.85);
+
+        scale.setToX(1);
+
+        scale.setToY(1);
+
+        scale.setDelay(
+                Duration.millis(delay)
+        );
+
+        fade.play();
+
+        scale.play();
     }
 
     // =====================================================
@@ -1317,7 +1474,6 @@ public class VisitorLog {
             return qrPass;
         }
 
-        // Keep this too if other existing code uses it.
         public String getQRPass() {
 
             return qrPass;

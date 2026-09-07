@@ -259,7 +259,7 @@ public class SecretarySidebar {
         // ========================================================
 
         Button dashboardBtn =
-                createMenuButton("Dashboard");
+                createMenuButton("🏠Dashboard");
 
         dashboardBtn.setOnAction(e -> {
 

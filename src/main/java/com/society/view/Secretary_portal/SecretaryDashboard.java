@@ -10,6 +10,10 @@ import com.society.dao.Secretary_dao.DashboardDao;
 import com.society.model.Welcome.User;
 import com.society.view.ScreenSize;
 
+import javafx.animation.FadeTransition;
+import javafx.animation.ParallelTransition;
+import javafx.animation.ScaleTransition;
+import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -28,6 +32,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 public class SecretaryDashboard {
 
@@ -144,6 +149,9 @@ public class SecretaryDashboard {
     // GET USER EMAIL
     // ============================================================
 
+    public SecretaryDashboard() {}
+       
+
     private String getUserEmail() {
 
         if (loggedInUser == null) {
@@ -159,6 +167,7 @@ public class SecretaryDashboard {
                 .trim()
                 .toLowerCase();
     }
+
 
     // ============================================================
     // CREATE SCENE
@@ -184,6 +193,7 @@ public class SecretaryDashboard {
             );
         }
 
+
         // ========================================================
         // SIDEBAR
         // ========================================================
@@ -197,7 +207,7 @@ public class SecretaryDashboard {
                 sidebarObj.createSidebar(
                         stage
                 );
-
+        
         // ========================================================
         // HEADER
         // ========================================================
@@ -206,6 +216,10 @@ public class SecretaryDashboard {
                 new HBox();
 
         header.setPrefHeight(80);
+
+        header.setMinHeight(80);
+
+        header.setMaxHeight(80);
 
         header.setPadding(
                 new Insets(20)
@@ -234,7 +248,8 @@ public class SecretaryDashboard {
                 );
 
         greeting.setStyle(
-                "-fx-font-size:24px;"
+                "-fx-font-family:'Bodoni MT';"
+                        + "-fx-font-size:24px;"
                         + "-fx-font-weight:bold;"
                         + "-fx-text-fill:white;"
         );
@@ -280,7 +295,8 @@ public class SecretaryDashboard {
                 );
 
         day.setStyle(
-                "-fx-font-size:13px;"
+                
+                        "-fx-font-size:13px;"
                         + "-fx-font-weight:bold;"
                         + "-fx-text-fill:white;"
         );
@@ -615,12 +631,19 @@ public class SecretaryDashboard {
                 true
         );
 
+        /*
+         * INVISIBLE SCROLLBARS
+         */
         scrollPane.setHbarPolicy(
-                ScrollPane.ScrollBarPolicy.AS_NEEDED
+                ScrollPane.ScrollBarPolicy.NEVER
         );
 
         scrollPane.setVbarPolicy(
-                ScrollPane.ScrollBarPolicy.AS_NEEDED
+                ScrollPane.ScrollBarPolicy.NEVER
+        );
+
+        scrollPane.setPannable(
+                false
         );
 
         scrollPane.setStyle(
@@ -669,6 +692,15 @@ public class SecretaryDashboard {
 
         loadUpcomingEvents();
 
+        /*
+         * Dashboard content animation.
+         * It starts from DOWN position and comes UP.
+         */
+        playDashboardAnimation(
+                cardsRow,
+                lowerContent
+        );
+
         return secretaryDash;
     }
 
@@ -700,7 +732,8 @@ public class SecretaryDashboard {
                 );
 
         title.setStyle(
-                "-fx-font-size:17px;"
+                
+                        "-fx-font-size:17px;"
                         + "-fx-font-weight:bold;"
                         + "-fx-text-fill:#183B56;"
         );
@@ -737,7 +770,8 @@ public class SecretaryDashboard {
                         + "-fx-text-fill:#183B56;"
                         + "-fx-font-size:13px;"
                         + "-fx-alignment:CENTER-LEFT;"
-                        + "-fx-padding:12px;";
+                        + "-fx-padding:12px;"
+                        + "-fx-cursor:hand;";
 
         addResident.setStyle(
                 buttonStyle
@@ -749,6 +783,22 @@ public class SecretaryDashboard {
 
         viewPayments.setStyle(
                 buttonStyle
+        );
+
+        // ========================================================
+        // BUTTON POPUP
+        // ========================================================
+
+        addButtonPopupAnimation(
+                addResident
+        );
+
+        addButtonPopupAnimation(
+                addNotice
+        );
+
+        addButtonPopupAnimation(
+                viewPayments
         );
 
         // ========================================================
@@ -827,6 +877,127 @@ public class SecretaryDashboard {
     }
 
     // ============================================================
+    // BUTTON POPUP ANIMATION
+    // ============================================================
+
+    private void addButtonPopupAnimation(
+            Button button) {
+
+        button.setOnMouseEntered(e -> {
+
+            ScaleTransition scaleUp =
+                    new ScaleTransition(
+                            Duration.millis(120),
+                            button
+                    );
+
+            scaleUp.setToX(1.05);
+            scaleUp.setToY(1.05);
+
+            scaleUp.play();
+        });
+
+        button.setOnMouseExited(e -> {
+
+            ScaleTransition scaleDown =
+                    new ScaleTransition(
+                            Duration.millis(120),
+                            button
+                    );
+
+            scaleDown.setToX(1.0);
+            scaleDown.setToY(1.0);
+
+            scaleDown.play();
+        });
+    }
+
+    // ============================================================
+    // DASHBOARD DOWN TO UP ANIMATION
+    // ============================================================
+
+    private void playDashboardAnimation(
+            HBox cardsRow,
+            HBox lowerContent) {
+
+        // ========================================================
+        // INITIAL POSITION
+        // ========================================================
+
+        cardsRow.setTranslateY(35);
+        cardsRow.setOpacity(0);
+
+        lowerContent.setTranslateY(45);
+        lowerContent.setOpacity(0);
+
+        // ========================================================
+        // CARDS ANIMATION
+        // ========================================================
+
+        TranslateTransition cardsSlide =
+                new TranslateTransition(
+                        Duration.millis(450),
+                        cardsRow
+                );
+
+        cardsSlide.setFromY(35);
+        cardsSlide.setToY(0);
+
+        FadeTransition cardsFade =
+                new FadeTransition(
+                        Duration.millis(450),
+                        cardsRow
+                );
+
+        cardsFade.setFromValue(0);
+        cardsFade.setToValue(1);
+
+        ParallelTransition cardsAnimation =
+                new ParallelTransition(
+                        cardsSlide,
+                        cardsFade
+                );
+
+        // ========================================================
+        // LOWER CONTENT ANIMATION
+        // ========================================================
+
+        TranslateTransition lowerSlide =
+                new TranslateTransition(
+                        Duration.millis(550),
+                        lowerContent
+                );
+
+        lowerSlide.setFromY(45);
+        lowerSlide.setToY(0);
+
+        FadeTransition lowerFade =
+                new FadeTransition(
+                        Duration.millis(550),
+                        lowerContent
+                );
+
+        lowerFade.setFromValue(0);
+        lowerFade.setToValue(1);
+
+        ParallelTransition lowerAnimation =
+                new ParallelTransition(
+                        lowerSlide,
+                        lowerFade
+                );
+
+        // ========================================================
+        // PLAY
+        // ========================================================
+
+        cardsAnimation.setOnFinished(
+                e -> lowerAnimation.play()
+        );
+
+        cardsAnimation.play();
+    }
+
+    // ============================================================
     // DASHBOARD CARD
     // ============================================================
 
@@ -858,7 +1029,8 @@ public class SecretaryDashboard {
                 );
 
         titleLabel.setStyle(
-                "-fx-font-size:14px;"
+               
+                        "-fx-font-size:14px;"
                         + "-fx-text-fill:#666666;"
         );
 
@@ -868,7 +1040,8 @@ public class SecretaryDashboard {
                 );
 
         countLabel.setStyle(
-                "-fx-font-size:28px;"
+                
+                        "-fx-font-size:28px;"
                         + "-fx-font-weight:bold;"
                         + "-fx-text-fill:#123C36;"
         );
@@ -879,7 +1052,8 @@ public class SecretaryDashboard {
                 );
 
         bottomLabel.setStyle(
-                "-fx-font-size:13px;"
+               
+                        "-fx-font-size:13px;"
                         + "-fx-text-fill:#777777;"
         );
 
@@ -920,7 +1094,8 @@ public class SecretaryDashboard {
                 );
 
         title.setStyle(
-                "-fx-font-size:18px;"
+               
+                         "-fx-font-size:18px;"
                         + "-fx-font-weight:bold;"
                         + "-fx-text-fill:#183B56;"
         );
@@ -980,7 +1155,8 @@ public class SecretaryDashboard {
         );
 
         note.setStyle(
-                "-fx-font-size:12px;"
+                
+                        "-fx-font-size:12px;"
                         + "-fx-text-fill:#777777;"
                         + "-fx-padding:10px;"
         );
@@ -1026,8 +1202,7 @@ public class SecretaryDashboard {
                         "Upcoming Events"
                 );
 
-        title.setStyle(
-                "-fx-font-size:18px;"
+        title.setStyle( "-fx-font-size:18px;"
                         + "-fx-font-weight:bold;"
                         + "-fx-text-fill:#183B56;"
         );
@@ -1042,7 +1217,8 @@ public class SecretaryDashboard {
         );
 
         upcomingEventsMessage.setStyle(
-                "-fx-font-size:13px;"
+               
+                        "-fx-font-size:13px;"
                         + "-fx-text-fill:#555555;"
                         + "-fx-padding:8px;"
         );
@@ -1055,8 +1231,14 @@ public class SecretaryDashboard {
         viewEvents.setStyle(
                 "-fx-background-color:transparent;"
                         + "-fx-text-fill:#4169A1;"
+                       
                         + "-fx-font-size:13px;"
                         + "-fx-font-weight:bold;"
+                        + "-fx-cursor:hand;"
+        );
+
+        addButtonPopupAnimation(
+                viewEvents
         );
 
         viewEvents.setOnAction(e -> {
@@ -1120,7 +1302,8 @@ public class SecretaryDashboard {
                 );
 
         title.setStyle(
-                "-fx-font-size:17px;"
+               
+                        "-fx-font-size:17px;"
                         + "-fx-font-weight:bold;"
                         + "-fx-text-fill:#D9534F;"
         );
@@ -1141,7 +1324,13 @@ public class SecretaryDashboard {
         viewAll.setStyle(
                 "-fx-background-color:transparent;"
                         + "-fx-text-fill:#4169A1;"
+                       
                         + "-fx-font-size:13px;"
+                        + "-fx-cursor:hand;"
+        );
+
+        addButtonPopupAnimation(
+                viewAll
         );
 
         viewAll.setOnAction(e -> {
@@ -1176,7 +1365,8 @@ public class SecretaryDashboard {
         );
 
         recentSOSMessage.setStyle(
-                "-fx-font-size:13px;"
+               
+                         "-fx-font-size:13px;"
                         + "-fx-text-fill:#777777;"
                         + "-fx-padding:8px;"
         );
@@ -1579,7 +1769,8 @@ public class SecretaryDashboard {
             Label label) {
 
         label.setStyle(
-                "-fx-font-size:13px;"
+               
+                        "-fx-font-size:13px;"
                         + "-fx-text-fill:#555555;"
                         + "-fx-padding:7px;"
         );
@@ -1876,4 +2067,4 @@ public class SecretaryDashboard {
             return "Good Night";
         }
     }
-}
+    }

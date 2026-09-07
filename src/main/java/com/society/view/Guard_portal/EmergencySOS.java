@@ -1,15 +1,22 @@
 package com.society.view.Guard_portal;
 
+import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+
+import com.society.controller.Guard_Controller.EmergencyController;
+import com.society.dao.Welcome.UserDao;
+import com.society.model.Guard_model.EmergencyModel;
+import com.society.model.Welcome.User;
+import com.society.view.ScreenSize;
+
 import javafx.animation.FadeTransition;
 import javafx.animation.ScaleTransition;
 import javafx.animation.TranslateTransition;
-import javafx.animation.ParallelTransition;
-import javafx.animation.SequentialTransition;
-import javafx.animation.PauseTransition;
-
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -18,9 +25,13 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-
 import javafx.scene.effect.DropShadow;
-
+import javafx.scene.image.Image;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
@@ -29,31 +40,14 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-
 import javafx.stage.Stage;
 import javafx.util.Duration;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-
-import com.society.view.ScreenSize;
-
-import com.society.controller.Guard_Controller.EmergencyController;
-
-import com.society.model.Guard_model.EmergencyModel;
-import com.society.model.Welcome.User;
-import com.society.dao.Welcome.UserDao;
-
 
 public class EmergencySOS {
 
     private static boolean sosActive = false;
-
 
     // =====================================================
     // FIRESTORE / LOGGED-IN USER DATA
@@ -75,57 +69,30 @@ public class EmergencySOS {
     // CREATE SCENE
     // =====================================================
 
-    public static Scene createScene(
-            Stage stage,
-            String guardEmail) {
+    public static Scene createScene(Stage stage, String guardEmail) {
+
+        // =====================================================
+        // SET LOGGED-IN EMAIL
+        // =====================================================
 
         loggedInEmail =
-        guardEmail == null
-                ? ""
-                : guardEmail.trim().toLowerCase();
+                guardEmail == null
+                        ? ""
+                        : guardEmail.trim().toLowerCase();
 
-setLoggedInEmail(loggedInEmail);
+        setLoggedInEmail(loggedInEmail);
 
-// =====================================================
-// RESTORE ACTIVE EMERGENCY FOR LOGGED-IN GUARD
-// =====================================================
+        // =====================================================
+        // RESTORE ACTIVE EMERGENCY
+        // =====================================================
 
-sosActive = false;
-activeEmergencyId = "";
+        loadActiveEmergencyForLoggedInGuard();
 
-if (!loggedInEmail.isEmpty()) {
+        // =====================================================
+        // ROOT
+        // =====================================================
 
-    List<EmergencyModel> activeEmergencies =
-            emergencyController.getActiveEmergenciesByEmail(
-                    loggedInEmail
-            );
-
-    if (activeEmergencies != null &&
-            !activeEmergencies.isEmpty()) {
-
-        EmergencyModel latestEmergency =
-                activeEmergencies.get(
-                        activeEmergencies.size() - 1
-                );
-
-        if (latestEmergency != null &&
-                latestEmergency.getEmergencyId() != null &&
-                !latestEmergency.getEmergencyId()
-                        .trim()
-                        .isEmpty()) {
-
-            activeEmergencyId =
-                    latestEmergency.getEmergencyId();
-
-            sosActive = true;
-        }
-    }
-}
-
-
-BorderPane root =
-        new BorderPane();
-
+        BorderPane root = new BorderPane();
 
         // =====================================================
         // SIDEBAR
@@ -143,34 +110,65 @@ BorderPane root =
                 sidebar.getSidebar()
         );
 
-
         // =====================================================
         // MAIN CONTENT
         // =====================================================
 
         VBox content =
-                new VBox(20);
+                new VBox(18);
 
         content.setPadding(
                 new Insets(
                         25,
                         40,
-                        30,
+                        25,
                         40
                 )
         );
 
-        content.setFillWidth(
-                true
-        );
+        content.setFillWidth(true);
 
         content.setStyle(
-                "-fx-background-color:#E8DDD5;"
+                "-fx-background-color: #DCCDBB;"
         );
 
+        // =====================================================
+        // BACKGROUND IMAGE
+        // IMAGE IS SHOWN ONLY IN CONTENT AREA
+        // (BELOW THE HEADER)
+        // =====================================================
+       Image backgroundImage =
+        new Image(
+                Paths.get(
+                        "src",
+                        "main",
+                        "resources",
+                        "background-Dashboard5.jpeg"
+                ).toUri().toString()
+        );
 
+BackgroundImage bgImage =
+        new BackgroundImage(
+                backgroundImage,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundPosition.CENTER,
+                new BackgroundSize(
+                        100,
+                        100,
+                        true,
+                        true,
+                        false,
+                        true
+                )
+        );
+
+content.setBackground(
+        new Background(bgImage)
+);
         // =====================================================
         // HEADER
+        // FIXED - NO ANIMATION
         // =====================================================
 
         HBox header =
@@ -185,14 +183,24 @@ BorderPane root =
                 )
         );
 
+        header.setMinHeight(80);
+        header.setPrefHeight(80);
+        header.setMaxHeight(80);
+
         header.setAlignment(
                 Pos.CENTER_LEFT
         );
 
-        header.setStyle(
-                "-fx-background-color:#4E342E;"
-        );
+        // Header fixed
+        header.setTranslateX(0);
+        header.setTranslateY(0);
+        header.setOpacity(1);
+        header.setScaleX(1);
+        header.setScaleY(1);
 
+        header.setStyle(
+                "-fx-background-color: #4E342E;"
+        );
 
         // =====================================================
         // HEADER TITLE
@@ -201,7 +209,6 @@ BorderPane root =
         VBox titleBox =
                 new VBox(3);
 
-
         Label title =
                 new Label(
                         "Emergency SOS"
@@ -209,10 +216,10 @@ BorderPane root =
 
         title.setStyle(
                 "-fx-font-size:24px;" +
+                "-fx-font-family:'Bodoni MT';" +
                 "-fx-font-weight:bold;" +
                 "-fx-text-fill:white;"
         );
-
 
         Label description =
                 new Label(
@@ -224,12 +231,10 @@ BorderPane root =
                 "-fx-text-fill:white;"
         );
 
-
         titleBox.getChildren().addAll(
                 title,
                 description
         );
-
 
         // =====================================================
         // HEADER SPACER
@@ -243,7 +248,6 @@ BorderPane root =
                 Priority.ALWAYS
         );
 
-
         // =====================================================
         // DATE
         // =====================================================
@@ -254,10 +258,8 @@ BorderPane root =
         Label date =
                 new Label();
 
-
         LocalDate today =
                 LocalDate.now();
-
 
         day.setText(
                 today.format(
@@ -267,7 +269,6 @@ BorderPane root =
                 )
         );
 
-
         date.setText(
                 today.format(
                         DateTimeFormatter.ofPattern(
@@ -276,34 +277,28 @@ BorderPane root =
                 )
         );
 
-
         day.setStyle(
                 "-fx-font-size:13px;" +
                 "-fx-font-weight:bold;" +
                 "-fx-text-fill:white;"
         );
 
-
         date.setStyle(
                 "-fx-font-size:11px;" +
                 "-fx-text-fill:#E6D8D3;"
         );
 
-
         VBox dateBox =
                 new VBox(3);
-
 
         dateBox.setAlignment(
                 Pos.CENTER_RIGHT
         );
 
-
         dateBox.getChildren().addAll(
                 day,
                 date
         );
-
 
         header.getChildren().addAll(
                 titleBox,
@@ -311,14 +306,12 @@ BorderPane root =
                 dateBox
         );
 
-
         // =====================================================
-        // EMERGENCY ALERT CARD
+        // ALERT CARD
         // =====================================================
 
         VBox alertCard =
                 new VBox();
-
 
         alertCard.setPadding(
                 new Insets(
@@ -329,16 +322,11 @@ BorderPane root =
                 )
         );
 
-
-        alertCard.setSpacing(
-                13
-        );
-
+        alertCard.setSpacing(13);
 
         alertCard.setMaxWidth(
                 Double.MAX_VALUE
         );
-
 
         alertCard.setStyle(
                 "-fx-background-color:#FFFDFC;" +
@@ -347,7 +335,6 @@ BorderPane root =
                 "-fx-border-radius:16;" +
                 "-fx-border-width:1;"
         );
-
 
         alertCard.setEffect(
                 new DropShadow(
@@ -361,20 +348,17 @@ BorderPane root =
                 )
         );
 
-
         // =====================================================
-        // ALERT HEADER
+        // ALERT HEADING
         // =====================================================
 
         VBox alertHeading =
                 new VBox(4);
 
-
         Label alertTitle =
                 new Label(
                         "Emergency Alert"
                 );
-
 
         alertTitle.setStyle(
                 "-fx-font-size:20px;" +
@@ -382,29 +366,22 @@ BorderPane root =
                 "-fx-text-fill:#A83A3A;"
         );
 
-
         Label alertMessage =
                 new Label(
                         "Press SOS to immediately notify residents and the secretary."
                 );
-
 
         alertMessage.setStyle(
                 "-fx-font-size:12px;" +
                 "-fx-text-fill:#52606D;"
         );
 
-
-        alertMessage.setWrapText(
-                true
-        );
-
+        alertMessage.setWrapText(true);
 
         alertHeading.getChildren().addAll(
                 alertTitle,
                 alertMessage
         );
-
 
         // =====================================================
         // ALERT BODY
@@ -413,11 +390,9 @@ BorderPane root =
         HBox alertBody =
                 new HBox(28);
 
-
         alertBody.setAlignment(
                 Pos.CENTER
         );
-
 
         alertBody.setPadding(
                 new Insets(
@@ -428,160 +403,89 @@ BorderPane root =
                 )
         );
 
-
         // =====================================================
-        // SOS BUTTON AREA
+        // SOS AREA
         // =====================================================
 
         StackPane sosArea =
                 new StackPane();
-
 
         sosArea.setPrefSize(
                 230,
                 175
         );
 
-
         // =====================================================
-        // OUTER SOS RING
+        // OUTER CIRCLE
         // =====================================================
 
         Circle outerCircle =
-                new Circle(
-                        82
-                );
-
+                new Circle(82);
 
         outerCircle.setFill(
-                Color.web(
-                        "#FFF8F8"
-                )
+                Color.web("#FFF8F8")
         );
-
 
         outerCircle.setStroke(
-                Color.web(
-                        "#EFD6D6"
-                )
+                Color.web("#EFD6D6")
         );
 
-
-        outerCircle.setStrokeWidth(
-                2
-        );
-
+        outerCircle.setStrokeWidth(2);
 
         // =====================================================
-        // SECOND SOS RING
+        // MIDDLE CIRCLE
         // =====================================================
 
         Circle middleCircle =
-                new Circle(
-                        70
-                );
-
+                new Circle(70);
 
         middleCircle.setFill(
-                Color.web(
-                        "#FDEFEF"
-                )
+                Color.web("#FDEFEF")
         );
-
 
         middleCircle.setStroke(
-                Color.web(
-                        "#F0D1D1"
-                )
+                Color.web("#F0D1D1")
         );
 
-
-        middleCircle.setStrokeWidth(
-                2
-        );
-
+        middleCircle.setStrokeWidth(2);
 
         // =====================================================
-        // INNER SOS RING
+        // INNER CIRCLE
         // =====================================================
 
         Circle innerCircle =
-                new Circle(
-                        61
-                );
-
+                new Circle(61);
 
         innerCircle.setFill(
-                Color.web(
-                        "#FBE4E4"
-                )
+                Color.web("#FBE4E4")
         );
-
 
         innerCircle.setStroke(
-                Color.web(
-                        "#F3D4D4"
-                )
+                Color.web("#F3D4D4")
         );
 
-
-        innerCircle.setStrokeWidth(
-                1
-        );
-
+        innerCircle.setStrokeWidth(1);
 
         // =====================================================
         // SOS BUTTON
         // =====================================================
 
         Button sendAlertButton =
-                new Button(
-                        "SOS"
-                );
+                new Button("SOS");
 
+        sendAlertButton.setPrefWidth(120);
+        sendAlertButton.setPrefHeight(120);
 
-        sendAlertButton.setPrefWidth(
-                120
+        sendAlertButton.setMinWidth(120);
+        sendAlertButton.setMinHeight(120);
+
+        sendAlertButton.setMaxWidth(120);
+        sendAlertButton.setMaxHeight(120);
+
+        setSOSButtonStyle(
+                sendAlertButton,
+                false
         );
-
-
-        sendAlertButton.setPrefHeight(
-                120
-        );
-
-
-        sendAlertButton.setMinWidth(
-                120
-        );
-
-
-        sendAlertButton.setMinHeight(
-                120
-        );
-
-
-        sendAlertButton.setMaxWidth(
-                120
-        );
-
-
-        sendAlertButton.setMaxHeight(
-                120
-        );
-
-
-        sendAlertButton.setStyle(
-                "-fx-background-color:#B83A3A;" +
-                "-fx-text-fill:white;" +
-                "-fx-font-size:28px;" +
-                "-fx-font-weight:bold;" +
-                "-fx-background-radius:100px;" +
-                "-fx-border-color:#EBAAAA;" +
-                "-fx-border-width:4px;" +
-                "-fx-border-radius:100px;" +
-                "-fx-cursor:hand;"
-        );
-
 
         sendAlertButton.setEffect(
                 new DropShadow(
@@ -595,56 +499,35 @@ BorderPane root =
                 )
         );
 
-
         // =====================================================
-        // SOS HOVER + ANIMATION
+        // SOS HOVER
         // =====================================================
 
-        sendAlertButton.setOnMouseEntered(
-                e -> {
+        sendAlertButton.setOnMouseEntered(e -> {
 
-                    sendAlertButton.setStyle(
-                            "-fx-background-color:#9E3030;" +
-                            "-fx-text-fill:white;" +
-                            "-fx-font-size:28px;" +
-                            "-fx-font-weight:bold;" +
-                            "-fx-background-radius:100px;" +
-                            "-fx-border-color:#E7A0A0;" +
-                            "-fx-border-width:4px;" +
-                            "-fx-border-radius:100px;" +
-                            "-fx-cursor:hand;"
-                    );
+            setSOSButtonStyle(
+                    sendAlertButton,
+                    true
+            );
 
-                    playHoverScale(
-                            sendAlertButton,
-                            1.06
-                    );
-                }
-        );
+            playHoverScale(
+                    sendAlertButton,
+                    1.06
+            );
+        });
 
+        sendAlertButton.setOnMouseExited(e -> {
 
-        sendAlertButton.setOnMouseExited(
-                e -> {
+            setSOSButtonStyle(
+                    sendAlertButton,
+                    false
+            );
 
-                    sendAlertButton.setStyle(
-                            "-fx-background-color:#B83A3A;" +
-                            "-fx-text-fill:white;" +
-                            "-fx-font-size:28px;" +
-                            "-fx-font-weight:bold;" +
-                            "-fx-background-radius:100px;" +
-                            "-fx-border-color:#EBAAAA;" +
-                            "-fx-border-width:4px;" +
-                            "-fx-border-radius:100px;" +
-                            "-fx-cursor:hand;"
-                    );
-
-                    playHoverScale(
-                            sendAlertButton,
-                            1.0
-                    );
-                }
-        );
-
+            playHoverScale(
+                    sendAlertButton,
+                    1.0
+            );
+        });
 
         sosArea.getChildren().addAll(
                 outerCircle,
@@ -652,7 +535,6 @@ BorderPane root =
                 innerCircle,
                 sendAlertButton
         );
-
 
         // =====================================================
         // SOS RING ANIMATION
@@ -663,7 +545,6 @@ BorderPane root =
                 middleCircle
         );
 
-
         // =====================================================
         // INFORMATION CARDS
         // =====================================================
@@ -671,11 +552,9 @@ BorderPane root =
         HBox infoCards =
                 new HBox(11);
 
-
         infoCards.setAlignment(
                 Pos.CENTER
         );
-
 
         VBox instantCard =
                 createInfoCard(
@@ -685,7 +564,6 @@ BorderPane root =
                         "#B83A3A"
                 );
 
-
         VBox secureCard =
                 createInfoCard(
                         "✓",
@@ -693,7 +571,6 @@ BorderPane root =
                         "Emergency information is stored securely.",
                         "#315B45"
                 );
-
 
         VBox responseCard =
                 createInfoCard(
@@ -703,19 +580,16 @@ BorderPane root =
                         "#7656A8"
                 );
 
-
         infoCards.getChildren().addAll(
                 instantCard,
                 secureCard,
                 responseCard
         );
 
-
         alertBody.getChildren().addAll(
                 sosArea,
                 infoCards
         );
-
 
         // =====================================================
         // STATUS
@@ -724,25 +598,20 @@ BorderPane root =
         HBox statusContainer =
                 new HBox();
 
-
         statusContainer.setAlignment(
                 Pos.CENTER
         );
 
-
         Label statusLabel =
                 new Label();
-
 
         updateStatus(
                 statusLabel
         );
 
-
         statusContainer.getChildren().add(
                 statusLabel
         );
-
 
         alertCard.getChildren().addAll(
                 alertHeading,
@@ -750,14 +619,12 @@ BorderPane root =
                 statusContainer
         );
 
-
         // =====================================================
-        // EMERGENCY DETAILS CARD
+        // DETAILS CARD
         // =====================================================
 
         VBox detailsCard =
                 new VBox();
-
 
         detailsCard.setPadding(
                 new Insets(
@@ -768,16 +635,11 @@ BorderPane root =
                 )
         );
 
-
-        detailsCard.setSpacing(
-                14
-        );
-
+        detailsCard.setSpacing(14);
 
         detailsCard.setMaxWidth(
                 Double.MAX_VALUE
         );
-
 
         detailsCard.setStyle(
                 "-fx-background-color:#FFFDFC;" +
@@ -786,7 +648,6 @@ BorderPane root =
                 "-fx-border-radius:16;" +
                 "-fx-border-width:1;"
         );
-
 
         detailsCard.setEffect(
                 new DropShadow(
@@ -797,8 +658,8 @@ BorderPane root =
                                 0,
                                 0.06
                         )
-         ) );
-
+                )
+        );
 
         // =====================================================
         // DETAILS HEADER
@@ -807,38 +668,22 @@ BorderPane root =
         HBox detailsHeader =
                 new HBox(12);
 
-
         detailsHeader.setAlignment(
                 Pos.CENTER_LEFT
         );
 
-
-        // =====================================================
-        // CLIPBOARD ICON
-        // =====================================================
-
         StackPane detailsIcon =
                 new StackPane();
 
-
         Circle detailsCircle =
-                new Circle(
-                        21
-                );
-
+                new Circle(21);
 
         detailsCircle.setFill(
-                Color.web(
-                        "#EAF2EC"
-                )
+                Color.web("#EAF2EC")
         );
 
-
         Label clipboardIcon =
-                new Label(
-                        "▤"
-                );
-
+                new Label("▤");
 
         clipboardIcon.setStyle(
                 "-fx-font-size:17px;" +
@@ -846,26 +691,18 @@ BorderPane root =
                 "-fx-text-fill:#315B45;"
         );
 
-
         detailsIcon.getChildren().addAll(
                 detailsCircle,
                 clipboardIcon
         );
 
-
-        // =====================================================
-        // DETAILS TITLE
-        // =====================================================
-
         VBox detailsHeading =
                 new VBox(3);
-
 
         Label detailsTitle =
                 new Label(
                         "Emergency Details"
                 );
-
 
         detailsTitle.setStyle(
                 "-fx-font-size:18px;" +
@@ -873,30 +710,25 @@ BorderPane root =
                 "-fx-text-fill:#171717;"
         );
 
-
         Label detailsSubtitle =
                 new Label(
                         "These details will be included in the emergency alert."
                 );
-
 
         detailsSubtitle.setStyle(
                 "-fx-font-size:12px;" +
                 "-fx-text-fill:#52606D;"
         );
 
-
         detailsHeading.getChildren().addAll(
                 detailsTitle,
                 detailsSubtitle
         );
 
-
         detailsHeader.getChildren().addAll(
                 detailsIcon,
                 detailsHeading
         );
-
 
         // =====================================================
         // FORM
@@ -905,55 +737,34 @@ BorderPane root =
         GridPane form =
                 new GridPane();
 
-
-        form.setHgap(
-                22
-        );
-
-
-        form.setVgap(
-                8
-        );
-
+        form.setHgap(22);
+        form.setVgap(8);
 
         form.setMaxWidth(
                 Double.MAX_VALUE
         );
 
-
         ColumnConstraints column1 =
                 new ColumnConstraints();
-
 
         ColumnConstraints column2 =
                 new ColumnConstraints();
 
-
-        column1.setPercentWidth(
-                50
-        );
-
-
-        column2.setPercentWidth(
-                50
-        );
-
+        column1.setPercentWidth(50);
+        column2.setPercentWidth(50);
 
         column1.setHgrow(
                 Priority.ALWAYS
         );
 
-
         column2.setHgrow(
                 Priority.ALWAYS
         );
-
 
         form.getColumnConstraints().addAll(
                 column1,
                 column2
         );
-
 
         // =====================================================
         // EMERGENCY TYPE
@@ -964,10 +775,8 @@ BorderPane root =
                         "Emergency Type *"
                 );
 
-
         ComboBox<String> typeBox =
                 new ComboBox<>();
-
 
         typeBox.getItems().addAll(
                 "Fire",
@@ -978,16 +787,13 @@ BorderPane root =
                 "Other"
         );
 
-
         typeBox.setPromptText(
                 "Select emergency type"
         );
 
-
         styleComboBox(
                 typeBox
         );
-
 
         // =====================================================
         // LOCATION
@@ -998,20 +804,16 @@ BorderPane root =
                         "Location *"
                 );
 
-
         TextField locationField =
                 new TextField();
-
 
         locationField.setPromptText(
                 "Example: Building A"
         );
 
-
         styleField(
                 locationField
         );
-
 
         form.add(
                 typeLabel,
@@ -1019,13 +821,11 @@ BorderPane root =
                 0
         );
 
-
         form.add(
                 locationLabel,
                 1,
                 0
         );
-
 
         form.add(
                 typeBox,
@@ -1033,13 +833,11 @@ BorderPane root =
                 1
         );
 
-
         form.add(
                 locationField,
                 1,
                 1
         );
-
 
         // =====================================================
         // ADDITIONAL INFORMATION
@@ -1050,30 +848,20 @@ BorderPane root =
                         "Additional Information"
                 );
 
-
         TextArea informationField =
                 new TextArea();
-
 
         informationField.setPromptText(
                 "Example: Smoke detected near the second floor..."
         );
 
-
-        informationField.setPrefHeight(
-                70
-        );
-
+        informationField.setPrefHeight(70);
 
         informationField.setMaxWidth(
                 Double.MAX_VALUE
         );
 
-
-        informationField.setWrapText(
-                true
-        );
-
+        informationField.setWrapText(true);
 
         informationField.setStyle(
                 "-fx-background-color:#FAF8F6;" +
@@ -1085,13 +873,11 @@ BorderPane root =
                 "-fx-padding:10;"
         );
 
-
         form.add(
                 informationLabel,
                 0,
                 2
         );
-
 
         form.add(
                 informationField,
@@ -1101,37 +887,20 @@ BorderPane root =
                 1
         );
 
-
         // =====================================================
         // CLEAR BUTTON
         // =====================================================
 
         Button clearButton =
-                new Button(
-                        "Clear"
-                );
+                new Button("Clear");
 
+        clearButton.setPrefWidth(100);
+        clearButton.setPrefHeight(40);
 
-        clearButton.setPrefWidth(
-                100
+        setClearButtonStyle(
+                clearButton,
+                false
         );
-
-
-        clearButton.setPrefHeight(
-                40
-        );
-
-
-        clearButton.setStyle(
-                "-fx-background-color:white;" +
-                "-fx-text-fill:#171717;" +
-                "-fx-font-weight:bold;" +
-                "-fx-border-color:#CFC7C2;" +
-                "-fx-border-radius:7;" +
-                "-fx-background-radius:7;" +
-                "-fx-cursor:hand;"
-        );
-
 
         // =====================================================
         // RESOLVE BUTTON
@@ -1142,128 +911,85 @@ BorderPane root =
                         "✓  Resolve Alert"
                 );
 
+        resolveButton.setPrefWidth(150);
+        resolveButton.setPrefHeight(40);
 
-        resolveButton.setPrefWidth(
-                150
+        setResolveButtonStyle(
+                resolveButton,
+                false
         );
-
-
-        resolveButton.setPrefHeight(
-                40
-        );
-
-
-        resolveButton.setStyle(
-                "-fx-background-color:#4E342E;" +
-                "-fx-text-fill:white;" +
-                "-fx-font-weight:bold;" +
-                "-fx-background-radius:7;" +
-                "-fx-cursor:hand;"
-        );
-
 
         // =====================================================
-        // BUTTON HOVER + SCALE ANIMATION
+        // BUTTON HOVER
         // =====================================================
 
-        clearButton.setOnMouseEntered(
-                e -> {
+        clearButton.setOnMouseEntered(e -> {
 
-                    clearButton.setStyle(
-                            "-fx-background-color:#F5F1EE;" +
-                            "-fx-text-fill:#171717;" +
-                            "-fx-font-weight:bold;" +
-                            "-fx-border-color:#BEB4AE;" +
-                            "-fx-border-radius:7;" +
-                            "-fx-background-radius:7;" +
-                            "-fx-cursor:hand;"
-                    );
+            setClearButtonStyle(
+                    clearButton,
+                    true
+            );
 
-                    playHoverScale(
-                            clearButton,
-                            1.04
-                    );
-                }
-        );
+            playHoverScale(
+                    clearButton,
+                    1.04
+            );
+        });
 
+        clearButton.setOnMouseExited(e -> {
 
-        clearButton.setOnMouseExited(
-                e -> {
+            setClearButtonStyle(
+                    clearButton,
+                    false
+            );
 
-                    clearButton.setStyle(
-                            "-fx-background-color:white;" +
-                            "-fx-text-fill:#171717;" +
-                            "-fx-font-weight:bold;" +
-                            "-fx-border-color:#CFC7C2;" +
-                            "-fx-border-radius:7;" +
-                            "-fx-background-radius:7;" +
-                            "-fx-cursor:hand;"
-                    );
+            playHoverScale(
+                    clearButton,
+                    1.0
+            );
+        });
 
-                    playHoverScale(
-                            clearButton,
-                            1.0
-                    );
-                }
-        );
+        resolveButton.setOnMouseEntered(e -> {
 
+            setResolveButtonStyle(
+                    resolveButton,
+                    true
+            );
 
-        resolveButton.setOnMouseEntered(
-                e -> {
+            playHoverScale(
+                    resolveButton,
+                    1.04
+            );
+        });
 
-                    resolveButton.setStyle(
-                            "-fx-background-color:#3E2723;" +
-                            "-fx-text-fill:white;" +
-                            "-fx-font-weight:bold;" +
-                            "-fx-background-radius:7;" +
-                            "-fx-cursor:hand;"
-                    );
+        resolveButton.setOnMouseExited(e -> {
 
-                    playHoverScale(
-                            resolveButton,
-                            1.04
-                    );
-                }
-        );
+            setResolveButtonStyle(
+                    resolveButton,
+                    false
+            );
 
-
-        resolveButton.setOnMouseExited(
-                e -> {
-
-                    resolveButton.setStyle(
-                            "-fx-background-color:#4E342E;" +
-                            "-fx-text-fill:white;" +
-                            "-fx-font-weight:bold;" +
-                            "-fx-background-radius:7;" +
-                            "-fx-cursor:hand;"
-                    );
-
-                    playHoverScale(
-                            resolveButton,
-                            1.0
-                    );
-                }
-        );
-
+            playHoverScale(
+                    resolveButton,
+                    1.0
+            );
+        });
 
         // =====================================================
-        // FIELD ANIMATIONS
+        // FIELD ANIMATION
         // =====================================================
 
         addFieldAnimation(
                 typeBox
         );
 
-
         addFieldAnimation(
                 locationField
         );
 
-
         addFieldAnimation(
                 informationField
         );
-
 
         // =====================================================
         // BOTTOM BUTTONS
@@ -1276,11 +1002,9 @@ BorderPane root =
                         resolveButton
                 );
 
-
         bottomButtons.setAlignment(
                 Pos.CENTER_RIGHT
         );
-
 
         detailsCard.getChildren().addAll(
                 detailsHeader,
@@ -1288,10 +1012,9 @@ BorderPane root =
                 bottomButtons
         );
 
-
         // =====================================================
         // SEND EMERGENCY ALERT
-        // FUNCTIONALITY UNCHANGED
+        // FIRESTORE FUNCTIONALITY
         // =====================================================
 
         sendAlertButton.setOnAction(e -> {
@@ -1309,7 +1032,6 @@ BorderPane root =
 
                 return;
             }
-
 
             if (
                     typeBox.getValue() == null
@@ -1331,20 +1053,16 @@ BorderPane root =
                 return;
             }
 
-
             emergencyType =
                     typeBox.getValue();
-
 
             emergencyLocation =
                     locationField.getText()
                             .trim();
 
-
             emergencyDetails =
                     informationField.getText()
                             .trim();
-
 
             emergencyTime =
                     LocalDateTime.now()
@@ -1354,22 +1072,18 @@ BorderPane root =
                                     )
                             );
 
-
             Alert confirmation =
                     new Alert(
                             Alert.AlertType.CONFIRMATION
                     );
 
-
             confirmation.setTitle(
                     "Confirm Emergency Alert"
             );
 
-
             confirmation.setHeaderText(
                     "Send Emergency Alert?"
             );
-
 
             confirmation.setContentText(
                     "Emergency: "
@@ -1379,7 +1093,6 @@ BorderPane root =
                             + "\n\nThis alert will be sent to residents and the secretary."
             );
 
-
             confirmation.showAndWait()
                     .ifPresent(response -> {
 
@@ -1388,8 +1101,17 @@ BorderPane root =
                                         ButtonType.OK
                         ) {
 
-                            if (loggedInEmail == null ||
-                                    loggedInEmail.trim().isEmpty()) {
+                            // =================================
+                            // CHECK EMAIL
+                            // =================================
+
+                            if (
+                                    loggedInEmail == null
+                                    ||
+                                    loggedInEmail
+                                            .trim()
+                                            .isEmpty()
+                            ) {
 
                                 showMessage(
                                         "User Not Found",
@@ -1399,9 +1121,17 @@ BorderPane root =
                                 return;
                             }
 
+                            // =================================
+                            // CHECK SOCIETY
+                            // =================================
 
-                            if (society == null ||
-                                    society.trim().isEmpty()) {
+                            if (
+                                    society == null
+                                    ||
+                                    society
+                                            .trim()
+                                            .isEmpty()
+                            ) {
 
                                 showMessage(
                                         "Society Not Found",
@@ -1411,6 +1141,9 @@ BorderPane root =
                                 return;
                             }
 
+                            // =================================
+                            // SAVE TO FIRESTORE
+                            // =================================
 
                             EmergencyModel savedEmergency =
                                     emergencyController.createEmergency(
@@ -1422,6 +1155,9 @@ BorderPane root =
                                             emergencyTime
                                     );
 
+                            // =================================
+                            // SAVE FAILED
+                            // =================================
 
                             if (savedEmergency == null) {
 
@@ -1443,28 +1179,27 @@ BorderPane root =
                                 return;
                             }
 
+                            // =================================
+                            // SAVE SUCCESSFUL
+                            // =================================
 
                             activeEmergencyId =
-                                    savedEmergency.getEmergencyId();
-
+                                    savedEmergency
+                                            .getEmergencyId();
 
                             sosActive = true;
-
 
                             updateStatus(
                                     statusLabel
                             );
 
-
                             playSOSSuccessAnimation(
                                     sendAlertButton
                             );
 
-
                             playCardAnimation(
                                     alertCard
                             );
-
 
                             showMessage(
                                     "Emergency Alert Sent",
@@ -1474,17 +1209,22 @@ BorderPane root =
                     });
         });
 
-
         // =====================================================
-        // RESOLVE EMERGENCY ALERT
-        // FUNCTIONALITY UNCHANGED
+        // RESOLVE EMERGENCY
+        // FIRESTORE FUNCTIONALITY
         // =====================================================
 
         resolveButton.setOnAction(e -> {
 
-            if (!sosActive ||
-                    activeEmergencyId == null ||
-                    activeEmergencyId.trim().isEmpty()) {
+            if (
+                    !sosActive
+                    ||
+                    activeEmergencyId == null
+                    ||
+                    activeEmergencyId
+                            .trim()
+                            .isEmpty()
+            ) {
 
                 playCardAnimation(
                         detailsCard
@@ -1498,13 +1238,11 @@ BorderPane root =
                 return;
             }
 
-
             boolean resolved =
-        emergencyController.resolveEmergency(
-                loggedInEmail,
-                activeEmergencyId
-        );
-
+                    emergencyController.resolveEmergency(
+                            loggedInEmail,
+                            activeEmergencyId
+                    );
 
             if (!resolved) {
 
@@ -1520,21 +1258,17 @@ BorderPane root =
                 return;
             }
 
-
             sosActive = false;
 
             activeEmergencyId = "";
-
 
             updateStatus(
                     statusLabel
             );
 
-
             playCardAnimation(
                     detailsCard
             );
-
 
             showMessage(
                     "Alert Resolved",
@@ -1542,30 +1276,22 @@ BorderPane root =
             );
         });
 
-
         // =====================================================
-        // CLEAR BUTTON
-        // FUNCTIONALITY UNCHANGED
+        // CLEAR
         // =====================================================
 
         clearButton.setOnAction(e -> {
 
-            typeBox.setValue(
-                    null
-            );
-
+            typeBox.setValue(null);
 
             locationField.clear();
 
-
             informationField.clear();
-
 
             playCardAnimation(
                     detailsCard
             );
         });
-
 
         // =====================================================
         // ADD CONTENT
@@ -1576,40 +1302,35 @@ BorderPane root =
                 detailsCard
         );
 
-
         // =====================================================
         // MAIN AREA
+        // HEADER FIXED
         // =====================================================
 
         BorderPane mainarea =
                 new BorderPane();
 
-
         mainarea.setTop(
                 header
         );
-
 
         mainarea.setCenter(
                 content
         );
 
-
         root.setCenter(
                 mainarea
         );
 
-
         // =====================================================
-        // PAGE ENTRANCE ANIMATION
+        // PAGE ANIMATION
+        // HEADER IS NOT ANIMATED
         // =====================================================
 
         playPageAnimation(
-                header,
                 alertCard,
                 detailsCard
         );
-
 
         // =====================================================
         // RETURN SCENE
@@ -1622,47 +1343,17 @@ BorderPane root =
         );
     }
 
-
     // =====================================================
     // PAGE ENTRANCE ANIMATION
-    // SAME STYLE AS MANUAL VISITOR ENTRY
+    // HEADER NOT INCLUDED
     // =====================================================
 
     private static void playPageAnimation(
-            HBox header,
             VBox alertCard,
             VBox detailsCard) {
 
-        header.setOpacity(0);
-
         alertCard.setOpacity(0);
-
         detailsCard.setOpacity(0);
-
-
-        FadeTransition headerFade =
-                new FadeTransition(
-                        Duration.millis(600),
-                        header
-                );
-
-
-        headerFade.setFromValue(0);
-
-        headerFade.setToValue(1);
-
-
-        TranslateTransition headerSlide =
-                new TranslateTransition(
-                        Duration.millis(600),
-                        header
-                );
-
-
-        headerSlide.setFromY(-25);
-
-        headerSlide.setToY(0);
-
 
         FadeTransition alertFade =
                 new FadeTransition(
@@ -1670,11 +1361,8 @@ BorderPane root =
                         alertCard
                 );
 
-
         alertFade.setFromValue(0);
-
         alertFade.setToValue(1);
-
 
         TranslateTransition alertSlide =
                 new TranslateTransition(
@@ -1682,11 +1370,8 @@ BorderPane root =
                         alertCard
                 );
 
-
         alertSlide.setFromY(30);
-
         alertSlide.setToY(0);
-
 
         FadeTransition detailsFade =
                 new FadeTransition(
@@ -1694,11 +1379,8 @@ BorderPane root =
                         detailsCard
                 );
 
-
         detailsFade.setFromValue(0);
-
         detailsFade.setToValue(1);
-
 
         TranslateTransition detailsSlide =
                 new TranslateTransition(
@@ -1706,50 +1388,136 @@ BorderPane root =
                         detailsCard
                 );
 
-
         detailsSlide.setFromY(30);
-
         detailsSlide.setToY(0);
 
-
-        headerFade.play();
-
-        headerSlide.play();
-
+        alertFade.play();
+        alertSlide.play();
 
         alertFade.setDelay(
                 Duration.millis(150)
         );
 
-
         alertSlide.setDelay(
                 Duration.millis(150)
         );
-
 
         detailsFade.setDelay(
                 Duration.millis(300)
         );
 
-
         detailsSlide.setDelay(
                 Duration.millis(300)
         );
 
-
-        alertFade.play();
-
-        alertSlide.play();
-
-
         detailsFade.play();
-
         detailsSlide.play();
     }
 
+    // =====================================================
+    // SOS BUTTON STYLE
+    // =====================================================
+
+    private static void setSOSButtonStyle(
+            Button button,
+            boolean hover) {
+
+        if (hover) {
+
+            button.setStyle(
+                    "-fx-background-color:#9E3030;" +
+                    "-fx-text-fill:white;" +
+                    "-fx-font-size:28px;" +
+                    "-fx-font-weight:bold;" +
+                    "-fx-background-radius:100px;" +
+                    "-fx-border-color:#E7A0A0;" +
+                    "-fx-border-width:4px;" +
+                    "-fx-border-radius:100px;" +
+                    "-fx-cursor:hand;"
+            );
+
+        } else {
+
+            button.setStyle(
+                    "-fx-background-color:#B83A3A;" +
+                    "-fx-text-fill:white;" +
+                    "-fx-font-size:28px;" +
+                    "-fx-font-weight:bold;" +
+                    "-fx-background-radius:100px;" +
+                    "-fx-border-color:#EBAAAA;" +
+                    "-fx-border-width:4px;" +
+                    "-fx-border-radius:100px;" +
+                    "-fx-cursor:hand;"
+            );
+        }
+    }
 
     // =====================================================
-    // BUTTON HOVER SCALE
+    // CLEAR BUTTON STYLE
+    // =====================================================
+
+    private static void setClearButtonStyle(
+            Button button,
+            boolean hover) {
+
+        if (hover) {
+
+            button.setStyle(
+                    "-fx-background-color:#F5F1EE;" +
+                    "-fx-text-fill:#171717;" +
+                    "-fx-font-weight:bold;" +
+                    "-fx-border-color:#BEB4AE;" +
+                    "-fx-border-radius:7;" +
+                    "-fx-background-radius:7;" +
+                    "-fx-cursor:hand;"
+            );
+
+        } else {
+
+            button.setStyle(
+                    "-fx-background-color:white;" +
+                    "-fx-text-fill:#171717;" +
+                    "-fx-font-weight:bold;" +
+                    "-fx-border-color:#CFC7C2;" +
+                    "-fx-border-radius:7;" +
+                    "-fx-background-radius:7;" +
+                    "-fx-cursor:hand;"
+            );
+        }
+    }
+
+    // =====================================================
+    // RESOLVE BUTTON STYLE
+    // =====================================================
+
+    private static void setResolveButtonStyle(
+            Button button,
+            boolean hover) {
+
+        if (hover) {
+
+            button.setStyle(
+                    "-fx-background-color:#3E2723;" +
+                    "-fx-text-fill:white;" +
+                    "-fx-font-weight:bold;" +
+                    "-fx-background-radius:7;" +
+                    "-fx-cursor:hand;"
+            );
+
+        } else {
+
+            button.setStyle(
+                    "-fx-background-color:#4E342E;" +
+                    "-fx-text-fill:white;" +
+                    "-fx-font-weight:bold;" +
+                    "-fx-background-radius:7;" +
+                    "-fx-cursor:hand;"
+            );
+        }
+    }
+
+    // =====================================================
+    // HOVER SCALE
     // =====================================================
 
     private static void playHoverScale(
@@ -1762,82 +1530,55 @@ BorderPane root =
                         node
                 );
 
-
         scale.setToX(
                 scaleValue
         );
-
 
         scale.setToY(
                 scaleValue
         );
 
-
         scale.play();
     }
 
-
     // =====================================================
-    // FIELD HOVER ANIMATION
+    // FIELD ANIMATION
     // =====================================================
 
     private static void addFieldAnimation(
             javafx.scene.Node field) {
 
-        field.setOnMouseEntered(
-                e -> {
+        field.setOnMouseEntered(e -> {
 
-                    ScaleTransition scale =
-                            new ScaleTransition(
-                                    Duration.millis(120),
-                                    field
-                            );
-
-
-                    scale.setToX(
-                            1.01
+            ScaleTransition scale =
+                    new ScaleTransition(
+                            Duration.millis(120),
+                            field
                     );
 
+            scale.setToX(1.01);
+            scale.setToY(1.01);
 
-                    scale.setToY(
-                            1.01
+            scale.play();
+        });
+
+        field.setOnMouseExited(e -> {
+
+            ScaleTransition scale =
+                    new ScaleTransition(
+                            Duration.millis(120),
+                            field
                     );
 
+            scale.setToX(1);
+            scale.setToY(1);
 
-                    scale.play();
-                }
-        );
-
-
-        field.setOnMouseExited(
-                e -> {
-
-                    ScaleTransition scale =
-                            new ScaleTransition(
-                                    Duration.millis(120),
-                                    field
-                            );
-
-
-                    scale.setToX(
-                            1
-                    );
-
-
-                    scale.setToY(
-                            1
-                    );
-
-
-                    scale.play();
-                }
-        );
+            scale.play();
+        });
     }
 
-
     // =====================================================
-    // CARD FEEDBACK ANIMATION
-    // SAME STYLE AS MANUAL VISITOR ENTRY
+    // CARD ANIMATION
     // =====================================================
 
     private static void playCardAnimation(
@@ -1849,40 +1590,18 @@ BorderPane root =
                         node
                 );
 
+        scale.setFromX(1);
+        scale.setFromY(1);
 
-        scale.setFromX(
-                1
-        );
+        scale.setToX(1.015);
+        scale.setToY(1.015);
 
+        scale.setAutoReverse(true);
 
-        scale.setFromY(
-                1
-        );
-
-
-        scale.setToX(
-                1.015
-        );
-
-
-        scale.setToY(
-                1.015
-        );
-
-
-        scale.setAutoReverse(
-                true
-        );
-
-
-        scale.setCycleCount(
-                2
-        );
-
+        scale.setCycleCount(2);
 
         scale.play();
     }
-
 
     // =====================================================
     // SOS RING ANIMATION
@@ -1898,39 +1617,19 @@ BorderPane root =
                         outerCircle
                 );
 
+        outerPulse.setFromX(1);
+        outerPulse.setFromY(1);
 
-        outerPulse.setFromX(
-                1
-        );
+        outerPulse.setToX(1.08);
+        outerPulse.setToY(1.08);
 
-
-        outerPulse.setFromY(
-                1
-        );
-
-
-        outerPulse.setToX(
-                1.08
-        );
-
-
-        outerPulse.setToY(
-                1.08
-        );
-
-
-        outerPulse.setAutoReverse(
-                true
-        );
-
+        outerPulse.setAutoReverse(true);
 
         outerPulse.setCycleCount(
                 ScaleTransition.INDEFINITE
         );
 
-
         outerPulse.play();
-
 
         ScaleTransition middlePulse =
                 new ScaleTransition(
@@ -1938,40 +1637,20 @@ BorderPane root =
                         middleCircle
                 );
 
+        middlePulse.setFromX(1);
+        middlePulse.setFromY(1);
 
-        middlePulse.setFromX(
-                1
-        );
+        middlePulse.setToX(1.05);
+        middlePulse.setToY(1.05);
 
-
-        middlePulse.setFromY(
-                1
-        );
-
-
-        middlePulse.setToX(
-                1.05
-        );
-
-
-        middlePulse.setToY(
-                1.05
-        );
-
-
-        middlePulse.setAutoReverse(
-                true
-        );
-
+        middlePulse.setAutoReverse(true);
 
         middlePulse.setCycleCount(
                 ScaleTransition.INDEFINITE
         );
 
-
         middlePulse.play();
     }
-
 
     // =====================================================
     // SOS SUCCESS ANIMATION
@@ -1986,76 +1665,39 @@ BorderPane root =
                         button
                 );
 
+        scale.setFromX(1);
+        scale.setFromY(1);
 
-        scale.setFromX(
-                1
-        );
+        scale.setToX(1.10);
+        scale.setToY(1.10);
 
+        scale.setAutoReverse(true);
 
-        scale.setFromY(
-                1
-        );
-
-
-        scale.setToX(
-                1.10
-        );
-
-
-        scale.setToY(
-                1.10
-        );
-
-
-        scale.setAutoReverse(
-                true
-        );
-
-
-        scale.setCycleCount(
-                2
-        );
-
+        scale.setCycleCount(2);
 
         scale.play();
     }
 
-
     // =====================================================
     // INFORMATION CARD
-    // UI ONLY
     // =====================================================
 
     private static VBox createInfoCard(
             String iconText,
             String titleText,
             String descriptionText,
-            String iconColor
-    ) {
+            String iconColor) {
 
         VBox card =
                 new VBox(9);
 
-
-        card.setPrefWidth(
-                190
-        );
-
-
-        card.setMinWidth(
-                175
-        );
-
-
-        card.setPrefHeight(
-                105
-        );
-
+        card.setPrefWidth(190);
+        card.setMinWidth(175);
+        card.setPrefHeight(105);
 
         card.setPadding(
                 new Insets(14)
         );
-
 
         card.setStyle(
                 "-fx-background-color:#FAF9F7;" +
@@ -2065,29 +1707,18 @@ BorderPane root =
                 "-fx-border-width:1;"
         );
 
-
-        // =====================================================
-        // ICON + TITLE
-        // =====================================================
-
         HBox top =
                 new HBox(9);
-
 
         top.setAlignment(
                 Pos.CENTER_LEFT
         );
 
-
         StackPane iconContainer =
                 new StackPane();
 
-
         Circle iconCircle =
-                new Circle(
-                        18
-                );
-
+                new Circle(18);
 
         iconCircle.setFill(
                 Color.web(
@@ -2097,12 +1728,10 @@ BorderPane root =
                 )
         );
 
-
         Label icon =
                 new Label(
                         iconText
                 );
-
 
         icon.setStyle(
                 "-fx-font-size:14px;" +
@@ -2112,18 +1741,15 @@ BorderPane root =
                 ";"
         );
 
-
         iconContainer.getChildren().addAll(
                 iconCircle,
                 icon
         );
 
-
         Label cardTitle =
                 new Label(
                         titleText
                 );
-
 
         cardTitle.setStyle(
                 "-fx-font-size:12px;" +
@@ -2131,109 +1757,72 @@ BorderPane root =
                 "-fx-text-fill:#171717;"
         );
 
-
         top.getChildren().addAll(
                 iconContainer,
                 cardTitle
         );
-
-
-        // =====================================================
-        // DESCRIPTION
-        // =====================================================
 
         Label description =
                 new Label(
                         descriptionText
                 );
 
-
-        description.setWrapText(
-                true
-        );
-
+        description.setWrapText(true);
 
         description.setStyle(
                 "-fx-font-size:10px;" +
                 "-fx-text-fill:#68756F;"
         );
 
-
         card.getChildren().addAll(
                 top,
                 description
         );
 
-
         // =====================================================
-        // INFORMATION CARD HOVER ANIMATION
+        // CARD HOVER
         // =====================================================
 
-        card.setOnMouseEntered(
-                e -> {
+        card.setOnMouseEntered(e -> {
 
-                    ScaleTransition scale =
-                            new ScaleTransition(
-                                    Duration.millis(120),
-                                    card
-                            );
-
-
-                    scale.setToX(
-                            1.03
+            ScaleTransition scale =
+                    new ScaleTransition(
+                            Duration.millis(120),
+                            card
                     );
 
+            scale.setToX(1.03);
+            scale.setToY(1.03);
 
-                    scale.setToY(
-                            1.03
+            scale.play();
+        });
+
+        card.setOnMouseExited(e -> {
+
+            ScaleTransition scale =
+                    new ScaleTransition(
+                            Duration.millis(120),
+                            card
                     );
 
+            scale.setToX(1);
+            scale.setToY(1);
 
-                    scale.play();
-                }
-        );
-
-
-        card.setOnMouseExited(
-                e -> {
-
-                    ScaleTransition scale =
-                            new ScaleTransition(
-                                    Duration.millis(120),
-                                    card
-                            );
-
-
-                    scale.setToX(
-                            1
-                    );
-
-
-                    scale.setToY(
-                            1
-                    );
-
-
-                    scale.play();
-                }
-        );
-
+            scale.play();
+        });
 
         return card;
     }
-
 
     // =====================================================
     // LIGHTEN COLOR
     // =====================================================
 
     private static String lightenColor(
-            String hex
-    ) {
+            String hex) {
 
         Color color =
                 Color.web(hex);
-
 
         double r =
                 Math.min(
@@ -2241,20 +1830,17 @@ BorderPane root =
                         color.getRed() + 0.80
                 );
 
-
         double g =
                 Math.min(
                         1,
                         color.getGreen() + 0.80
                 );
 
-
         double b =
                 Math.min(
                         1,
                         color.getBlue() + 0.80
                 );
-
 
         return String.format(
                 "#%02X%02X%02X",
@@ -2263,7 +1849,6 @@ BorderPane root =
                 (int) (b * 255)
         );
     }
-
 
     // =====================================================
     // RESTORE ACTIVE EMERGENCY
@@ -2274,50 +1859,91 @@ BorderPane root =
         sosActive = false;
         activeEmergencyId = "";
 
-        if (loggedInEmail == null ||
-                loggedInEmail.trim().isEmpty()) {
+        if (
+                loggedInEmail == null
+                ||
+                loggedInEmail
+                        .trim()
+                        .isEmpty()
+        ) {
             return;
         }
 
         try {
-            List<EmergencyModel> emergencies =
-                    emergencyController.getEmergenciesByEmail(
-                            loggedInEmail
-                    );
 
-            if (emergencies == null || emergencies.isEmpty()) {
+            List<EmergencyModel> emergencies =
+                    emergencyController
+                            .getEmergenciesByEmail(
+                                    loggedInEmail
+                            );
+
+            if (
+                    emergencies == null
+                    ||
+                    emergencies.isEmpty()
+            ) {
                 return;
             }
 
             EmergencyModel latestActive = null;
 
-            for (EmergencyModel emergency : emergencies) {
+            for (
+                    EmergencyModel emergency :
+                    emergencies
+            ) {
 
-                if (emergency == null ||
+                if (
+                        emergency == null
+                        ||
                         !"ACTIVE".equalsIgnoreCase(
-                                emergency.getStatus())) {
+                                emergency.getStatus()
+                        )
+                ) {
                     continue;
                 }
 
                 if (latestActive == null) {
-                    latestActive = emergency;
+
+                    latestActive =
+                            emergency;
+
                     continue;
                 }
 
-                if (emergency.getCreatedAt() != null &&
-                        (latestActive.getCreatedAt() == null ||
-                                emergency.getCreatedAt().after(
-                                        latestActive.getCreatedAt()))) {
-                    latestActive = emergency;
+                if (
+                        emergency.getCreatedAt() != null
+                        &&
+                        (
+                                latestActive.getCreatedAt()
+                                        == null
+                                ||
+                                emergency.getCreatedAt()
+                                        .after(
+                                                latestActive
+                                                        .getCreatedAt()
+                                        )
+                        )
+                ) {
+
+                    latestActive =
+                            emergency;
                 }
             }
 
-            if (latestActive != null &&
-                    latestActive.getEmergencyId() != null &&
-                    !latestActive.getEmergencyId().trim().isEmpty()) {
+            if (
+                    latestActive != null
+                    &&
+                    latestActive.getEmergencyId() != null
+                    &&
+                    !latestActive
+                            .getEmergencyId()
+                            .trim()
+                            .isEmpty()
+            ) {
 
                 activeEmergencyId =
-                        latestActive.getEmergencyId();
+                        latestActive
+                                .getEmergencyId();
 
                 emergencyType =
                         latestActive.getType() == null
@@ -2352,21 +1978,18 @@ BorderPane root =
         }
     }
 
-
     // =====================================================
     // UPDATE STATUS
     // =====================================================
 
     private static void updateStatus(
-            Label statusLabel
-    ) {
+            Label statusLabel) {
 
         if (sosActive) {
 
             statusLabel.setText(
                     "  ALERT ACTIVE  "
             );
-
 
             statusLabel.setStyle(
                     "-fx-font-size:12px;" +
@@ -2383,7 +2006,6 @@ BorderPane root =
                     "  ●  No active emergency  "
             );
 
-
             statusLabel.setStyle(
                     "-fx-font-size:12px;" +
                     "-fx-font-weight:bold;" +
@@ -2395,20 +2017,15 @@ BorderPane root =
         }
     }
 
-
     // =====================================================
     // CREATE LABEL
     // =====================================================
 
     private static Label createLabel(
-            String text
-    ) {
+            String text) {
 
         Label label =
-                new Label(
-                        text
-                );
-
+                new Label(text);
 
         label.setStyle(
                 "-fx-font-size:12px;" +
@@ -2416,28 +2033,21 @@ BorderPane root =
                 "-fx-text-fill:#171717;"
         );
 
-
         return label;
     }
-
 
     // =====================================================
     // STYLE TEXT FIELD
     // =====================================================
 
     private static void styleField(
-            TextField field
-    ) {
+            TextField field) {
 
         field.setMaxWidth(
                 Double.MAX_VALUE
         );
 
-
-        field.setPrefHeight(
-                42
-        );
-
+        field.setPrefHeight(42);
 
         field.setStyle(
                 "-fx-background-color:#FAF8F6;" +
@@ -2450,24 +2060,18 @@ BorderPane root =
         );
     }
 
-
     // =====================================================
     // STYLE COMBO BOX
     // =====================================================
 
     private static void styleComboBox(
-            ComboBox<String> box
-    ) {
+            ComboBox<String> box) {
 
         box.setMaxWidth(
                 Double.MAX_VALUE
         );
 
-
-        box.setPrefHeight(
-                42
-        );
-
+        box.setPrefHeight(42);
 
         box.setStyle(
                 "-fx-background-color:#FAF8F6;" +
@@ -2479,54 +2083,46 @@ BorderPane root =
         );
     }
 
-
     // =====================================================
     // SHOW MESSAGE
     // =====================================================
 
     private static void showMessage(
             String title,
-            String message
-    ) {
+            String message) {
 
         Alert alert =
                 new Alert(
                         Alert.AlertType.INFORMATION
                 );
 
-
         alert.setTitle(
                 title
         );
-
 
         alert.setHeaderText(
                 null
         );
 
-
         alert.setContentText(
                 message
         );
 
-
         alert.showAndWait();
     }
 
-
     // =====================================================
-    // SET LOGGED-IN GUARD EMAIL
-    // =====================================================
-    //
-    // Call this after successful guard login.
-    // No separate session file is required.
+    // SET LOGGED-IN EMAIL
     // =====================================================
 
     public static void setLoggedInEmail(
             String email) {
 
-        if (email == null ||
-                email.trim().isEmpty()) {
+        if (
+                email == null
+                ||
+                email.trim().isEmpty()
+        ) {
 
             loggedInEmail = "";
             society = "";
@@ -2538,85 +2134,77 @@ BorderPane root =
             return;
         }
 
-
         loggedInEmail =
                 email.trim().toLowerCase();
-
 
         try {
 
             UserDao userDao =
                     new UserDao();
 
-
             User user =
                     userDao.getUserByEmail(
                             loggedInEmail
                     );
 
+            if (user != null) {
 
-                        if (user != null) {
+                society =
+                        user.getSociety();
 
-                society = user.getSociety();
+                if (
+                        society == null
+                        ||
+                        society.trim().isEmpty()
+                ) {
 
-                if (society == null || society.trim().isEmpty()) {
-
-                        society = user.getSociety();
-                }
-
-                if (society == null) {
-
-                        society = "";
-
-                } else {
-
-                        society = society.trim();
-                }
+                    society = "";
 
                 } else {
+
+                    society =
+                            society.trim();
+                }
+
+            } else {
 
                 society = "";
-                }
-
+            }
 
             System.out.println(
                     "Emergency SOS User Loaded"
             );
 
-
             System.out.println(
-                    "Email: " +
-                            loggedInEmail
+                    "Email: "
+                            + loggedInEmail
             );
 
-
             System.out.println(
-                    "Society: " +
-                            (society.isEmpty()
-                                    ? "NOT FOUND"
-                                    : society)
+                    "Society: "
+                            +
+                            (
+                                    society.isEmpty()
+                                            ? "NOT FOUND"
+                                            : society
+                            )
             );
-
 
             System.out.println(
                     "======================================"
             );
 
-
         } catch (Exception e) {
 
             society = "";
-
 
             System.out.println(
                     "ERROR: Unable to load guard society."
             );
 
-
             e.printStackTrace();
         }
     }
-
 
     // =====================================================
     // SOS STATUS
