@@ -1,11 +1,14 @@
 package com.society.controller.Secretary_Controller;
 
+import com.society.dao.Resident_dao.Resident;
 import com.society.dao.Secretary_dao.ReportDao;
 import com.society.dao.Welcome.UserDao;
 import com.society.model.Secretary_model.Report;
 import com.society.model.Welcome.User;
+//import com.society.view.Owner_portal.ResidentModel;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -357,5 +360,17 @@ public class ReportController {
         }
 
         return value.trim();
+    }
+
+    
+
+    public static boolean removeTenant(String ownerEmail, Object email, LocalDate moveOutDateValue, String reason) {
+        
+        throw new UnsupportedOperationException("Unimplemented method 'removeTenant'");
+    }
+
+    public static List<Resident> getActiveTenants(String ownerEmail) {
+        
+        throw new UnsupportedOperationException("Unimplemented method 'getActiveTenants'");
     }
 }
