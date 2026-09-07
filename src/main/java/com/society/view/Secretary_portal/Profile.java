@@ -7,6 +7,10 @@ import com.society.model.Welcome.User;
 import com.society.view.ScreenSize;
 import com.society.view.Welcome.LogInPage;
 
+import javafx.animation.FadeTransition;
+import javafx.animation.ParallelTransition;
+import javafx.animation.ScaleTransition;
+import javafx.animation.TranslateTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -21,29 +25,12 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-
-
-// =========================================================
-// PROFILE
-// =========================================================
+import javafx.util.Duration;
 
 public class Profile {
 
-    // =========================================================
-    // SCENE
-    // =========================================================
-
     private Scene profileScene;
-
-    // =========================================================
-    // LOGGED IN USER
-    // =========================================================
-
     private User loggedInUser;
-
-    // =========================================================
-    // EDIT FIELDS
-    // =========================================================
 
     private TextField nameField;
     private TextField emailField;
@@ -55,10 +42,6 @@ public class Profile {
     private TextField societyField;
     private TextField addressField;
 
-    // =========================================================
-    // VIEW LABELS
-    // =========================================================
-
     private Label viewNameValue;
     private Label viewEmailValue;
     private Label viewPhoneValue;
@@ -68,36 +51,13 @@ public class Profile {
     private Label viewMembersValue;
     private Label viewAddressValue;
 
-    // =========================================================
-    // LEFT PROFILE LABELS
-    // =========================================================
-
     private Label profileInitialLabel;
     private Label profileNameLabel;
     private Label profileRoleLabel;
     private Label profileSocietyLabel;
 
-    // =========================================================
-    // BUTTONS
-    // =========================================================
-
     private Button editBtn;
     private Button saveBtn;
-
-    // =========================================================
-    // IMPORTANT UI CONTAINERS
-    // =========================================================
-
-    /*
-     * हे class-level fields ठेवले आहेत.
-     *
-     * त्यामुळे enableEditing() मध्ये:
-     *
-     * getParent()
-     * child index
-     *
-     * वगैरे वापरण्याची गरज नाही.
-     */
 
     private VBox personalView;
     private VBox personalEdit;
@@ -108,15 +68,11 @@ public class Profile {
     private HBox saveBox;
 
     // =========================================================
-    // DEFAULT CONSTRUCTOR
+    // CONSTRUCTORS
     // =========================================================
 
     public Profile() {
     }
-
-    // =========================================================
-    // CONSTRUCTOR
-    // =========================================================
 
     public Profile(User loggedInUser) {
         this.loggedInUser = loggedInUser;
@@ -128,15 +84,7 @@ public class Profile {
 
     public Scene createScene(Stage stage) {
 
-        // =====================================================
-        // STEP 1: GET LOGGED-IN EMAIL
-        // =====================================================
-
         String loggedEmail = UserDao.getLoggedInEmail();
-
-        // =====================================================
-        // STEP 2: IF USER OBJECT NULL, FETCH USING EMAIL
-        // =====================================================
 
         if (loggedInUser == null) {
 
@@ -150,15 +98,7 @@ public class Profile {
             }
         }
 
-        // =====================================================
-        // STEP 3: ALWAYS LOAD LATEST FIRESTORE DATA
-        // =====================================================
-
         loadLatestUserData();
-
-        // =====================================================
-        // STEP 4: USER NOT FOUND
-        // =====================================================
 
         if (loggedInUser == null) {
 
@@ -181,6 +121,60 @@ public class Profile {
                 sidebarObj.createSidebar(stage);
 
         // =====================================================
+        // HEADER
+        // =====================================================
+
+        HBox header = new HBox();
+
+        header.setPrefHeight(80);
+        header.setMinHeight(80);
+        header.setMaxHeight(80);
+
+        header.setPadding(
+                new Insets(18, 25, 18, 25)
+        );
+
+        header.setAlignment(
+                Pos.CENTER_LEFT
+        );
+
+        header.setStyle(
+                "-fx-background-color:#593a32;"
+        );
+
+        Label headerTitle =
+                new Label("PROFILE");
+
+        headerTitle.setStyle(
+                "-fx-font-size:25px;" +
+                "-fx-font-weight:bold;" +
+                "-fx-text-fill:white;"
+        );
+
+        Region headerSpacer =
+                new Region();
+
+        HBox.setHgrow(
+                headerSpacer,
+                Priority.ALWAYS
+        );
+
+        Label headerText =
+                new Label("Secretary Profile");
+
+        headerText.setStyle(
+                "-fx-font-size:16px;" +
+                "-fx-font-weight:bold;" +
+                "-fx-text-fill:white;"
+        );
+
+        header.getChildren().addAll(
+                headerTitle,
+                headerSpacer,
+                headerText
+        );
+
+        // =====================================================
         // MAIN CONTAINER
         // =====================================================
 
@@ -201,7 +195,7 @@ public class Profile {
         );
 
         // =====================================================
-        // PAGE HEADING
+        // HEADING
         // =====================================================
 
         Label heading =
@@ -286,10 +280,6 @@ public class Profile {
                 Priority.ALWAYS
         );
 
-        // =====================================================
-        // ADD TO CARD
-        // =====================================================
-
         profileCard.getChildren().addAll(
                 leftProfile,
                 rightProfile
@@ -311,6 +301,37 @@ public class Profile {
                 profileCard
         );
 
+        VBox.setVgrow(
+                mainContainer,
+                Priority.ALWAYS
+        );
+
+        // =====================================================
+        // CONTENT WRAPPER
+        // =====================================================
+
+        VBox contentWrapper =
+                new VBox();
+
+        contentWrapper.setMaxSize(
+                Double.MAX_VALUE,
+                Double.MAX_VALUE
+        );
+
+        contentWrapper.setStyle(
+                "-fx-background-color:#B3ADAD;"
+        );
+
+        contentWrapper.getChildren().addAll(
+                header,
+                mainContainer
+        );
+
+        VBox.setVgrow(
+                mainContainer,
+                Priority.ALWAYS
+        );
+
         // =====================================================
         // ROOT
         // =====================================================
@@ -319,7 +340,7 @@ public class Profile {
                 new BorderPane();
 
         root.setLeft(sidebar);
-        root.setCenter(mainContainer);
+        root.setCenter(contentWrapper);
 
         root.setStyle(
                 "-fx-background-color:#B3ADAD;"
@@ -335,6 +356,17 @@ public class Profile {
                         ScreenSize.getWidth(),
                         ScreenSize.getHeight()
                 );
+
+        // =====================================================
+        // DOWN → UP ANIMATION
+        // =====================================================
+
+        playProfileAnimation(
+                heading,
+                title,
+                subtitle,
+                profileCard
+        );
 
         return profileScene;
     }
@@ -357,7 +389,7 @@ public class Profile {
         );
 
         // =====================================================
-        // INITIAL
+        // PROFILE INITIAL
         // =====================================================
 
         profileInitialLabel =
@@ -491,48 +523,34 @@ public class Profile {
         // =====================================================
 
         editBtn =
-                new Button(
-                        "Edit Profile"
-                );
+                new Button("Edit Profile");
 
-        editBtn.setPrefWidth(
-                240
-        );
-
-        editBtn.setPrefHeight(
-                46
-        );
+        editBtn.setPrefWidth(240);
+        editBtn.setPrefHeight(46);
 
         editBtn.setStyle(
-                "-fx-background-color:#434141;" +
+                "-fx-background-color:#593a32;" +
                 "-fx-text-fill:white;" +
                 "-fx-font-size:14px;" +
                 "-fx-font-weight:bold;" +
                 "-fx-background-radius:7;"
         );
 
-        editBtn.setOnAction(e -> {
+        addPopupAnimation(editBtn);
 
-            enableEditing(true);
-
-        });
+        editBtn.setOnAction(e ->
+                enableEditing(true)
+        );
 
         // =====================================================
         // LOGOUT BUTTON
         // =====================================================
 
         Button logoutBtn =
-                new Button(
-                        "Logout"
-                );
+                new Button("Logout");
 
-        logoutBtn.setPrefWidth(
-                240
-        );
-
-        logoutBtn.setPrefHeight(
-                46
-        );
+        logoutBtn.setPrefWidth(240);
+        logoutBtn.setPrefHeight(46);
 
         logoutBtn.setStyle(
                 "-fx-background-color:#D9534F;" +
@@ -542,24 +560,16 @@ public class Profile {
                 "-fx-background-radius:7;"
         );
 
-        logoutBtn.setOnAction(e -> {
+        addPopupAnimation(logoutBtn);
 
-            handleLogout(stage);
-
-        });
-
-        // =====================================================
-        // ADD BUTTONS
-        // =====================================================
+        logoutBtn.setOnAction(e ->
+                handleLogout(stage)
+        );
 
         buttonBox.getChildren().addAll(
                 editBtn,
                 logoutBtn
         );
-
-        // =====================================================
-        // ADD LEFT CONTENT
-        // =====================================================
 
         box.getChildren().addAll(
                 profileInitialLabel,
@@ -605,23 +615,11 @@ public class Profile {
                 "-fx-text-fill:#123C36;"
         );
 
-        // =====================================================
-        // PERSONAL SEPARATOR
-        // =====================================================
-
         Region personalSeparator =
                 createSeparator();
 
-        // =====================================================
-        // PERSONAL VIEW
-        // =====================================================
-
         personalView =
                 createPersonalView();
-
-        // =====================================================
-        // PERSONAL EDIT
-        // =====================================================
 
         personalEdit =
                 createPersonalEdit();
@@ -641,23 +639,11 @@ public class Profile {
                 "-fx-text-fill:#123C36;"
         );
 
-        // =====================================================
-        // SOCIETY SEPARATOR
-        // =====================================================
-
         Region societySeparator =
                 createSeparator();
 
-        // =====================================================
-        // SOCIETY VIEW
-        // =====================================================
-
         societyView =
                 createSocietyView();
-
-        // =====================================================
-        // SOCIETY EDIT
-        // =====================================================
 
         societyEdit =
                 createSocietyEdit();
@@ -682,17 +668,10 @@ public class Profile {
         // =====================================================
 
         saveBtn =
-                new Button(
-                        "Save Changes"
-                );
+                new Button("Save Changes");
 
-        saveBtn.setPrefWidth(
-                160
-        );
-
-        saveBtn.setPrefHeight(
-                42
-        );
+        saveBtn.setPrefWidth(160);
+        saveBtn.setPrefHeight(42);
 
         saveBtn.setStyle(
                 "-fx-background-color:#2E7D32;" +
@@ -702,18 +681,18 @@ public class Profile {
                 "-fx-background-radius:7;"
         );
 
-        saveBtn.setOnAction(e -> {
+        addPopupAnimation(saveBtn);
 
-            saveProfile();
-
-        });
+        saveBtn.setOnAction(e ->
+                saveProfile()
+        );
 
         saveBox.getChildren().add(
                 saveBtn
         );
 
         // =====================================================
-        // ADD EVERYTHING
+        // ADD CONTENT
         // =====================================================
 
         mainBox.getChildren().addAll(
@@ -768,81 +747,45 @@ public class Profile {
                 new Insets(20, 0, 22, 0)
         );
 
-        // =====================================================
-        // NAME
-        // =====================================================
-
         VBox nameBox =
-                createViewField(
-                        "Full Name"
-                );
+                createViewField("Full Name");
 
         viewNameValue =
-                getValueLabel(
-                        getUserName()
-                );
+                getValueLabel(getUserName());
 
         nameBox.getChildren().add(
                 viewNameValue
         );
 
-        // =====================================================
-        // EMAIL
-        // =====================================================
-
         VBox emailBox =
-                createViewField(
-                        "Email"
-                );
+                createViewField("Email");
 
         viewEmailValue =
-                getValueLabel(
-                        getUserEmail()
-                );
+                getValueLabel(getUserEmail());
 
         emailBox.getChildren().add(
                 viewEmailValue
         );
 
-        // =====================================================
-        // PHONE
-        // =====================================================
-
         VBox phoneBox =
-                createViewField(
-                        "Phone"
-                );
+                createViewField("Phone");
 
         viewPhoneValue =
-                getValueLabel(
-                        getUserPhone()
-                );
+                getValueLabel(getUserPhone());
 
         phoneBox.getChildren().add(
                 viewPhoneValue
         );
 
-        // =====================================================
-        // ROLE
-        // =====================================================
-
         VBox roleBox =
-                createViewField(
-                        "Role"
-                );
+                createViewField("Role");
 
         viewRoleValue =
-                getValueLabel(
-                        getUserRole()
-                );
+                getValueLabel(getUserRole());
 
         roleBox.getChildren().add(
                 viewRoleValue
         );
-
-        // =====================================================
-        // ADD
-        // =====================================================
 
         box.getChildren().addAll(
                 nameBox,
@@ -867,63 +810,35 @@ public class Profile {
                 new Insets(20, 0, 0, 0)
         );
 
-        // =====================================================
-        // SOCIETY
-        // =====================================================
-
         VBox societyBox =
-                createViewField(
-                        "Society"
-                );
+                createViewField("Society");
 
         viewSocietyValue =
-                getValueLabel(
-                        getUserSociety()
-                );
+                getValueLabel(getUserSociety());
 
         societyBox.getChildren().add(
                 viewSocietyValue
         );
 
-        // =====================================================
-        // MEMBERS
-        // =====================================================
-
         VBox membersBox =
-                createViewField(
-                        "Members"
-                );
+                createViewField("Members");
 
         viewMembersValue =
-                getValueLabel(
-                        getMemberCount()
-                );
+                getValueLabel(getMemberCount());
 
         membersBox.getChildren().add(
                 viewMembersValue
         );
 
-        // =====================================================
-        // ADDRESS
-        // =====================================================
-
         VBox addressBox =
-                createViewField(
-                        "Address"
-                );
+                createViewField("Address");
 
         viewAddressValue =
-                getValueLabel(
-                        getUserAddress()
-                );
+                getValueLabel(getUserAddress());
 
         addressBox.getChildren().add(
                 viewAddressValue
         );
-
-        // =====================================================
-        // ADD
-        // =====================================================
 
         box.getChildren().addAll(
                 societyBox,
@@ -947,32 +862,18 @@ public class Profile {
                 new Insets(18, 0, 18, 0)
         );
 
-        // =====================================================
-        // NAME
-        // =====================================================
-
         Label nameLabel =
-                createFieldLabel(
-                        "Full Name"
-                );
+                createFieldLabel("Full Name");
 
         nameField =
                 new TextField(
                         getUserName()
                 );
 
-        styleTextField(
-                nameField
-        );
-
-        // =====================================================
-        // EMAIL
-        // =====================================================
+        styleTextField(nameField);
 
         Label emailLabel =
-                createFieldLabel(
-                        "Email"
-                );
+                createFieldLabel("Email");
 
         emailField =
                 new TextField(
@@ -995,50 +896,28 @@ public class Profile {
                 "-fx-padding:8;"
         );
 
-        // =====================================================
-        // PHONE
-        // =====================================================
-
         Label phoneLabel =
-                createFieldLabel(
-                        "Mobile Number"
-                );
+                createFieldLabel("Mobile Number");
 
         phoneField =
                 new TextField(
                         getUserPhone()
                 );
 
-        styleTextField(
-                phoneField
-        );
-
-        // =====================================================
-        // DOB
-        // =====================================================
+        styleTextField(phoneField);
 
         Label dobLabel =
-                createFieldLabel(
-                        "Date of Birth"
-                );
+                createFieldLabel("Date of Birth");
 
         dobField =
                 new TextField(
                         getUserDob()
                 );
 
-        styleTextField(
-                dobField
-        );
-
-        // =====================================================
-        // GENDER
-        // =====================================================
+        styleTextField(dobField);
 
         Label genderLabel =
-                createFieldLabel(
-                        "Gender"
-                );
+                createFieldLabel("Gender");
 
         genderComboBox =
                 new ComboBox<>();
@@ -1060,9 +939,7 @@ public class Profile {
             );
         }
 
-        genderComboBox.setPrefHeight(
-                40
-        );
+        genderComboBox.setPrefHeight(40);
 
         genderComboBox.setMaxWidth(
                 Double.MAX_VALUE
@@ -1158,10 +1035,6 @@ public class Profile {
                 Priority.ALWAYS
         );
 
-        // =====================================================
-        // ADD
-        // =====================================================
-
         box.getChildren().addAll(
                 row1,
                 row2,
@@ -1184,14 +1057,8 @@ public class Profile {
                 new Insets(18, 0, 0, 0)
         );
 
-        // =====================================================
-        // SOCIETY
-        // =====================================================
-
         Label societyLabel =
-                createFieldLabel(
-                        "Society"
-                );
+                createFieldLabel("Society");
 
         societyField =
                 new TextField(
@@ -1200,9 +1067,7 @@ public class Profile {
 
         societyField.setEditable(false);
 
-        societyField.setPrefHeight(
-                40
-        );
+        societyField.setPrefHeight(40);
 
         societyField.setMaxWidth(
                 Double.MAX_VALUE
@@ -1216,27 +1081,15 @@ public class Profile {
                 "-fx-padding:8;"
         );
 
-        // =====================================================
-        // ADDRESS
-        // =====================================================
-
         Label addressLabel =
-                createFieldLabel(
-                        "Address"
-                );
+                createFieldLabel("Address");
 
         addressField =
                 new TextField(
                         getUserAddress()
                 );
 
-        styleTextField(
-                addressField
-        );
-
-        // =====================================================
-        // ADD
-        // =====================================================
+        styleTextField(addressField);
 
         box.getChildren().addAll(
 
@@ -1261,10 +1114,6 @@ public class Profile {
     private void enableEditing(
             boolean enable) {
 
-        // =====================================================
-        // SAFETY
-        // =====================================================
-
         if (nameField == null ||
                 personalView == null ||
                 personalEdit == null ||
@@ -1275,35 +1124,15 @@ public class Profile {
             return;
         }
 
-        // =====================================================
-        // EDITABLE FIELDS
-        // =====================================================
-
         nameField.setEditable(enable);
-
         phoneField.setEditable(enable);
-
         dobField.setEditable(enable);
-
         addressField.setEditable(enable);
 
         genderComboBox.setDisable(!enable);
 
-        // =====================================================
-        // EMAIL READ ONLY
-        // =====================================================
-
         emailField.setEditable(false);
-
-        // =====================================================
-        // SOCIETY READ ONLY
-        // =====================================================
-
         societyField.setEditable(false);
-
-        // =====================================================
-        // VIEW MODE
-        // =====================================================
 
         personalView.setVisible(!enable);
         personalView.setManaged(!enable);
@@ -1311,26 +1140,14 @@ public class Profile {
         societyView.setVisible(!enable);
         societyView.setManaged(!enable);
 
-        // =====================================================
-        // EDIT MODE
-        // =====================================================
-
         personalEdit.setVisible(enable);
         personalEdit.setManaged(enable);
 
         societyEdit.setVisible(enable);
         societyEdit.setManaged(enable);
 
-        // =====================================================
-        // SAVE BUTTON
-        // =====================================================
-
         saveBox.setVisible(enable);
         saveBox.setManaged(enable);
-
-        // =====================================================
-        // EDIT BUTTON
-        // =====================================================
 
         editBtn.setVisible(!enable);
         editBtn.setManaged(!enable);
@@ -1342,10 +1159,6 @@ public class Profile {
 
     private void saveProfile() {
 
-        // =====================================================
-        // CHECK USER
-        // =====================================================
-
         if (loggedInUser == null) {
 
             showError(
@@ -1355,10 +1168,6 @@ public class Profile {
 
             return;
         }
-
-        // =====================================================
-        // GET VALUES
-        // =====================================================
 
         String name =
                 safeString(
@@ -1385,21 +1194,10 @@ public class Profile {
                         addressField.getText()
                 );
 
-        /*
-         * Email Firestore document key आहे.
-         * म्हणून user ला email change करू देत नाही.
-         */
-
         String email =
                 safeString(
                         emailField.getText()
                 );
-
-        /*
-         * Society सुद्धा read-only आहे.
-         *
-         * DAO existing society verify करेल.
-         */
 
         String society =
                 safeString(
@@ -1407,7 +1205,7 @@ public class Profile {
                 );
 
         // =====================================================
-        // VALIDATION - EMAIL
+        // VALIDATION
         // =====================================================
 
         if (email.isEmpty()) {
@@ -1420,10 +1218,6 @@ public class Profile {
             return;
         }
 
-        // =====================================================
-        // VALIDATION - SOCIETY
-        // =====================================================
-
         if (society.isEmpty()) {
 
             showError(
@@ -1434,10 +1228,6 @@ public class Profile {
             return;
         }
 
-        // =====================================================
-        // VALIDATION - NAME
-        // =====================================================
-
         if (name.isEmpty()) {
 
             showError(
@@ -1447,10 +1237,6 @@ public class Profile {
 
             return;
         }
-
-        // =====================================================
-        // VALIDATION - PHONE
-        // =====================================================
 
         if (!phone.isEmpty() &&
                 !phone.matches("\\d{10}")) {
@@ -1470,25 +1256,15 @@ public class Profile {
         UserDao dao =
                 new UserDao();
 
-        // =====================================================
-        // UPDATE FIRESTORE
-        // =====================================================
-
         boolean updated =
                 dao.updateSecretaryProfile(
 
                         email,
-
                         society,
-
                         name,
-
                         phone,
-
                         dob,
-
                         gender,
-
                         address
                 );
 
@@ -1503,14 +1279,8 @@ public class Profile {
                     "Your profile has been updated successfully."
             );
 
-            // =================================================
-            // FETCH LATEST FIRESTORE DATA
-            // =================================================
-
             User latestUser =
-                    dao.getUserByEmail(
-                            email
-                    );
+                    dao.getUserByEmail(email);
 
             if (latestUser != null) {
 
@@ -1518,20 +1288,13 @@ public class Profile {
                         latestUser;
             }
 
-            // =================================================
-            // RELOAD PROFILE SCREEN
-            // =================================================
-
             Stage stage =
-                    (Stage) profileScene
-                            .getWindow();
+                    (Stage) profileScene.getWindow();
 
             Scene newScene =
                     createScene(stage);
 
-            stage.setScene(
-                    newScene
-            );
+            stage.setScene(newScene);
 
             stage.show();
 
@@ -1546,7 +1309,7 @@ public class Profile {
     }
 
     // =========================================================
-    // LOAD LATEST FIRESTORE DATA
+    // LOAD LATEST USER DATA
     // =========================================================
 
     private void loadLatestUserData() {
@@ -1555,10 +1318,6 @@ public class Profile {
 
             String email =
                     UserDao.getLoggedInEmail();
-
-            // =================================================
-            // FALLBACK TO USER OBJECT EMAIL
-            // =================================================
 
             if (email == null ||
                     email.trim().isEmpty()) {
@@ -1570,31 +1329,17 @@ public class Profile {
                 }
             }
 
-            // =================================================
-            // NO EMAIL
-            // =================================================
-
             if (email == null ||
                     email.trim().isEmpty()) {
 
                 return;
             }
 
-            // =================================================
-            // FIRESTORE
-            // =================================================
-
             UserDao dao =
                     new UserDao();
 
             User latestUser =
-                    dao.getUserByEmail(
-                            email
-                    );
-
-            // =================================================
-            // UPDATE OBJECT
-            // =================================================
+                    dao.getUserByEmail(email);
 
             if (latestUser != null) {
 
@@ -1615,12 +1360,6 @@ public class Profile {
     // =========================================================
     // MEMBER COUNT
     // =========================================================
-    //
-    // Firestore मधून current society चे Residents count.
-    //
-    // Hardcoded number नाही.
-    //
-    // =========================================================
 
     private String getMemberCount() {
 
@@ -1637,11 +1376,6 @@ public class Profile {
 
             UserDao dao =
                     new UserDao();
-
-            /*
-             * Existing UserDao.getUsers("resident")
-             * वापरतो.
-             */
 
             List<User> residents =
                     dao.getUsers("resident");
@@ -1687,7 +1421,7 @@ public class Profile {
     }
 
     // =========================================================
-    // USER NAME
+    // USER GETTERS
     // =========================================================
 
     private String getUserName() {
@@ -1701,10 +1435,6 @@ public class Profile {
         );
     }
 
-    // =========================================================
-    // USER EMAIL
-    // =========================================================
-
     private String getUserEmail() {
 
         if (loggedInUser == null) {
@@ -1715,11 +1445,6 @@ public class Profile {
                 safeString(
                         loggedInUser.getEmail()
                 );
-
-        /*
-         * जर User object मध्ये email नसेल
-         * तर session email वापर.
-         */
 
         if (email.isEmpty()) {
 
@@ -1732,10 +1457,6 @@ public class Profile {
         return email;
     }
 
-    // =========================================================
-    // USER PHONE
-    // =========================================================
-
     private String getUserPhone() {
 
         if (loggedInUser == null) {
@@ -1746,10 +1467,6 @@ public class Profile {
                 loggedInUser.getPhone()
         );
     }
-
-    // =========================================================
-    // USER DOB
-    // =========================================================
 
     private String getUserDob() {
 
@@ -1762,10 +1479,6 @@ public class Profile {
         );
     }
 
-    // =========================================================
-    // USER GENDER
-    // =========================================================
-
     private String getUserGender() {
 
         if (loggedInUser == null) {
@@ -1776,10 +1489,6 @@ public class Profile {
                 loggedInUser.getGender()
         );
     }
-
-    // =========================================================
-    // USER SOCIETY
-    // =========================================================
 
     private String getUserSociety() {
 
@@ -1792,10 +1501,6 @@ public class Profile {
         );
     }
 
-    // =========================================================
-    // USER ADDRESS
-    // =========================================================
-
     private String getUserAddress() {
 
         if (loggedInUser == null) {
@@ -1806,10 +1511,6 @@ public class Profile {
                 loggedInUser.getAddress()
         );
     }
-
-    // =========================================================
-    // USER ROLE
-    // =========================================================
 
     private String getUserRole() {
 
@@ -1832,7 +1533,6 @@ public class Profile {
                 getUserName();
 
         if (name.isEmpty()) {
-
             return "";
         }
 
@@ -1842,7 +1542,7 @@ public class Profile {
     }
 
     // =========================================================
-    // CREATE VIEW FIELD
+    // VIEW FIELD
     // =========================================================
 
     private VBox createViewField(
@@ -1852,9 +1552,7 @@ public class Profile {
                 new VBox(3);
 
         Label label =
-                createFieldLabel(
-                        labelText
-                );
+                createFieldLabel(labelText);
 
         box.getChildren().add(
                 label
@@ -1940,9 +1638,7 @@ public class Profile {
     private void styleTextField(
             TextField field) {
 
-        field.setPrefHeight(
-                40
-        );
+        field.setPrefHeight(40);
 
         field.setMaxWidth(
                 Double.MAX_VALUE
@@ -1966,9 +1662,7 @@ public class Profile {
         Region separator =
                 new Region();
 
-        separator.setPrefHeight(
-                1
-        );
+        separator.setPrefHeight(1);
 
         separator.setMaxWidth(
                 Double.MAX_VALUE
@@ -1982,6 +1676,238 @@ public class Profile {
     }
 
     // =========================================================
+    // BUTTON POPUP ANIMATION
+    // =========================================================
+
+    private void addPopupAnimation(
+            Button button) {
+
+        button.setOnMouseEntered(e -> {
+
+            ScaleTransition scale =
+                    new ScaleTransition(
+                            Duration.millis(120),
+                            button
+                    );
+
+            scale.setToX(1.05);
+            scale.setToY(1.05);
+
+            scale.play();
+        });
+
+        button.setOnMouseExited(e -> {
+
+            ScaleTransition scale =
+                    new ScaleTransition(
+                            Duration.millis(120),
+                            button
+                    );
+
+            scale.setToX(1.0);
+            scale.setToY(1.0);
+
+            scale.play();
+        });
+
+        button.setOnMousePressed(e -> {
+
+            ScaleTransition scale =
+                    new ScaleTransition(
+                            Duration.millis(80),
+                            button
+                    );
+
+            scale.setToX(0.97);
+            scale.setToY(0.97);
+
+            scale.play();
+        });
+
+        button.setOnMouseReleased(e -> {
+
+            ScaleTransition scale =
+                    new ScaleTransition(
+                            Duration.millis(100),
+                            button
+                    );
+
+            scale.setToX(1.05);
+            scale.setToY(1.05);
+
+            scale.play();
+        });
+    }
+
+    // =========================================================
+    // DOWN → UP PROFILE ANIMATION
+    // =========================================================
+
+    private void playProfileAnimation(
+            javafx.scene.Node heading,
+            javafx.scene.Node title,
+            javafx.scene.Node subtitle,
+            javafx.scene.Node profileCard) {
+
+        // =====================================================
+        // INITIAL POSITION
+        // =====================================================
+
+        heading.setOpacity(0);
+        heading.setTranslateY(35);
+
+        title.setOpacity(0);
+        title.setTranslateY(40);
+
+        subtitle.setOpacity(0);
+        subtitle.setTranslateY(45);
+
+        profileCard.setOpacity(0);
+        profileCard.setTranslateY(55);
+
+        // =====================================================
+        // HEADING ANIMATION
+        // =====================================================
+
+        FadeTransition fadeHeading =
+                new FadeTransition(
+                        Duration.millis(350),
+                        heading
+                );
+
+        fadeHeading.setFromValue(0);
+        fadeHeading.setToValue(1);
+
+        TranslateTransition moveHeading =
+                new TranslateTransition(
+                        Duration.millis(350),
+                        heading
+                );
+
+        moveHeading.setFromY(35);
+        moveHeading.setToY(0);
+
+        ParallelTransition headingAnimation =
+                new ParallelTransition(
+                        fadeHeading,
+                        moveHeading
+                );
+
+        // =====================================================
+        // TITLE ANIMATION
+        // =====================================================
+
+        FadeTransition fadeTitle =
+                new FadeTransition(
+                        Duration.millis(400),
+                        title
+                );
+
+        fadeTitle.setFromValue(0);
+        fadeTitle.setToValue(1);
+
+        TranslateTransition moveTitle =
+                new TranslateTransition(
+                        Duration.millis(400),
+                        title
+                );
+
+        moveTitle.setFromY(40);
+        moveTitle.setToY(0);
+
+        ParallelTransition titleAnimation =
+                new ParallelTransition(
+                        fadeTitle,
+                        moveTitle
+                );
+
+        // =====================================================
+        // SUBTITLE ANIMATION
+        // =====================================================
+
+        FadeTransition fadeSubtitle =
+                new FadeTransition(
+                        Duration.millis(450),
+                        subtitle
+                );
+
+        fadeSubtitle.setFromValue(0);
+        fadeSubtitle.setToValue(1);
+
+        TranslateTransition moveSubtitle =
+                new TranslateTransition(
+                        Duration.millis(450),
+                        subtitle
+                );
+
+        moveSubtitle.setFromY(45);
+        moveSubtitle.setToY(0);
+
+        ParallelTransition subtitleAnimation =
+                new ParallelTransition(
+                        fadeSubtitle,
+                        moveSubtitle
+                );
+
+        // =====================================================
+        // PROFILE CARD ANIMATION
+        // =====================================================
+
+        FadeTransition fadeCard =
+                new FadeTransition(
+                        Duration.millis(550),
+                        profileCard
+                );
+
+        fadeCard.setFromValue(0);
+        fadeCard.setToValue(1);
+
+        TranslateTransition moveCard =
+                new TranslateTransition(
+                        Duration.millis(550),
+                        profileCard
+                );
+
+        moveCard.setFromY(55);
+        moveCard.setToY(0);
+
+        ParallelTransition cardAnimation =
+                new ParallelTransition(
+                        fadeCard,
+                        moveCard
+                );
+
+        // =====================================================
+        // DELAYS
+        // =====================================================
+
+        headingAnimation.setDelay(
+                Duration.millis(80)
+        );
+
+        titleAnimation.setDelay(
+                Duration.millis(160)
+        );
+
+        subtitleAnimation.setDelay(
+                Duration.millis(240)
+        );
+
+        cardAnimation.setDelay(
+                Duration.millis(320)
+        );
+
+        // =====================================================
+        // PLAY
+        // =====================================================
+
+        headingAnimation.play();
+        titleAnimation.play();
+        subtitleAnimation.play();
+        cardAnimation.play();
+    }
+
+    // =========================================================
     // SAFE STRING
     // =========================================================
 
@@ -1989,7 +1915,6 @@ public class Profile {
             String value) {
 
         if (value == null) {
-
             return "";
         }
 
@@ -2005,23 +1930,13 @@ public class Profile {
 
         try {
 
-            // =================================================
-            // CLEAR SESSION
-            // =================================================
-
             UserDao.clearLoggedInUser();
-
-            // =================================================
-            // LOGIN PAGE
-            // =================================================
 
             LogInPage loginPage =
                     new LogInPage();
 
             Scene loginScene =
-                    loginPage.createScene(
-                            stage
-                    );
+                    loginPage.createScene(stage);
 
             stage.setScene(
                     loginScene
@@ -2061,17 +1976,11 @@ public class Profile {
                         Alert.AlertType.INFORMATION
                 );
 
-        alert.setTitle(
-                title
-        );
+        alert.setTitle(title);
 
-        alert.setHeaderText(
-                null
-        );
+        alert.setHeaderText(null);
 
-        alert.setContentText(
-                message
-        );
+        alert.setContentText(message);
 
         alert.showAndWait();
     }
@@ -2089,17 +1998,11 @@ public class Profile {
                         Alert.AlertType.ERROR
                 );
 
-        alert.setTitle(
-                title
-        );
+        alert.setTitle(title);
 
-        alert.setHeaderText(
-                null
-        );
+        alert.setHeaderText(null);
 
-        alert.setContentText(
-                message
-        );
+        alert.setContentText(message);
 
         alert.showAndWait();
     }
@@ -2137,13 +2040,17 @@ public class Profile {
                         "Go to Login"
                 );
 
-        loginButton.setPrefWidth(
-                140
+        loginButton.setPrefWidth(140);
+        loginButton.setPrefHeight(38);
+
+        loginButton.setStyle(
+                "-fx-background-color:#593a32;" +
+                "-fx-text-fill:white;" +
+                "-fx-font-weight:bold;" +
+                "-fx-background-radius:7;"
         );
 
-        loginButton.setPrefHeight(
-                38
-        );
+        addPopupAnimation(loginButton);
 
         loginButton.setOnAction(e -> {
 
@@ -2161,7 +2068,6 @@ public class Profile {
             );
 
             stage.show();
-
         });
 
         box.getChildren().addAll(

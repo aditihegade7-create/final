@@ -1,4 +1,3 @@
-
 package com.society.view.Secretary_portal;
 
 import com.society.controller.welcome.UserController;
@@ -153,9 +152,19 @@ public class SecretarySidebar {
         sidebar.setPadding(
                 new Insets(20));
 
-        sidebar.setStyle(
-                "-fx-background-color:#4e4b4b;");
-
+        
+        sidebar.setTranslateX(0); 
+        sidebar.setTranslateY(0); 
+ 
+        sidebar.setOpacity(1); 
+ 
+        sidebar.setScaleX(1); 
+        sidebar.setScaleY(1); 
+ 
+        sidebar.setStyle( 
+                "-fx-background-color: #4e342e;" 
+        ); 
+ 
         // ========================================================
         // LOGO
         // ========================================================
@@ -188,7 +197,7 @@ public class SecretarySidebar {
         // ========================================================
 
         Button dashboardBtn =
-                createMenuButton("Dashboard");
+                createMenuButton("🏠Dashboard");
 
         dashboardBtn.setOnAction(e -> {
 
