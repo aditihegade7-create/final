@@ -11,6 +11,12 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
@@ -31,6 +37,7 @@ import com.society.controller.Guard_Controller.GuardController;
 import com.society.model.Guard_model.GuardModel;
 import com.society.model.Guard_model.VisitorModel;
 import com.society.view.ScreenSize;
+import com.society.view.Owner_portal.OwnerDashboard;
 
 public class ManualVisitorEntry {
 
@@ -44,6 +51,30 @@ public class ManualVisitorEntry {
     public static Scene createScene(Stage stage, String guardEmail) {
 
         BorderPane root = new BorderPane();
+
+         Image image = new Image(
+                    OwnerDashboard.class
+                            .getResource(
+                                    "/background-Dashboard5.jpeg"
+                            )
+                            .toExternalForm()
+            );
+
+                BackgroundImage bgImage = new BackgroundImage(
+                                image,
+                                BackgroundRepeat.NO_REPEAT,
+                                BackgroundRepeat.NO_REPEAT,
+                                BackgroundPosition.CENTER,
+                                new BackgroundSize(
+                                                100,
+                                                100,
+                                                true,
+                                                true,
+                                                false,
+                                                true));
+
+                root.setBackground(
+                                new Background(bgImage));
 
         // =====================================================
         // GET SOCIETY FROM LOGGED-IN GUARD
@@ -98,9 +129,7 @@ public class ManualVisitorEntry {
 
         content.setFillWidth(true);
 
-        content.setStyle(
-                "-fx-background-color: #e8ddd5;"
-        );
+      
 
         // =====================================================
         // HEADER - FIXED

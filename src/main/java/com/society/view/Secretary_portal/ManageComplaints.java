@@ -127,7 +127,7 @@ public class ManageComplaints {
                         "Manage Complaints"
                 );
 
-        title.setStyle(
+        title.setStyle( "-fx-font-family:'Bodoni MT';" +
                 "-fx-font-size:20px;"
                         + "-fx-font-weight:bold;"
                         + "-fx-text-fill:white;"
@@ -142,7 +142,7 @@ public class ManageComplaints {
                         "View and manage complaints submitted by residents of your society"
                 );
 
-        subtitle.setStyle(
+        subtitle.setStyle( "-fx-font-family:'Bodoni MT';" +
                 "-fx-font-size:13px;"
                         + "-fx-text-fill:white;"
         );
@@ -232,9 +232,6 @@ public class ManageComplaints {
 
         complaintHeader.setPadding(
                 new Insets(
-                        15,
-                        20,
-                        15,
                         20
                 )
         );

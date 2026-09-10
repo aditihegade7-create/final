@@ -451,6 +451,7 @@ public class Community {
                 new Label(
                         "Community Portal"
                 );
+                title.setStyle( "-fx-font-family:'Bodoni MT';" );
 
         title.setFont(
                 Font.font(
@@ -466,6 +467,8 @@ public class Community {
                 new Label(
                         "Connect, Share & Support Each Other"
                 );
+
+                subtitle.setStyle( "-fx-font-family:'Bodoni MT';" );
 
         subtitle.setFont(
                 Font.font(
@@ -1189,7 +1192,7 @@ public class Community {
                 new Insets(12, 18, 12, 18)
         );
         chatHeader.setStyle(
-                "-fx-background-color: #4e342e;" +
+                "-fx-background-color: #e7c3bb;" +
                 "-fx-border-color: #4e342e;" +
                 "-fx-border-width: 0 0 1 0;"
         );

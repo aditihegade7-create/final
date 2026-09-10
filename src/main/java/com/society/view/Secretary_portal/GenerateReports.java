@@ -26,6 +26,12 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
+import javafx.scene.image.Image;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -66,7 +72,7 @@ public class GenerateReports {
             "#F7F7F7";
 
     private static final String DARK =
-            "#3D322E";
+            "#4e342e";
 
     private static final String TEXT =
             "#292525";
@@ -203,11 +209,30 @@ public class GenerateReports {
         BorderPane main =
                 new BorderPane();
 
-        main.setStyle(
-                "-fx-background-color:"
-                        + BACKGROUND
-                        + ";"
-        );
+                   Image backgroundImage = new Image(
+                                getClass()
+                                                .getResource("/background-Dashboard5.jpeg")
+                                                .toExternalForm());
+
+                BackgroundSize backgroundSize = new BackgroundSize(
+                                100,
+                                100,
+                                true,
+                                true,
+                                false,
+                                true);
+
+                BackgroundImage bgImage = new BackgroundImage(
+                                backgroundImage,
+                                BackgroundRepeat.NO_REPEAT,
+                                BackgroundRepeat.NO_REPEAT,
+                                BackgroundPosition.CENTER,
+                                backgroundSize);
+
+                main.setBackground(
+                                new Background(bgImage));
+
+        
 
         // =====================================================
         // HEADER
@@ -328,7 +353,7 @@ public class GenerateReports {
         );
 
         header.setStyle(
-                "-fx-background-color:white;"
+                "-fx-background-color:#4e342e;"
                         + "-fx-border-color:"
                         + BORDER
                         + ";"
@@ -340,11 +365,11 @@ public class GenerateReports {
                         "Daily Reports"
                 );
 
-        title.setStyle(
+        title.setStyle( "-fx-font-family:'Bodoni MT';" +
                 "-fx-font-size:26px;"
                         + "-fx-font-weight:bold;"
                         + "-fx-text-fill:"
-                        + DARK
+                        + BACKGROUND
                         + ";"
         );
 
@@ -353,10 +378,10 @@ public class GenerateReports {
                         "Generate and review daily society activity reports"
                 );
 
-        subtitle.setStyle(
+        subtitle.setStyle( "-fx-font-family:'Bodoni MT';" +
                 "-fx-font-size:14px;"
                         + "-fx-text-fill:"
-                        + SECONDARY
+                        + BACKGROUND
                         + ";"
         );
 

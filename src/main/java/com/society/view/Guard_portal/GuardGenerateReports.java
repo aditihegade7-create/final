@@ -15,6 +15,7 @@ import com.society.model.Guard_model.GuardModel;
 import com.society.model.Guard_model.ParkingModel;
 import com.society.model.Guard_model.VisitorModel;
 import com.society.view.ScreenSize;
+import com.society.view.Owner_portal.OwnerDashboard;
 
 import javafx.animation.FadeTransition;
 import javafx.animation.Interpolator;
@@ -28,6 +29,12 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
+import javafx.scene.image.Image;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -133,9 +140,31 @@ public class GuardGenerateReports {
         BorderPane root =
                 new BorderPane();
 
-        root.setStyle(
-                "-fx-background-color:#E8DDD5;"
-        );
+                 Image image = new Image(
+                    OwnerDashboard.class
+                            .getResource(
+                                    "/background-Dashboard5.jpeg"
+                            )
+                            .toExternalForm()
+            );
+
+                BackgroundImage bgImage = new BackgroundImage(
+                                image,
+                                BackgroundRepeat.NO_REPEAT,
+                                BackgroundRepeat.NO_REPEAT,
+                                BackgroundPosition.CENTER,
+                                new BackgroundSize(
+                                                100,
+                                                100,
+                                                true,
+                                                true,
+                                                false,
+                                                true));
+
+                root.setBackground(
+                                new Background(bgImage));
+
+       
 
         // =================================================
         // SIDEBAR
@@ -161,9 +190,7 @@ public class GuardGenerateReports {
         BorderPane mainArea =
                 new BorderPane();
 
-        mainArea.setStyle(
-                "-fx-background-color:#E8DDD5;"
-        );
+      
 
         // =================================================
         // HEADER

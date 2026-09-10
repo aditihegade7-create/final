@@ -724,7 +724,7 @@ public class OwnerSidebar {
 
                     button.setStyle(
 
-                            "-fx-background-color:#e7c3bb;" +
+                            "-fx-background-color: #e7c3bb;" +
 
                             "-fx-text-fill:#4e342e;" +
 

@@ -129,7 +129,7 @@ public class ManageEvents {
                         "Manage Events"
                 );
 
-        title.setStyle(
+        title.setStyle( "-fx-font-family:'Bodoni MT';" +
                 "-fx-font-size:20px;" +
                 "-fx-font-weight:bold;" +
                 "-fx-text-fill:white;"
@@ -140,7 +140,7 @@ public class ManageEvents {
                         "Create and manage society events"
                 );
 
-        subtitle.setStyle(
+        subtitle.setStyle( "-fx-font-family:'Bodoni MT';" +
                 "-fx-font-size:13px;" +
                 "-fx-text-fill:white;"
         );

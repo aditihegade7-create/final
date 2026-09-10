@@ -222,7 +222,8 @@ public class PollsSurveys {
         Label title = new Label( "Polls & Surveys"
                 );
 
-        title.setStyle("-fx-text-fill: white;"
+        title.setStyle("-fx-text-fill: white;"+
+         "-fx-font-family:'Bodoni MT';" 
         );
 
         title.setFont(Font.font("System",FontWeight.BOLD, 25)

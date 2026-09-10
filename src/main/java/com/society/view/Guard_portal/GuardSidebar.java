@@ -65,7 +65,7 @@ public class GuardSidebar {
         );
 
         sidebar.setStyle(
-                "-fx-background-color: #593a32;"
+                "-fx-background-color: #4e342e;"
         );
 
 
@@ -331,7 +331,7 @@ public class GuardSidebar {
             button.setStyle(
                     "-fx-background-color: #e7c3bb;" +
                     "-fx-font-weight: bold;" +
-                    "-fx-text-fill: #3e2723;" +
+                    "-fx-text-fill: #4e342e;" +
                     "-fx-font-size: 14px;" +
                     "-fx-alignment: CENTER_LEFT;" +
                     "-fx-background-radius: 6;"
@@ -415,7 +415,7 @@ public class GuardSidebar {
         if (activeButton != null) {
 
             activeButton.setStyle(
-                    "-fx-background-color: #563128;" +
+                    "-fx-background-color: #4e342e;" +
                     "-fx-font-weight: bold;" +
                     "-fx-text-fill: white;" +
                     "-fx-font-size: 14px;" +

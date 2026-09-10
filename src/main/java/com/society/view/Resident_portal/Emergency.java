@@ -159,6 +159,8 @@ public class Emergency {
 
         Label title = new Label("Emergency SOS");
 
+        title.setStyle( "-fx-font-family:'Bodoni MT';" );
+
         title.setFont(
                 Font.font(
                         "System",
@@ -172,6 +174,8 @@ public class Emergency {
         Label subtitle = new Label(
                 "Quickly request emergency assistance"
         );
+
+        subtitle.setStyle( "-fx-font-family:'Bodoni MT';" );
 
         subtitle.setFont(
                 Font.font(
@@ -195,16 +199,21 @@ public class Emergency {
         // MAIN CONTENT
         // =========================================================
 
-        VBox mainContent = new VBox(22);
+        VBox mainContent = new VBox();
 
-        mainContent.setPadding(
-                new Insets(28, 40, 35, 40)
-        );
+mainContent.setPadding(
+        new Insets(0, 0, 25, 0)
+);
 
-        mainContent.setStyle(
-                "-fx-background-color: transparent;"
-        );
+mainContent.setSpacing(18);
 
+mainContent.setAlignment(
+        Pos.TOP_LEFT
+);
+
+mainContent.setStyle(
+        "-fx-background-color: #e8ddd5;"
+);
         // =========================================================
         // EMERGENCY ALERT CARD
         // =========================================================

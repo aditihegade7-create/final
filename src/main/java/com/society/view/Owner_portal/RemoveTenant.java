@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.society.controller.Owner_Controller.ResidentController;
 import com.society.model.Owner_model.ResidentModel;
+import com.society.view.ScreenSize;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -56,13 +57,21 @@ public class RemoveTenant {
         // MAIN CONTENT - SAME THEME
         // =====================================================
 
-        VBox mainContent = new VBox();
-        mainContent.setPadding(new Insets(30, 40, 30, 40));
-        mainContent.setSpacing(20);
-        mainContent.setAlignment(Pos.TOP_LEFT);
-        mainContent.setStyle(
-                "-fx-background-color:" + BACKGROUND + ";"
-        );
+       VBox mainContent = new VBox();
+
+mainContent.setPadding(
+        new Insets(0, 0, 25, 0)
+);
+
+mainContent.setSpacing(18);
+
+mainContent.setAlignment(
+        Pos.TOP_LEFT
+);
+
+mainContent.setStyle(
+        "-fx-background-color: #e8ddd5;"
+);
 
         // =====================================================
         // HEADER - SAME AS CURRENT PAGE
@@ -756,12 +765,26 @@ public class RemoveTenant {
 
         root.setCenter(mainContent);
 
-        return new Scene(
-                root,
-                1500,
-                750
+
+         Scene scene =
+                new Scene(
+                        root,
+                        ScreenSize.getWidth(),
+                        ScreenSize.getHeight()
+                );
+
+        stage.setScene(
+                scene
         );
+
+        stage.setMaximized(
+                true
+        );
+
+        return scene;
     }
+
+      
 
     // =========================================================
     // LOAD ACTIVE TENANTS

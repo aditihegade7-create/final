@@ -431,6 +431,21 @@ public class panel {
                         stage.show();
                 });
 
+                Button aboutUsPage = createButton("👤 AboutUs");
+
+                aboutUsPage.setOnAction(event -> {
+
+                        setActiveButton(aboutUsPage);
+
+                        AboutUsPage profil = new AboutUsPage(residentEmail);
+
+                        navigate(
+                                        stage,
+                                        profil.getAboutUsScene(
+                                                        stage,
+                                                        residentEmail));
+                });
+
                 // =====================================================
                 // ADD ALL COMPONENTS
                 // =====================================================
@@ -451,7 +466,8 @@ public class panel {
                                 eventsBtn,
                                 reportsBtn,
                                 profileBtn,
-                                Parkingbtn
+                                Parkingbtn,
+                                aboutUsPage
                 // logoutBtn
                 );
 
@@ -471,7 +487,8 @@ public class panel {
                                 eventsBtn,
                                 reportsBtn,
                                 profileBtn,
-                                Parkingbtn
+                                Parkingbtn,
+                                aboutUsPage
                 // logoutBtn
                 );
 
@@ -490,7 +507,9 @@ public class panel {
                 animateButton(eventsBtn);
                 animateButton(reportsBtn);
                 animateButton(profileBtn);
-                animateButton(Parkingbtn);
+                animateButton(aboutUsPage);
+                
+
                 // animateButton(logoutBtn);
 
                 // =====================================================
@@ -540,6 +559,7 @@ public class panel {
                         animateButtonEntry(reportsBtn, 820);
                         animateButtonEntry(profileBtn, 900);
                         animateButtonEntry(Parkingbtn, 980);
+                        animateButtonEntry(aboutUsPage, 980);
                         // animateButtonEntry(logoutBtn, 1060);
 
                         sidebarAnimationDone = true;

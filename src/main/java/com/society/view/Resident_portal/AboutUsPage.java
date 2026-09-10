@@ -55,7 +55,7 @@ public class AboutUsPage {
         this.residentEmail = residentEmail == null ? "" : residentEmail.trim();
     }
 
-    public Scene getAboutUsScene(Stage stage) {
+    public Scene getAboutUsScene(Stage stage, String residentEmail) {
 
         BorderPane root = new BorderPane();
         root.setStyle("-fx-background-color: " + LIGHT_BG + ";");

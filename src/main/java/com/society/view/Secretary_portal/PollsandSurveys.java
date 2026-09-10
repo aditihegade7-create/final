@@ -133,7 +133,7 @@ public class PollsandSurveys {
         Label heading =
                 new Label("Polls & Surveys");
 
-        heading.setStyle(
+        heading.setStyle( "-fx-font-family:'Bodoni MT';" +
                 "-fx-font-size:24px;" +
                 "-fx-font-weight:bold;" +
                 "-fx-text-fill:white;"
@@ -144,7 +144,7 @@ public class PollsandSurveys {
                         "Create polls, collect opinions and manage society surveys"
                 );
 
-        subtitle.setStyle(
+        subtitle.setStyle( "-fx-font-family:'Bodoni MT';" +
                 "-fx-font-size:13px;" +
                 "-fx-text-fill:white;"
         );

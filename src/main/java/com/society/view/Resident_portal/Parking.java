@@ -159,7 +159,7 @@ public class Parking {
 
                 Label title = new Label("Smart Parking");
 
-                title.setStyle(
+                title.setStyle( "-fx-font-family:'Bodoni MT';" +
                                 "-fx-font-size:26px;" +
                                                 "-fx-font-weight:bold;" +
                                                 "-fx-text-fill:white;");
@@ -176,7 +176,7 @@ public class Parking {
                                         "Society: " + residentSociety);
                 }
 
-                subtitle.setStyle(
+                subtitle.setStyle( "-fx-font-family:'Bodoni MT';" +
                                 "-fx-font-size:14px;" +
                                                 "-fx-text-fill:white;");
 
@@ -185,8 +185,13 @@ public class Parking {
                                 title,
                                 subtitle);
 
-                header.setPadding(
-                                new Insets(15, 20, 15, 20));
+                 header.setPadding(new Insets(
+                        15,
+                        30,
+                        15,
+                        30
+                )
+        );
 
                 header.setStyle(
                                 "-fx-background-color: #4e342e;"
@@ -237,7 +242,7 @@ public class Parking {
                 mySlot.setStyle(
                                 "-fx-font-size:16px;" +
                                                 "-fx-font-weight:bold;" +
-                                                "-fx-text-fill:#37474f;");
+                                                "-fx-text-fill: #37474f;");
 
                 Label myStatus;
 
@@ -246,7 +251,7 @@ public class Parking {
                         myStatus = new Label("● NOT ALLOCATED");
 
                         myStatus.setStyle(
-                                        "-fx-text-fill:#757575;" +
+                                        "-fx-text-fill: #757575;" +
                                                         "-fx-font-size:15px;" +
                                                         "-fx-font-weight:bold;");
 
@@ -275,7 +280,7 @@ public class Parking {
                 myParkingCard.setStyle(
                                 "-fx-background-color:white;" +
                                                 "-fx-background-radius:12;" +
-                                                "-fx-border-color:#789098;" +
+                                                "-fx-border-color: #789098;" +
                                                 "-fx-border-radius:12;");
 
                 // =========================================================
@@ -380,7 +385,7 @@ public class Parking {
                 parkingArea.setStyle(
                                 "-fx-background-color:white;" +
                                                 "-fx-background-radius:15;" +
-                                                "-fx-border-color:#789098;" +
+                                                "-fx-border-color: #789098;" +
                                                 "-fx-border-radius:15;");
 
                 mainContent.getChildren().addAll(
@@ -1007,13 +1012,13 @@ public class Parking {
                         }
 
                         slot.setStyle(
-                                        "-fx-background-color:#81c784;" +
+                                        "-fx-background-color: #81c784;" +
                                                         "-fx-text-fill:white;" +
                                                         "-fx-font-size:15px;" +
                                                         "-fx-font-weight:bold;" +
                                                         "-fx-background-radius:10;" +
-                                                        "-fx-border-color:#2e7d32;" +
-                                                        "-fx-border-width:3;" +
+                                                        "-fx-border-color: #2e7d32;" +
+                                                        "-fx-border-width:4;" +
                                                         "-fx-border-radius:10;");
                 }
 
@@ -1028,7 +1033,7 @@ public class Parking {
                                                         + "\nALLOCATED");
 
                         slot.setStyle(
-                                        "-fx-background-color:#e57373;" +
+                                        "-fx-background-color: #e57373;" +
                                                         "-fx-text-fill:white;" +
                                                         "-fx-font-size:15px;" +
                                                         "-fx-font-weight:bold;" +
@@ -1047,7 +1052,7 @@ public class Parking {
 
                         slot.setStyle(
                                         "-fx-background-color:#a5d6a7;" +
-                                                        "-fx-text-fill:#1b5e20;" +
+                                                        "-fx-text-fill: #1b5e20;" +
                                                         "-fx-font-size:15px;" +
                                                         "-fx-font-weight:bold;" +
                                                         "-fx-background-radius:10;");
