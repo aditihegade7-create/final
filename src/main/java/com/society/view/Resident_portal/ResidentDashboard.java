@@ -164,23 +164,17 @@ public class ResidentDashboard {
                 // MAIN CONTENT
                 // =====================================================
 
-                VBox mainContent = new VBox(20);
+                VBox mainContent = new VBox();
 
                 mainContent.setPadding(
-                                new Insets(
-                                                25,
-                                                30,
-                                                25,
-                                                30));
+                                new Insets(20));
 
-                /*
-                 * IMPORTANT:
-                 * Transparent so root background image
-                 * can be visible.
-                 */
-                mainContent.setStyle(
-                                "-fx-background-color: transparent;");
+                mainContent.setSpacing(18);
 
+                mainContent.setAlignment(
+                                Pos.TOP_LEFT);
+
+                
                 // =========================================================
                 // MAIN PAGE FADE-IN ANIMATION
                 // Sidebar and Header are NOT animated
@@ -213,10 +207,7 @@ public class ResidentDashboard {
 
                 header.setPadding(
                                 new Insets(
-                                                0,
-                                                15,
-                                                0,
-                                                15));
+                                               20));
 
                 VBox welcomeBox = new VBox(4);
 
@@ -225,6 +216,9 @@ public class ResidentDashboard {
                                                 + ", "
                                                 + residentName
                                                 + " 👋");
+
+                welcome.setStyle(
+                                "-fx-font-family:'Bodoni MT';");
 
                 welcome.setFont(
                                 Font.font(
@@ -896,140 +890,131 @@ public class ResidentDashboard {
         // FIND NEXT OUTSTANDING BILL
         // =========================================================
 
-    private Map<String, Object> findNextOutstandingMaintenance(
-            List<Map<String, Object>> maintenanceList) {
+        private Map<String, Object> findNextOutstandingMaintenance(
+                        List<Map<String, Object>> maintenanceList) {
 
-        Map<String, Object> selected = null;
+                Map<String, Object> selected = null;
 
-        LocalDate selectedDate =
-                LocalDate.MAX;
+                LocalDate selectedDate = LocalDate.MAX;
 
-        for (Map<String, Object> maintenance
-                : maintenanceList) {
+                for (Map<String, Object> maintenance : maintenanceList) {
 
-            if (maintenance == null) {
-                continue;
-            }
+                        if (maintenance == null) {
+                                continue;
+                        }
 
-            Object statusObject =
-                    maintenance.get("status");
+                        Object statusObject = maintenance.get("status");
 
-            String status =
-                    statusObject == null
-                            ? ""
-                            : statusObject.toString()
-                            .trim()
-                            .toLowerCase();
+                        String status = statusObject == null
+                                        ? ""
+                                        : statusObject.toString()
+                                                        .trim()
+                                                        .toLowerCase();
 
-            boolean outstanding =
-                    status.isEmpty()
-                            || "pending".equals(status)
-                            || "overdue".equals(status)
-                            || "unpaid".equals(status)
-                            || "open".equals(status);
+                        boolean outstanding = status.isEmpty()
+                                        || "pending".equals(status)
+                                        || "overdue".equals(status)
+                                        || "unpaid".equals(status)
+                                        || "open".equals(status);
 
-            if (!outstanding) {
-                continue;
-            }
+                        if (!outstanding) {
+                                continue;
+                        }
 
-            Object dateObject =
-                    maintenance.get("date");
+                        Object dateObject = maintenance.get("date");
 
-            String date =
-                    dateObject == null
-                            ? ""
-                            : dateObject.toString()
-                            .trim();
+                        String date = dateObject == null
+                                        ? ""
+                                        : dateObject.toString()
+                                                        .trim();
 
-            if (date.isEmpty()) {
+                        if (date.isEmpty()) {
 
-                if (selected == null) {
-                    selected = maintenance;
+                                if (selected == null) {
+                                        selected = maintenance;
+                                }
+
+                                continue;
+                        }
+
+                        try {
+
+                                LocalDate parsed = LocalDate.parse(date);
+
+                                if (parsed.isBefore(
+                                                selectedDate)) {
+
+                                        selectedDate = parsed;
+                                        selected = maintenance;
+                                }
+
+                        } catch (Exception ignored) {
+
+                                if (selected == null) {
+                                        selected = maintenance;
+                                }
+                        }
+                        // List<Map<String, Object>> billList) {
+
+                        // if (billList == null || billList.isEmpty()) {
+                        // return null;
+                        // }
+
+                        // Map<String, Object> selected = null;
+
+                        // LocalDate selectedDate = LocalDate.MAX;
+
+                        // for (Map<String, Object> bill : billList) {
+
+                        // if (bill == null) {
+                        // continue;
+                        // }
+
+                        // String status =
+                        // getMapString(
+                        // bill,
+                        // "status"
+                        // ).toLowerCase();
+
+                        // boolean outstanding =
+                        // status.isEmpty()
+                        // || "pending".equals(status)
+                        // || "overdue".equals(status)
+                        // || "unpaid".equals(status)
+                        // || "due".equals(status)
+                        // || "open".equals(status);
+
+                        // if (!outstanding) {
+                        // continue;
+                        // }
+
+                        // String date =
+                        // getMapString(
+                        // bill,
+                        // "date"
+                        // );
+
+                        // if (date.isEmpty()) {
+
+                        // if (selected == null) {
+                        // selected = bill;
+                        // }
+
+                        // continue;
+                        // }
+
+                        // LocalDate parsed =
+                        // parseBillDate(date);
+
+                        // if (parsed.isBefore(selectedDate)) {
+
+                        // selectedDate = parsed;
+                        // selected = bill;
+                        // }
+                        // }
                 }
-
-                continue;
-            }
-
-            try {
-
-                LocalDate parsed =
-                        LocalDate.parse(date);
-
-                if (parsed.isBefore(
-                        selectedDate
-                )) {
-
-                    selectedDate = parsed;
-                    selected = maintenance;
-                }
-
-            } catch (Exception ignored) {
-
-                if (selected == null) {
-                    selected = maintenance;
-                }
+                return selected;
         }
-        //     List<Map<String, Object>> billList) {
-
-        // if (billList == null || billList.isEmpty()) {
-        //     return null;
-        // }
-
-        // Map<String, Object> selected = null;
-
-        // LocalDate selectedDate = LocalDate.MAX;
-
-        // for (Map<String, Object> bill : billList) {
-
-        //     if (bill == null) {
-        //         continue;
-        //     }
-
-        //     String status =
-        //             getMapString(
-        //                     bill,
-        //                     "status"
-        //             ).toLowerCase();
-
-        //     boolean outstanding =
-        //             status.isEmpty()
-        //                     || "pending".equals(status)
-        //                     || "overdue".equals(status)
-        //                     || "unpaid".equals(status)
-        //                     || "due".equals(status)
-        //                     || "open".equals(status);
-
-        //     if (!outstanding) {
-        //         continue;
-        //     }
-
-        //     String date =
-        //             getMapString(
-        //                     bill,
-        //                     "date"
-        //             );
-
-        //     if (date.isEmpty()) {
-
-        //         if (selected == null) {
-        //             selected = bill;
-        //         }
-
-        //         continue;
-        //     }
-
-        //     LocalDate parsed =
-        //             parseBillDate(date);
-
-        //     if (parsed.isBefore(selectedDate)) {
-
-        //         selectedDate = parsed;
-        //         selected = bill;
-        //     }
-        // }
-                }
-        return selected;
-    }
 
         // =========================================================
         // GET STRING FROM BILL MAP

@@ -217,7 +217,7 @@ public class Profile {
         Label title =
                 new Label("My Profile");
 
-        title.setStyle(
+        title.setStyle( "-fx-font-family:'Bodoni MT';" +
                 "-fx-font-size:24px;" +
                 "-fx-font-weight:bold;" +
                 "-fx-text-fill:white;"
@@ -228,7 +228,7 @@ public class Profile {
                         "Manage your personal and society information"
                 );
 
-        subtitle.setStyle(
+        subtitle.setStyle( "-fx-font-family:'Bodoni MT';" +
                 "-fx-font-size:13px;" +
                 "-fx-text-fill:white;"
         );

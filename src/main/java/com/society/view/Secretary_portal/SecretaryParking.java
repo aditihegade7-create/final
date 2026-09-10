@@ -486,6 +486,8 @@ public class SecretaryParking {
                 Label title = new Label(
                                 "Smart Parking");
 
+                                title.setStyle( "-fx-font-family:'Bodoni MT';" );
+
                 title.setTextFill(
                                 Color.WHITE);
 
@@ -501,6 +503,9 @@ public class SecretaryParking {
 
                 Label subtitle = new Label(
                                 "Manage parking slots and resident/owner parking assignments");
+
+
+                                subtitle.setStyle( "-fx-font-family:'Bodoni MT';" );
 
                 subtitle.setTextFill(
                                 Color.WHITE);

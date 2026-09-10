@@ -134,7 +134,7 @@ public class ManagePayment {
                         "Manage Payment"
                 );
 
-        heading.setStyle(
+        heading.setStyle( "-fx-font-family:'Bodoni MT';" +
                 "-fx-font-size:26px;" +
                 "-fx-font-weight:bold;" +
                 "-fx-text-fill:white;"
@@ -145,7 +145,7 @@ public class ManagePayment {
                         "Manage society amenities bookings and payments"
                 );
 
-        subtitle.setStyle(
+        subtitle.setStyle( "-fx-font-family:'Bodoni MT';" +
                 "-fx-font-size:14px;" +
                 "-fx-text-fill:white;"
         );

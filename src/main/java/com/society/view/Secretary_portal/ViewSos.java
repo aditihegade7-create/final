@@ -65,12 +65,12 @@ public class ViewSos {
     // =========================================================
 
     private static final String BACKGROUND = "#B3ADAD";
-    private static final String DARK = "#434141";
+    private static final String DARK = "#4e342e";
     private static final String TEXT_DARK = "#333333";
     private static final String GREEN = "#123C36";
     private static final String BORDER = "#EEEEEE";
     private static final String WHITE = "#FFFFFF";
-    private static final String GREY = "#777777";
+    private static final String GREY = "#4e342e";
 
     // =========================================================
     // BACKGROUND IMAGE
@@ -182,7 +182,7 @@ public class ViewSos {
                       
                 );
 
-        greeting.setStyle(
+        greeting.setStyle( "-fx-font-family:'Bodoni MT';" +
                 "-fx-font-size:24px;" +
                 "-fx-font-weight:bold;" +
                 "-fx-text-fill:white;"
@@ -193,7 +193,7 @@ public class ViewSos {
                         "View emergency alerts from residents and guards"
                 );
 
-        subtitle.setStyle(
+        subtitle.setStyle( "-fx-font-family:'Bodoni MT';" +
                 "-fx-font-size:13px;" +
                 "-fx-text-fill:" + GREY + ";"
         );

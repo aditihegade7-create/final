@@ -6,10 +6,11 @@ import java.time.format.DateTimeFormatter;
 import com.society.controller.Owner_Controller.ResidentController;
 import com.society.controller.welcome.UserController;
 import com.society.model.Owner_model.ResidentModel;
+import com.society.view.ScreenSize;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-
+import javafx.scene.control.ScrollPane;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -28,1386 +29,1053 @@ import javafx.scene.layout.VBox;
 
 import javafx.stage.Stage;
 
-
 public class AddTenant {
 
-    private static final ResidentController residentController =
-            new ResidentController();
+        private static final ResidentController residentController = new ResidentController();
 
-    private static final UserController userController =
-            new UserController();
+        private static final UserController userController = new UserController();
 
-    public static Scene createScene(Stage stage, String ownerEmail) {
+        public static Scene createScene(Stage stage, String ownerEmail) {
 
-        BorderPane root = new BorderPane();
+                BorderPane root = new BorderPane();
 
-        OwnerSidebar sidebar =
-                new OwnerSidebar(stage, ownerEmail);
+                OwnerSidebar sidebar = new OwnerSidebar(stage, ownerEmail);
 
-        root.setLeft(
-                sidebar.getSidebar()
-        );
+                root.setLeft(
+                                sidebar.getSidebar());
 
+                // =====================================================
+                // MAIN CONTENT
+                // =====================================================
+                VBox mainContent = new VBox();
 
-        // =====================================================
-        // MAIN CONTENT
-        // =====================================================
+                mainContent.setPadding(
+                                new Insets(0, 0, 25, 0));
 
-        VBox mainContent = new VBox();
+                mainContent.setSpacing(18);
 
-        mainContent.setPadding(
-                new Insets(25, 35, 25, 35)
-        );
+                mainContent.setAlignment(
+                                Pos.TOP_LEFT);
 
-        mainContent.setSpacing(18);
+                mainContent.setStyle(
+                                "-fx-background-color: #e8ddd5;");
 
-        mainContent.setAlignment(
-                Pos.TOP_LEFT
-        );
+                // =====================================================
+                // HEADER
+                // =====================================================
 
-        mainContent.setStyle(
-                "-fx-background-color: #e8ddd5;"
-        );
+                HBox header = new HBox();
 
+                header.setPrefHeight(80);
+                header.setPadding(
+                                new Insets(15, 25, 15, 25));
+                header.setAlignment(Pos.CENTER_LEFT);
 
-        // =====================================================
-        // HEADER
-        // =====================================================
+                header.setStyle(
+                                "-fx-background-color:#4e342e;");
 
-        HBox header = new HBox();
+                VBox headingBox = new VBox();
 
-        header.setPrefWidth(900);
-        header.setPrefHeight(80);
+                headingBox.setSpacing(3);
 
-        header.setPadding(
-                new Insets(20)
-        );
+                Label greeting = new Label("Add Tenant");
 
-        header.setAlignment(
-                Pos.CENTER_LEFT
-        );
+                greeting.setStyle( "-fx-font-family:'Bodoni MT';" +
+                                "-fx-font-size:24px;" +
+                                                "-fx-font-weight:bold;" +
+                                                "-fx-text-fill:#ffffff;");
 
-        header.setStyle(
-                "-fx-background-color: #4e342e;"
-        );
+                Label description = new Label(
+                                "Add and manage tenant details for your property");
 
+                description.setStyle( "-fx-font-family:'Bodoni MT';" +
+                                "-fx-font-size:12px;" +
+                                                "-fx-text-fill:#ffffff;");
 
-        VBox headingBox = new VBox();
+                headingBox.getChildren().addAll(
+                                greeting,
+                                description);
 
-        headingBox.setSpacing(3);
+                Region spacer = new Region();
 
+                HBox.setHgrow(
+                                spacer,
+                                Priority.ALWAYS);
 
-        Label greeting =
-                new Label("Add Tenant");
+                Label day = new Label();
 
-        greeting.setStyle(
-                "-fx-font-size:24px;" +
-                "-fx-font-weight:bold;" +
-                "-fx-text-fill:#ffffff;"
-        );
+                Label date = new Label();
 
+                LocalDate today = LocalDate.now();
 
-        Label description =
-                new Label(
-                        "Add and manage tenant details for your property"
-                );
+                day.setText(
+                                today.format(
+                                                DateTimeFormatter.ofPattern("EEEE")));
 
-        description.setStyle(
-                "-fx-font-size:12px;" +
-                "-fx-text-fill:#ffffff;"
-        );
+                day.setStyle(
+                                "-fx-text-fill:#ffffff;");
 
+                date.setText(
+                                today.format(
+                                                DateTimeFormatter.ofPattern(
+                                                                "dd MMMM yyyy")));
 
-        headingBox.getChildren().addAll(
-                greeting,
-                description
-        );
+                date.setStyle(
+                                "-fx-text-fill:#ffffff;");
 
+                VBox dateBox = new VBox();
 
-        Region spacer =
-                new Region();
+                dateBox.setSpacing(2);
 
-        HBox.setHgrow(
-                spacer,
-                Priority.ALWAYS
-        );
+                dateBox.getChildren().addAll(
+                                day,
+                                date);
 
+                header.getChildren().addAll(
+                                headingBox,
+                                spacer,
+                                dateBox);
 
-        Label day =
-                new Label();
+                // =====================================================
+                // FORM CARD
+                // =====================================================
 
-        Label date =
-                new Label();
+                VBox formCard = new VBox();
 
+                formCard.setPadding(
+                                new Insets(20, 25, 20, 25));
 
-        LocalDate today =
-                LocalDate.now();
+                formCard.setSpacing(15);
+                formCard.setMaxWidth(Double.MAX_VALUE);
 
+                formCard.setStyle(
+                                "-fx-background-color:#efeff3;" +
+                                                "-fx-background-radius:12;");
 
-        day.setText(
-                today.format(
-                        DateTimeFormatter.ofPattern("EEEE")
-                )
-        );
+                // =====================================================
+                // FORM HEADING
+                // =====================================================
 
-        day.setStyle(
-                "-fx-text-fill:#ffffff;"
-        );
+                Label formTitle = new Label(
+                                "Tenant Information");
 
+                formTitle.setStyle(
+                                "-fx-font-size:18px;" +
+                                                "-fx-font-weight:bold;" +
+                                                "-fx-text-fill:#102A43;");
 
-        date.setText(
-                today.format(
-                        DateTimeFormatter.ofPattern(
-                                "dd MMMM yyyy"
-                        )
-                )
-        );
+                Label formSubtitle = new Label(
+                                "Please provide the required tenant details");
 
-        date.setStyle(
-                "-fx-text-fill:#ffffff;"
-        );
+                formSubtitle.setStyle(
+                                "-fx-font-size:12px;" +
+                                                "-fx-text-fill:#546E7A;");
 
+                VBox formHeading = new VBox(
+                                3,
+                                formTitle,
+                                formSubtitle);
 
-        VBox dateBox =
-                new VBox();
+                // =====================================================
+                // FORM
+                // =====================================================
 
-        dateBox.setSpacing(2);
+                GridPane form = new GridPane();
 
-        dateBox.getChildren().addAll(
-                day,
-                date
-        );
+                form.setHgap(25);
+                form.setVgap(10);
 
+                // =====================================================
+                // NAME
+                // =====================================================
 
-        header.getChildren().addAll(
-                headingBox,
-                spacer,
-                dateBox
-        );
+                Label nameLabel = createLabel("Full Name");
 
+                TextField nameField = createField("Enter full name");
 
-        // =====================================================
-        // FORM CARD
-        // =====================================================
+                // =====================================================
+                // PHONE
+                // =====================================================
 
-        VBox formCard =
-                new VBox();
+                Label phoneLabel = createLabel("Phone Number");
 
-        formCard.setPadding(
-                new Insets(20, 25, 20, 25)
-        );
+                TextField phoneField = createField("Enter phone number");
 
-        formCard.setSpacing(15);
+                // =====================================================
+                // EMAIL
+                // =====================================================
 
-        formCard.setMaxWidth(
-                1050
-        );
+                Label emailLabel = createLabel("Email");
 
-        formCard.setStyle(
-                "-fx-background-color:#efeff3;" +
-                "-fx-background-radius:12;"
-        );
+                TextField emailField = createField("Enter email address");
 
+                // =====================================================
+                // FLAT
+                // =====================================================
 
-        // =====================================================
-        // FORM HEADING
-        // =====================================================
+                Label flatLabel = createLabel("Flat / Unit Number");
 
-        Label formTitle =
-                new Label(
-                        "Tenant Information"
-                );
+                TextField flatField = createField("Enter flat number");
 
-        formTitle.setStyle(
-                "-fx-font-size:18px;" +
-                "-fx-font-weight:bold;" +
-                "-fx-text-fill:#102A43;"
-        );
+                // =====================================================
+                // MOVE-IN DATE
+                // =====================================================
 
+                Label moveInLabel = createLabel("Move-in Date");
 
-        Label formSubtitle =
-                new Label(
-                        "Please provide the required tenant details"
-                );
+                DatePicker moveInDate = new DatePicker();
 
-        formSubtitle.setStyle(
-                "-fx-font-size:12px;" +
-                "-fx-text-fill:#546E7A;"
-        );
+                moveInDate.setPromptText(
+                                "Select date");
 
+                moveInDate.setPrefWidth(
+                                320);
 
-        VBox formHeading =
-                new VBox(
-                        3,
-                        formTitle,
-                        formSubtitle
-                );
+                moveInDate.setPrefHeight(
+                                38);
 
+                // =====================================================
+                // MONTHLY RENT
+                // =====================================================
 
-        // =====================================================
-        // FORM
-        // =====================================================
+                Label rentLabel = createLabel("Monthly Rent");
 
-        GridPane form =
-                new GridPane();
+                TextField rentField = createField("Enter monthly rent");
 
-        form.setHgap(25);
-        form.setVgap(10);
+                // =====================================================
+                // SECURITY DEPOSIT
+                // =====================================================
 
+                Label depositLabel = createLabel("Security Deposit");
 
-        // =====================================================
-        // NAME
-        // =====================================================
+                TextField depositField = createField(
+                                "Enter security deposit");
 
-        Label nameLabel =
-                createLabel("Full Name");
+                // =====================================================
+                // ID PROOF
+                // =====================================================
 
-        TextField nameField =
-                createField("Enter full name");
+                Label idLabel = createLabel("ID Proof Number");
 
+                TextField idField = createField(
+                                "Enter ID proof number");
 
-        // =====================================================
-        // PHONE
-        // =====================================================
+                // =====================================================
+                // EMERGENCY CONTACT
+                // =====================================================
 
-        Label phoneLabel =
-                createLabel("Phone Number");
+                Label emergencyLabel = createLabel("Emergency Contact");
 
-        TextField phoneField =
-                createField("Enter phone number");
+                TextField emergencyField = createField(
+                                "Enter emergency contact");
 
+                // =====================================================
+                // PASSWORD
+                // =====================================================
 
-        // =====================================================
-        // EMAIL
-        // =====================================================
+                Label passwordLabel = createLabel("Password");
 
-        Label emailLabel =
-                createLabel("Email");
+                PasswordField passwordField = createPasswordField("Enter tenant password");
 
-        TextField emailField =
-                createField("Enter email address");
+                // =====================================================
+                // CONFIRM PASSWORD
+                // =====================================================
 
+                Label confirmPasswordLabel = createLabel("Confirm Password");
 
-        // =====================================================
-        // FLAT
-        // =====================================================
+                PasswordField confirmPasswordField = createPasswordField("Confirm tenant password");
 
-        Label flatLabel =
-                createLabel("Flat / Unit Number");
+                // =====================================================
+                // FORM LAYOUT
+                // =====================================================
 
-        TextField flatField =
-                createField("Enter flat number");
+                form.add(
+                                nameLabel,
+                                0,
+                                0);
 
+                form.add(
+                                phoneLabel,
+                                1,
+                                0);
 
-        // =====================================================
-        // MOVE-IN DATE
-        // =====================================================
+                form.add(
+                                nameField,
+                                0,
+                                1);
 
-        Label moveInLabel =
-                createLabel("Move-in Date");
+                form.add(
+                                phoneField,
+                                1,
+                                1);
 
-        DatePicker moveInDate =
-                new DatePicker();
+                form.add(
+                                emailLabel,
+                                0,
+                                2);
 
-        moveInDate.setPromptText(
-                "Select date"
-        );
+                form.add(
+                                flatLabel,
+                                1,
+                                2);
 
-        moveInDate.setPrefWidth(
-                320
-        );
+                form.add(
+                                emailField,
+                                0,
+                                3);
 
-        moveInDate.setPrefHeight(
-                38
-        );
+                form.add(
+                                flatField,
+                                1,
+                                3);
 
+                form.add(
+                                moveInLabel,
+                                0,
+                                4);
 
-        // =====================================================
-        // MONTHLY RENT
-        // =====================================================
+                form.add(
+                                rentLabel,
+                                1,
+                                4);
 
-        Label rentLabel =
-                createLabel("Monthly Rent");
+                form.add(
+                                moveInDate,
+                                0,
+                                5);
 
-        TextField rentField =
-                createField("Enter monthly rent");
+                form.add(
+                                rentField,
+                                1,
+                                5);
 
+                form.add(
+                                depositLabel,
+                                0,
+                                6);
 
-        // =====================================================
-        // SECURITY DEPOSIT
-        // =====================================================
+                form.add(
+                                idLabel,
+                                1,
+                                6);
 
-        Label depositLabel =
-                createLabel("Security Deposit");
+                form.add(
+                                depositField,
+                                0,
+                                7);
 
-        TextField depositField =
-                createField(
-                        "Enter security deposit"
-                );
+                form.add(
+                                idField,
+                                1,
+                                7);
 
+                form.add(
+                                emergencyLabel,
+                                0,
+                                8);
 
-        // =====================================================
-        // ID PROOF
-        // =====================================================
+                form.add(
+                                passwordLabel,
+                                1,
+                                8);
 
-        Label idLabel =
-                createLabel("ID Proof Number");
+                form.add(
+                                emergencyField,
+                                0,
+                                9);
 
-        TextField idField =
-                createField(
-                        "Enter ID proof number"
-                );
+                form.add(
+                                passwordField,
+                                1,
+                                9);
 
+                // =====================================================
+                // REMARKS
+                // =====================================================
 
-        // =====================================================
-        // EMERGENCY CONTACT
-        // =====================================================
+                Label remarksLabel = createLabel("Remarks");
 
-        Label emergencyLabel =
-                createLabel("Emergency Contact");
+                TextArea remarksArea = new TextArea();
 
-        TextField emergencyField =
-                createField(
-                        "Enter emergency contact"
-                );
+                remarksArea.setPromptText(
+                                "Enter any additional information");
 
+                remarksArea.setPrefHeight(
+                                55);
 
-        // =====================================================
-        // PASSWORD
-        // =====================================================
+                remarksArea.setWrapText(
+                                true);
 
-        Label passwordLabel =
-                createLabel("Password");
+                remarksArea.setStyle(
+                                "-fx-background-color:white;" +
+                                                "-fx-border-color:#CBD5D8;" +
+                                                "-fx-border-radius:6;" +
+                                                "-fx-background-radius:6;");
 
-        PasswordField passwordField =
-                createPasswordField("Enter tenant password");
+                form.add(
+                                confirmPasswordLabel,
+                                0,
+                                10);
 
+                form.add(
+                                confirmPasswordField,
+                                0,
+                                11);
 
-        // =====================================================
-        // CONFIRM PASSWORD
-        // =====================================================
+                form.add(
+                                remarksLabel,
+                                1,
+                                10);
 
-        Label confirmPasswordLabel =
-                createLabel("Confirm Password");
+                form.add(
+                                remarksArea,
+                                1,
+                                11);
 
-        PasswordField confirmPasswordField =
-                createPasswordField("Confirm tenant password");
+                // =====================================================
+                // BUTTONS
+                // =====================================================
 
+                Button clearButton = new Button("Clear");
 
-        // =====================================================
-        // FORM LAYOUT
-        // =====================================================
+                Button saveButton = new Button("Save Tenant");
 
-        form.add(
-                nameLabel,
-                0,
-                0
-        );
+                clearButton.setPrefWidth(100);
+                clearButton.setPrefHeight(38);
 
-        form.add(
-                phoneLabel,
-                1,
-                0
-        );
+                saveButton.setPrefWidth(125);
+                saveButton.setPrefHeight(38);
 
+                clearButton.setStyle(
+                                "-fx-background-color:#ffffff;" +
+                                                "-fx-text-fill:#4e342e;" +
+                                                "-fx-font-weight:bold;" +
+                                                "-fx-background-radius:7;");
 
-        form.add(
-                nameField,
-                0,
-                1
-        );
+                saveButton.setStyle(
+                                "-fx-background-color:#4e342e;" +
+                                                "-fx-text-fill:#ffffff;" +
+                                                "-fx-font-weight:bold;" +
+                                                "-fx-background-radius:7;");
 
-        form.add(
-                phoneField,
-                1,
-                1
-        );
+                HBox buttons = new HBox();
 
+                buttons.setSpacing(12);
 
-        form.add(
-                emailLabel,
-                0,
-                2
-        );
+                buttons.setAlignment(
+                                Pos.CENTER_RIGHT);
 
-        form.add(
-                flatLabel,
-                1,
-                2
-        );
+                buttons.getChildren().addAll(
+                                clearButton,
+                                saveButton);
 
+                // =====================================================
+                // CLEAR BUTTON
+                // =====================================================
 
-        form.add(
-                emailField,
-                0,
-                3
-        );
+                clearButton.setOnAction(
+                                event -> {
 
-        form.add(
-                flatField,
-                1,
-                3
-        );
+                                        nameField.clear();
+                                        phoneField.clear();
+                                        emailField.clear();
+                                        flatField.clear();
 
+                                        moveInDate.setValue(null);
 
-        form.add(
-                moveInLabel,
-                0,
-                4
-        );
+                                        rentField.clear();
+                                        depositField.clear();
 
-        form.add(
-                rentLabel,
-                1,
-                4
-        );
+                                        idField.clear();
+                                        emergencyField.clear();
+                                        passwordField.clear();
+                                        confirmPasswordField.clear();
 
+                                        remarksArea.clear();
+                                });
 
-        form.add(
-                moveInDate,
-                0,
-                5
-        );
+                // =====================================================
+                // SAVE TENANT
+                // =====================================================
 
-        form.add(
-                rentField,
-                1,
-                5
-        );
+                saveButton.setOnAction(
+                                event -> {
 
+                                        System.out.println(
+                                                        "SAVE TENANT BUTTON CLICKED");
 
-        form.add(
-                depositLabel,
-                0,
-                6
-        );
+                                        try {
 
-        form.add(
-                idLabel,
-                1,
-                6
-        );
+                                                // =================================================
+                                                // READ FORM VALUES
+                                                // =================================================
 
+                                                String tenantName = nameField.getText()
+                                                                .trim();
 
-        form.add(
-                depositField,
-                0,
-                7
-        );
+                                                String tenantPhone = phoneField.getText()
+                                                                .trim();
 
-        form.add(
-                idField,
-                1,
-                7
-        );
+                                                String tenantEmail = emailField.getText()
+                                                                .trim()
+                                                                .toLowerCase();
 
+                                                String tenantPassword = passwordField.getText();
 
-        form.add(
-                emergencyLabel,
-                0,
-                8
-        );
+                                                String tenantConfirmPassword = confirmPasswordField.getText();
 
-        form.add(
-                passwordLabel,
-                1,
-                8
-        );
+                                                String tenantFlat = flatField.getText()
+                                                                .trim();
 
-        form.add(
-                emergencyField,
-                0,
-                9
-        );
+                                                String tenantMonthlyRent = rentField.getText()
+                                                                .trim();
 
-        form.add(
-                passwordField,
-                1,
-                9
-        );
+                                                String tenantSecurityDeposit = depositField.getText()
+                                                                .trim();
 
+                                                String tenantIdProof = idField.getText()
+                                                                .trim();
 
-        // =====================================================
-        // REMARKS
-        // =====================================================
+                                                String tenantEmergencyContact = emergencyField.getText()
+                                                                .trim();
 
-        Label remarksLabel =
-                createLabel("Remarks");
+                                                String tenantRemarks = remarksArea.getText()
+                                                                .trim();
 
+                                                // =================================================
+                                                // MOVE-IN DATE
+                                                // =================================================
 
-        TextArea remarksArea =
-                new TextArea();
+                                                String tenantMoveInDate = "";
 
-        remarksArea.setPromptText(
-                "Enter any additional information"
-        );
+                                                if (moveInDate.getValue() != null) {
 
-        remarksArea.setPrefHeight(
-                55
-        );
+                                                        tenantMoveInDate = moveInDate.getValue()
+                                                                        .format(
+                                                                                        DateTimeFormatter.ofPattern(
+                                                                                                        "dd MMMM yyyy"));
+                                                }
 
-        remarksArea.setWrapText(
-                true
-        );
+                                                // =================================================
+                                                // VALIDATION
+                                                // =================================================
 
-        remarksArea.setStyle(
-                "-fx-background-color:white;" +
-                "-fx-border-color:#CBD5D8;" +
-                "-fx-border-radius:6;" +
-                "-fx-background-radius:6;"
-        );
+                                                if (tenantName.isEmpty()) {
 
+                                                        showAlert(
+                                                                        Alert.AlertType.WARNING,
+                                                                        "Missing Information",
+                                                                        "Please enter tenant name.");
 
-        form.add(
-                confirmPasswordLabel,
-                0,
-                10
-        );
+                                                        return;
+                                                }
 
-        form.add(
-                confirmPasswordField,
-                0,
-                11
-        );
+                                                if (tenantPhone.isEmpty()) {
 
-        form.add(
-                remarksLabel,
-                1,
-                10
-        );
+                                                        showAlert(
+                                                                        Alert.AlertType.WARNING,
+                                                                        "Missing Information",
+                                                                        "Please enter phone number.");
 
-        form.add(
-                remarksArea,
-                1,
-                11
-        );
+                                                        return;
+                                                }
 
+                                                if (tenantEmail.isEmpty()) {
 
-        // =====================================================
-        // BUTTONS
-        // =====================================================
+                                                        showAlert(
+                                                                        Alert.AlertType.WARNING,
+                                                                        "Missing Information",
+                                                                        "Please enter tenant email.");
 
-        Button clearButton =
-                new Button("Clear");
+                                                        return;
+                                                }
 
-        Button saveButton =
-                new Button("Save Tenant");
+                                                if (!tenantEmail.contains("@") ||
+                                                                !tenantEmail.contains(".")) {
 
+                                                        showAlert(
+                                                                        Alert.AlertType.WARNING,
+                                                                        "Invalid Email",
+                                                                        "Please enter a valid email address.");
 
-        clearButton.setPrefWidth(100);
-        clearButton.setPrefHeight(38);
+                                                        return;
+                                                }
 
+                                                if (tenantPassword == null ||
+                                                                tenantPassword.isEmpty()) {
 
-        saveButton.setPrefWidth(125);
-        saveButton.setPrefHeight(38);
+                                                        showAlert(
+                                                                        Alert.AlertType.WARNING,
+                                                                        "Missing Information",
+                                                                        "Please enter tenant password.");
 
+                                                        return;
+                                                }
 
-        clearButton.setStyle(
-                "-fx-background-color:#ffffff;" +
-                "-fx-text-fill:#4e342e;" +
-                "-fx-font-weight:bold;" +
-                "-fx-background-radius:7;"
-        );
+                                                if (tenantPassword.length() < 6) {
 
+                                                        showAlert(
+                                                                        Alert.AlertType.WARNING,
+                                                                        "Invalid Password",
+                                                                        "Password must contain at least 6 characters.");
 
-        saveButton.setStyle(
-                "-fx-background-color:#4e342e;" +
-                "-fx-text-fill:#ffffff;" +
-                "-fx-font-weight:bold;" +
-                "-fx-background-radius:7;"
-        );
+                                                        return;
+                                                }
 
+                                                if (!tenantPassword.equals(
+                                                                tenantConfirmPassword)) {
 
-        HBox buttons =
-                new HBox();
+                                                        showAlert(
+                                                                        Alert.AlertType.WARNING,
+                                                                        "Password Mismatch",
+                                                                        "Password and confirm password do not match.");
 
-        buttons.setSpacing(12);
+                                                        return;
+                                                }
 
-        buttons.setAlignment(
-                Pos.CENTER_RIGHT
-        );
+                                                if (tenantFlat.isEmpty()) {
 
+                                                        showAlert(
+                                                                        Alert.AlertType.WARNING,
+                                                                        "Missing Information",
+                                                                        "Please enter flat number.");
 
-        buttons.getChildren().addAll(
-                clearButton,
-                saveButton
-        );
+                                                        return;
+                                                }
 
+                                                if (tenantMoveInDate.isEmpty()) {
 
-        // =====================================================
-        // CLEAR BUTTON
-        // =====================================================
+                                                        showAlert(
+                                                                        Alert.AlertType.WARNING,
+                                                                        "Missing Information",
+                                                                        "Please select move-in date.");
 
-        clearButton.setOnAction(
-                event -> {
+                                                        return;
+                                                }
 
-                    nameField.clear();
-                    phoneField.clear();
-                    emailField.clear();
-                    flatField.clear();
+                                                if (tenantMonthlyRent.isEmpty()) {
 
-                    moveInDate.setValue(null);
+                                                        showAlert(
+                                                                        Alert.AlertType.WARNING,
+                                                                        "Missing Information",
+                                                                        "Please enter monthly rent.");
 
-                    rentField.clear();
-                    depositField.clear();
+                                                        return;
+                                                }
 
-                    idField.clear();
-                    emergencyField.clear();
-                    passwordField.clear();
-                    confirmPasswordField.clear();
+                                                if (tenantSecurityDeposit.isEmpty()) {
 
-                    remarksArea.clear();
-                }
-        );
+                                                        showAlert(
+                                                                        Alert.AlertType.WARNING,
+                                                                        "Missing Information",
+                                                                        "Please enter security deposit.");
 
+                                                        return;
+                                                }
 
-        // =====================================================
-        // SAVE TENANT
-        // =====================================================
+                                                if (tenantIdProof.isEmpty()) {
 
-        saveButton.setOnAction(
-                event -> {
+                                                        showAlert(
+                                                                        Alert.AlertType.WARNING,
+                                                                        "Missing Information",
+                                                                        "Please enter ID proof number.");
 
-                    System.out.println(
-                            "SAVE TENANT BUTTON CLICKED"
-                    );
+                                                        return;
+                                                }
 
+                                                if (tenantEmergencyContact.isEmpty()) {
 
-                    try {
+                                                        showAlert(
+                                                                        Alert.AlertType.WARNING,
+                                                                        "Missing Information",
+                                                                        "Please enter emergency contact.");
 
-                        // =================================================
-                        // READ FORM VALUES
-                        // =================================================
+                                                        return;
+                                                }
 
-                        String tenantName =
-                                nameField.getText()
-                                        .trim();
+                                                // =================================================
+                                                // CREATE RESIDENT MODEL
+                                                // =================================================
 
+                                                ResidentModel resident = new ResidentModel();
 
-                        String tenantPhone =
-                                phoneField.getText()
-                                        .trim();
+                                                resident.setEmail(
+                                                                tenantEmail);
 
+                                                resident.setName(
+                                                                tenantName);
 
-                        String tenantEmail =
-                                emailField.getText()
-                                        .trim()
-                                        .toLowerCase();
+                                                resident.setPhone(
+                                                                tenantPhone);
 
-                        String tenantPassword =
-                                passwordField.getText();
+                                                resident.setDateOfBirth(
+                                                                "");
 
-                        String tenantConfirmPassword =
-                                confirmPasswordField.getText();
+                                                resident.setGender(
+                                                                "");
 
+                                                resident.setFlat(
+                                                                tenantFlat);
 
-                        String tenantFlat =
-                                flatField.getText()
-                                        .trim();
+                                                // =================================================
+                                                // SOCIETY FROM LOGGED-IN OWNER
+                                                // =================================================
 
+                                                String normalizedOwnerEmail = ownerEmail == null
+                                                                ? ""
+                                                                : ownerEmail.trim().toLowerCase();
 
-                        String tenantMonthlyRent =
-                                rentField.getText()
-                                        .trim();
+                                                ResidentModel owner = residentController.getOwnerByEmail(
+                                                                normalizedOwnerEmail);
 
+                                                if (owner == null ||
+                                                                owner.getSociety() == null ||
+                                                                owner.getSociety().trim().isEmpty()) {
 
-                        String tenantSecurityDeposit =
-                                depositField.getText()
-                                        .trim();
+                                                        showAlert(
+                                                                        Alert.AlertType.ERROR,
+                                                                        "Society Not Found",
+                                                                        "The owner's society could not be found. " +
+                                                                                        "Tenant was not saved.");
 
+                                                        return;
+                                                }
 
-                        String tenantIdProof =
-                                idField.getText()
-                                        .trim();
+                                                resident.setSociety(
+                                                                owner.getSociety().trim());
 
+                                                // =================================================
+                                                // RESIDENT TYPE
+                                                // =================================================
 
-                        String tenantEmergencyContact =
-                                emergencyField.getText()
-                                        .trim();
+                                                resident.setResidentType(
+                                                                "Tenant");
 
+                                                // =================================================
+                                                // OWNER RELATIONSHIP
+                                                // =================================================
 
-                        String tenantRemarks =
-                                remarksArea.getText()
-                                        .trim();
+                                                resident.setOwnerEmail(
+                                                                normalizedOwnerEmail);
 
+                                                resident.setPrimaryResidentEmail(
+                                                                "");
 
-                        // =================================================
-                        // MOVE-IN DATE
-                        // =================================================
+                                                // =================================================
+                                                // RENTAL INFORMATION
+                                                // =================================================
 
-                        String tenantMoveInDate =
-                                "";
+                                                resident.setMoveInDate(
+                                                                tenantMoveInDate);
 
+                                                resident.setMoveOutDate(
+                                                                "");
 
-                        if (moveInDate.getValue() != null) {
+                                                resident.setMonthlyRent(
+                                                                tenantMonthlyRent);
 
-                            tenantMoveInDate =
-                                    moveInDate.getValue()
-                                            .format(
-                                                    DateTimeFormatter.ofPattern(
-                                                            "dd MMMM yyyy"
-                                                    )
-                                            );
-                        }
+                                                resident.setSecurityDeposit(
+                                                                tenantSecurityDeposit);
 
+                                                // =================================================
+                                                // OTHER INFORMATION
+                                                // =================================================
 
-                        // =================================================
-                        // VALIDATION
-                        // =================================================
+                                                resident.setIdProof(
+                                                                tenantIdProof);
 
-                        if (tenantName.isEmpty()) {
+                                                resident.setEmergencyContact(
+                                                                tenantEmergencyContact);
 
-                            showAlert(
-                                    Alert.AlertType.WARNING,
-                                    "Missing Information",
-                                    "Please enter tenant name."
-                            );
+                                                resident.setRemarks(
+                                                                tenantRemarks);
 
-                            return;
-                        }
+                                                resident.setRemovalReason(
+                                                                "");
 
+                                                resident.setStatus(
+                                                                "Active");
 
-                        if (tenantPhone.isEmpty()) {
+                                                // =================================================
+                                                // DEBUG
+                                                // =================================================
 
-                            showAlert(
-                                    Alert.AlertType.WARNING,
-                                    "Missing Information",
-                                    "Please enter phone number."
-                            );
+                                                System.out.println(
+                                                                "------------------------------------");
 
-                            return;
-                        }
+                                                System.out.println(
+                                                                "Saving Tenant");
 
+                                                System.out.println(
+                                                                "Tenant Email: "
+                                                                                + tenantEmail);
 
-                        if (tenantEmail.isEmpty()) {
+                                                System.out.println(
+                                                                "Tenant Name: "
+                                                                                + tenantName);
 
-                            showAlert(
-                                    Alert.AlertType.WARNING,
-                                    "Missing Information",
-                                    "Please enter tenant email."
-                            );
+                                                System.out.println(
+                                                                "Tenant Flat: "
+                                                                                + tenantFlat);
 
-                            return;
-                        }
+                                                System.out.println(
+                                                                "Owner Email: "
+                                                                                + ownerEmail);
 
+                                                System.out.println(
+                                                                "Resident Type: Tenant");
 
-                        if (!tenantEmail.contains("@") ||
-                                !tenantEmail.contains(".")) {
+                                                System.out.println(
+                                                                "------------------------------------");
 
-                            showAlert(
-                                    Alert.AlertType.WARNING,
-                                    "Invalid Email",
-                                    "Please enter a valid email address."
-                            );
+                                                // =================================================
+                                                // CREATE FIREBASE AUTHENTICATION ACCOUNT
+                                                // =================================================
 
-                            return;
-                        }
+                                                System.out.println(
+                                                                "Creating Firebase Authentication account...");
 
+                                                boolean authCreated = userController.createFirebaseAccount(
+                                                                tenantEmail,
+                                                                tenantPassword);
 
-                        if (tenantPassword == null ||
-                                tenantPassword.isEmpty()) {
+                                                System.out.println(
+                                                                "Firebase Authentication result: "
+                                                                                + authCreated);
 
-                            showAlert(
-                                    Alert.AlertType.WARNING,
-                                    "Missing Information",
-                                    "Please enter tenant password."
-                            );
+                                                if (!authCreated) {
 
-                            return;
-                        }
+                                                        showAlert(
+                                                                        Alert.AlertType.ERROR,
+                                                                        "Authentication Failed",
+                                                                        "Tenant Firebase Authentication account could not be created.\n\n"
+                                                                                        + "The tenant was not saved to Firestore.");
 
+                                                        return;
+                                                }
 
-                        if (tenantPassword.length() < 6) {
+                                                // =================================================
+                                                // SAVE TO FIRESTORE
+                                                // =================================================
 
-                            showAlert(
-                                    Alert.AlertType.WARNING,
-                                    "Invalid Password",
-                                    "Password must contain at least 6 characters."
-                            );
+                                                boolean success = residentController.addResident(
+                                                                resident);
 
-                            return;
-                        }
+                                                System.out.println(
+                                                                "Firestore save result: "
+                                                                                + success);
 
+                                                // =================================================
+                                                // SUCCESS
+                                                // =================================================
 
-                        if (!tenantPassword.equals(
-                                tenantConfirmPassword)) {
+                                                if (success) {
 
-                            showAlert(
-                                    Alert.AlertType.WARNING,
-                                    "Password Mismatch",
-                                    "Password and confirm password do not match."
-                            );
+                                                        showAlert(
+                                                                        Alert.AlertType.INFORMATION,
+                                                                        "Tenant Added",
+                                                                        "Tenant has been successfully added.\n\n"
+                                                                                        + "Firebase login account has also been created.");
 
-                            return;
-                        }
+                                                        // Clear form
 
+                                                        nameField.clear();
 
-                        if (tenantFlat.isEmpty()) {
+                                                        phoneField.clear();
 
-                            showAlert(
-                                    Alert.AlertType.WARNING,
-                                    "Missing Information",
-                                    "Please enter flat number."
-                            );
+                                                        emailField.clear();
 
-                            return;
-                        }
+                                                        flatField.clear();
 
+                                                        moveInDate.setValue(
+                                                                        null);
 
-                        if (tenantMoveInDate.isEmpty()) {
+                                                        rentField.clear();
 
-                            showAlert(
-                                    Alert.AlertType.WARNING,
-                                    "Missing Information",
-                                    "Please select move-in date."
-                            );
+                                                        depositField.clear();
 
-                            return;
-                        }
+                                                        idField.clear();
 
+                                                        emergencyField.clear();
+                                                        passwordField.clear();
+                                                        confirmPasswordField.clear();
 
-                        if (tenantMonthlyRent.isEmpty()) {
+                                                        remarksArea.clear();
 
-                            showAlert(
-                                    Alert.AlertType.WARNING,
-                                    "Missing Information",
-                                    "Please enter monthly rent."
-                            );
+                                                } else {
 
-                            return;
-                        }
+                                                        showAlert(
+                                                                        Alert.AlertType.ERROR,
+                                                                        "Save Failed",
+                                                                        "Tenant could not be saved to Firestore.");
+                                                }
 
+                                        } catch (Exception ex) {
 
-                        if (tenantSecurityDeposit.isEmpty()) {
+                                                System.out.println(
+                                                                "====================================");
 
-                            showAlert(
-                                    Alert.AlertType.WARNING,
-                                    "Missing Information",
-                                    "Please enter security deposit."
-                            );
+                                                System.out.println(
+                                                                "ADD TENANT ERROR");
 
-                            return;
-                        }
+                                                System.out.println(
+                                                                "====================================");
 
+                                                ex.printStackTrace();
 
-                        if (tenantIdProof.isEmpty()) {
+                                                showAlert(
+                                                                Alert.AlertType.ERROR,
+                                                                "Error",
+                                                                "Error while saving tenant:\n\n"
+                                                                                + ex.getMessage());
+                                        }
+                                });
 
-                            showAlert(
-                                    Alert.AlertType.WARNING,
-                                    "Missing Information",
-                                    "Please enter ID proof number."
-                            );
+                // =====================================================
+                // ADD FORM TO CARD
+                // =====================================================
 
-                            return;
-                        }
+                formCard.getChildren().addAll(
+                                formHeading,
+                                form,
+                                buttons);
 
+                // =====================================================
+                // ADD CONTENT
+                // =====================================================
 
-                        if (tenantEmergencyContact.isEmpty()) {
+                mainContent.getChildren().addAll(
+                                header,
+                                formCard);
 
-                            showAlert(
-                                    Alert.AlertType.WARNING,
-                                    "Missing Information",
-                                    "Please enter emergency contact."
-                            );
+                // =====================================================
+                // MAIN AREA
+                // =====================================================
 
-                            return;
-                        }
+                BorderPane mainArea = new BorderPane();
 
+                mainArea.setCenter(
+                                mainContent);
 
-                        // =================================================
-                        // CREATE RESIDENT MODEL
-                        // =================================================
+                root.setCenter(
+                                mainArea);
 
-                        ResidentModel resident =
-                                new ResidentModel();
+                // =====================================================
+                // RETURN SCENE
+                // =====================================================
 
+                Scene scene = new Scene(
+                                root,
+                                ScreenSize.getWidth(),
+                                ScreenSize.getHeight());
 
-                        resident.setEmail(
-                                tenantEmail
-                        );
+                stage.setScene(
+                                scene);
 
+                stage.setMaximized(
+                                true);
 
-                        resident.setName(
-                                tenantName
-                        );
+                return scene;
+        }
 
+        // return new Scene(
+        // root,
+        // 1500,
+        // 750
+        // );
+        // }
 
-                        resident.setPhone(
-                                tenantPhone
-                        );
+        // =========================================================
+        // CREATE LABEL
+        // =========================================================
 
+        private static Label createLabel(
+                        String text) {
 
-                        resident.setDateOfBirth(
-                                ""
-                        );
+                Label label = new Label(text);
 
+                label.setStyle(
+                                "-fx-font-size:12px;" +
+                                                "-fx-font-weight:bold;" +
+                                                "-fx-text-fill:#37474F;");
 
-                        resident.setGender(
-                                ""
-                        );
+                return label;
+        }
 
+        // =========================================================
+        // CREATE PASSWORD FIELD
+        // =========================================================
 
-                        resident.setFlat(
-                                tenantFlat
-                        );
+        private static PasswordField createPasswordField(
+                        String prompt) {
 
+                PasswordField field = new PasswordField();
 
-                        // =================================================
-                        // SOCIETY FROM LOGGED-IN OWNER
-                        // =================================================
+                field.setPromptText(
+                                prompt);
 
-                        String normalizedOwnerEmail =
-                                ownerEmail == null
-                                        ? ""
-                                        : ownerEmail.trim().toLowerCase();
+                field.setPrefWidth(
+                                320);
 
-                        ResidentModel owner =
-                                residentController.getOwnerByEmail(
-                                        normalizedOwnerEmail
-                                );
+                field.setPrefHeight(
+                                38);
 
-                        if (owner == null ||
-                                owner.getSociety() == null ||
-                                owner.getSociety().trim().isEmpty()) {
+                field.setStyle(
+                                "-fx-background-color:white;" +
+                                                "-fx-border-color:#CBD5D8;" +
+                                                "-fx-border-radius:6;" +
+                                                "-fx-background-radius:6;");
 
-                            showAlert(
-                                    Alert.AlertType.ERROR,
-                                    "Society Not Found",
-                                    "The owner's society could not be found. " +
-                                            "Tenant was not saved."
-                            );
+                return field;
+        }
 
-                            return;
-                        }
+        // =========================================================
+        // CREATE TEXT FIELD
+        // =========================================================
 
-                        resident.setSociety(
-                                owner.getSociety().trim()
-                        );
+        private static TextField createField(
+                        String prompt) {
 
+                TextField field = new TextField();
 
-                        // =================================================
-                        // RESIDENT TYPE
-                        // =================================================
+                field.setPromptText(
+                                prompt);
 
-                        resident.setResidentType(
-                                "Tenant"
-                        );
+                field.setPrefWidth(
+                                320);
 
+                field.setPrefHeight(
+                                38);
 
-                        // =================================================
-                        // OWNER RELATIONSHIP
-                        // =================================================
+                field.setStyle(
+                                "-fx-background-color:white;" +
+                                                "-fx-border-color:#CBD5D8;" +
+                                                "-fx-border-radius:6;" +
+                                                "-fx-background-radius:6;");
 
-                        resident.setOwnerEmail(
-                                normalizedOwnerEmail
-                        );
+                return field;
+        }
 
+        // =========================================================
+        // ALERT
+        // =========================================================
 
-                        resident.setPrimaryResidentEmail(
-                                ""
-                        );
+        private static void showAlert(
+                        Alert.AlertType type,
+                        String title,
+                        String message) {
 
+                Alert alert = new Alert(type);
 
-                        // =================================================
-                        // RENTAL INFORMATION
-                        // =================================================
+                alert.setTitle(
+                                title);
 
-                        resident.setMoveInDate(
-                                tenantMoveInDate
-                        );
+                alert.setHeaderText(
+                                null);
 
+                alert.setContentText(
+                                message);
 
-                        resident.setMoveOutDate(
-                                ""
-                        );
-
-
-                        resident.setMonthlyRent(
-                                tenantMonthlyRent
-                        );
-
-
-                        resident.setSecurityDeposit(
-                                tenantSecurityDeposit
-                        );
-
-
-                        // =================================================
-                        // OTHER INFORMATION
-                        // =================================================
-
-                        resident.setIdProof(
-                                tenantIdProof
-                        );
-
-
-                        resident.setEmergencyContact(
-                                tenantEmergencyContact
-                        );
-
-
-                        resident.setRemarks(
-                                tenantRemarks
-                        );
-
-
-                        resident.setRemovalReason(
-                                ""
-                        );
-
-
-                        resident.setStatus(
-                                "Active"
-                        );
-
-
-                        // =================================================
-                        // DEBUG
-                        // =================================================
-
-                        System.out.println(
-                                "------------------------------------"
-                        );
-
-                        System.out.println(
-                                "Saving Tenant"
-                        );
-
-                        System.out.println(
-                                "Tenant Email: "
-                                        + tenantEmail
-                        );
-
-                        System.out.println(
-                                "Tenant Name: "
-                                        + tenantName
-                        );
-
-                        System.out.println(
-                                "Tenant Flat: "
-                                        + tenantFlat
-                        );
-
-                        System.out.println(
-                                "Owner Email: "
-                                        + ownerEmail
-                        );
-
-                        System.out.println(
-                                "Resident Type: Tenant"
-                        );
-
-                        System.out.println(
-                                "------------------------------------"
-                        );
-
-
-                        // =================================================
-                        // CREATE FIREBASE AUTHENTICATION ACCOUNT
-                        // =================================================
-
-                        System.out.println(
-                                "Creating Firebase Authentication account..."
-                        );
-
-                        boolean authCreated =
-                                userController.createFirebaseAccount(
-                                        tenantEmail,
-                                        tenantPassword
-                                );
-
-
-                        System.out.println(
-                                "Firebase Authentication result: "
-                                        + authCreated
-                        );
-
-
-                        if (!authCreated) {
-
-                            showAlert(
-                                    Alert.AlertType.ERROR,
-                                    "Authentication Failed",
-                                    "Tenant Firebase Authentication account could not be created.\n\n"
-                                            + "The tenant was not saved to Firestore."
-                            );
-
-                            return;
-                        }
-
-
-                        // =================================================
-                        // SAVE TO FIRESTORE
-                        // =================================================
-
-                        boolean success =
-                                residentController.addResident(
-                                        resident
-                                );
-
-
-                        System.out.println(
-                                "Firestore save result: "
-                                        + success
-                        );
-
-
-                        // =================================================
-                        // SUCCESS
-                        // =================================================
-
-                        if (success) {
-
-                            showAlert(
-                                    Alert.AlertType.INFORMATION,
-                                    "Tenant Added",
-                                    "Tenant has been successfully added.\n\n"
-                                            + "Firebase login account has also been created."
-                            );
-
-
-                            // Clear form
-
-                            nameField.clear();
-
-                            phoneField.clear();
-
-                            emailField.clear();
-
-                            flatField.clear();
-
-                            moveInDate.setValue(
-                                    null
-                            );
-
-                            rentField.clear();
-
-                            depositField.clear();
-
-                            idField.clear();
-
-                            emergencyField.clear();
-                            passwordField.clear();
-                            confirmPasswordField.clear();
-
-                            remarksArea.clear();
-
-
-                        } else {
-
-                            showAlert(
-                                    Alert.AlertType.ERROR,
-                                    "Save Failed",
-                                    "Tenant could not be saved to Firestore."
-                            );
-                        }
-
-
-                    } catch (Exception ex) {
-
-                        System.out.println(
-                                "===================================="
-                        );
-
-                        System.out.println(
-                                "ADD TENANT ERROR"
-                        );
-
-                        System.out.println(
-                                "===================================="
-                        );
-
-
-                        ex.printStackTrace();
-
-
-                        showAlert(
-                                Alert.AlertType.ERROR,
-                                "Error",
-                                "Error while saving tenant:\n\n"
-                                        + ex.getMessage()
-                        );
-                    }
-                }
-        );
-
-
-        // =====================================================
-        // ADD FORM TO CARD
-        // =====================================================
-
-        formCard.getChildren().addAll(
-                formHeading,
-                form,
-                buttons
-        );
-
-
-        // =====================================================
-        // ADD CONTENT
-        // =====================================================
-
-        mainContent.getChildren().addAll(
-                header,
-                formCard
-        );
-
-
-        // =====================================================
-        // MAIN AREA
-        // =====================================================
-
-        BorderPane mainArea =
-                new BorderPane();
-
-        mainArea.setCenter(
-                mainContent
-        );
-
-
-        root.setCenter(
-                mainArea
-        );
-
-
-        // =====================================================
-        // RETURN SCENE
-        // =====================================================
-
-        return new Scene(
-                root,
-                1500,
-                750
-        );
-    }
-
-
-    // =========================================================
-    // CREATE LABEL
-    // =========================================================
-
-    private static Label createLabel(
-            String text) {
-
-        Label label =
-                new Label(text);
-
-
-        label.setStyle(
-                "-fx-font-size:12px;" +
-                "-fx-font-weight:bold;" +
-                "-fx-text-fill:#37474F;"
-        );
-
-
-        return label;
-    }
-
-
-    // =========================================================
-    // CREATE PASSWORD FIELD
-    // =========================================================
-
-    private static PasswordField createPasswordField(
-            String prompt) {
-
-        PasswordField field =
-                new PasswordField();
-
-
-        field.setPromptText(
-                prompt
-        );
-
-
-        field.setPrefWidth(
-                320
-        );
-
-
-        field.setPrefHeight(
-                38
-        );
-
-
-        field.setStyle(
-                "-fx-background-color:white;" +
-                "-fx-border-color:#CBD5D8;" +
-                "-fx-border-radius:6;" +
-                "-fx-background-radius:6;"
-        );
-
-
-        return field;
-    }
-
-
-    // =========================================================
-    // CREATE TEXT FIELD
-    // =========================================================
-
-    private static TextField createField(
-            String prompt) {
-
-        TextField field =
-                new TextField();
-
-
-        field.setPromptText(
-                prompt
-        );
-
-
-        field.setPrefWidth(
-                320
-        );
-
-
-        field.setPrefHeight(
-                38
-        );
-
-
-        field.setStyle(
-                "-fx-background-color:white;" +
-                "-fx-border-color:#CBD5D8;" +
-                "-fx-border-radius:6;" +
-                "-fx-background-radius:6;"
-        );
-
-
-        return field;
-    }
-
-
-    // =========================================================
-    // ALERT
-    // =========================================================
-
-    private static void showAlert(
-            Alert.AlertType type,
-            String title,
-            String message) {
-
-        Alert alert =
-                new Alert(type);
-
-
-        alert.setTitle(
-                title
-        );
-
-
-        alert.setHeaderText(
-                null
-        );
-
-
-        alert.setContentText(
-                message
-        );
-
-
-        alert.showAndWait();
-    }
+                alert.showAndWait();
+        }
 }

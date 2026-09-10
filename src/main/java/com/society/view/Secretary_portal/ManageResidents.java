@@ -10,6 +10,7 @@ import java.util.List;
 import com.society.controller.Secretary_Controller.ResidentController;
 import com.society.model.Secretary_model.Resident;
 import com.society.view.ScreenSize;
+import com.society.view.Owner_portal.OwnerDashboard;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -93,9 +94,33 @@ public class ManageResidents {
 
         mainvb.setSpacing(10);
 
-        mainvb.setStyle(
-                "-fx-background-color:#b3adad;"
-        );
+        // mainvb.setStyle(
+        //         "-fx-background-color: #b3adad;"
+        // );
+
+        Image image = new Image(
+                    OwnerDashboard.class
+                            .getResource(
+                                    "/background-Dashboard5.jpeg"
+                            )
+                            .toExternalForm()
+            );
+
+                BackgroundImage bgImage = new BackgroundImage(
+                                image,
+                                BackgroundRepeat.NO_REPEAT,
+                                BackgroundRepeat.NO_REPEAT,
+                                BackgroundPosition.CENTER,
+                                new BackgroundSize(
+                                                100,
+                                                100,
+                                                true,
+                                                true,
+                                                false,
+                                                true));
+
+                mainvb.setBackground(
+                                new Background(bgImage));
 
         // =====================================================
         // HEADER
@@ -115,7 +140,7 @@ public class ManageResidents {
         Label greeting =
                 new Label( "Manage Residents");
 
-        greeting.setStyle(
+        greeting.setStyle( "-fx-font-family:'Bodoni MT';" +
                 "-fx-text-fill:white;" +
                 "-fx-font-size:20px;" +
                 "-fx-font-weight:bold;"
@@ -125,7 +150,7 @@ public class ManageResidents {
                         "View and manage residents of your society"
                 );
 
-        subtitle.setStyle(
+        subtitle.setStyle( "-fx-font-family:'Bodoni MT';" +
                 "-fx-font-size:14px;" +
                 "-fx-text-fill:#777777;"
         );
@@ -290,7 +315,7 @@ public class ManageResidents {
         refreshBtn.setPrefHeight(45);
 
         refreshBtn.setStyle(
-                "-fx-background-color:#434141;" +
+                "-fx-background-color:#4e342e;" +
                 "-fx-text-fill:white;" +
                 "-fx-font-size:22px;" +
                 "-fx-font-weight:bold;" +
@@ -318,7 +343,7 @@ public class ManageResidents {
         addResidentBtn.setPrefHeight(45);
 
         addResidentBtn.setStyle(
-                "-fx-background-color:#434141;" +
+                "-fx-background-color:#4e342e;" +
                 "-fx-text-fill:white;" +
                 "-fx-font-weight:bold;" +
                 "-fx-background-radius:8;" +

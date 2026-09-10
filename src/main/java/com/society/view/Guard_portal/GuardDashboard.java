@@ -17,6 +17,7 @@ import com.society.model.Guard_model.GuardModel;
 
 import com.society.dao.Guard_dao.ParkingDao;
 import com.society.view.ScreenSize;
+import com.society.view.Owner_portal.OwnerDashboard;
 
 import javafx.animation.FadeTransition;
 import javafx.animation.ParallelTransition;
@@ -33,6 +34,11 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -113,52 +119,6 @@ public class GuardDashboard {
         // BACKGROUND IMAGE
         // =====================================================
 
-        java.net.URL bgUrl =
-                GuardDashboard.class.getResource(
-                        "/background-Dashboard5.jpeg"
-                );
-
-        ImageView backgroundImage =
-                new ImageView();
-
-        if (bgUrl != null) {
-
-            Image bgImage =
-                    new Image(
-                            bgUrl.toExternalForm()
-                    );
-
-            backgroundImage.setImage(
-                    bgImage
-            );
-
-        } else {
-
-            System.out.println(
-                    "WARNING: Background image not found: " +
-                    "WhatsApp Image 2026-08-27 at 1.20.20 PM.jpeg"
-            );
-        }
-
-        backgroundImage.setPreserveRatio(
-                false
-        );
-
-        backgroundImage.setFitWidth(
-                ScreenSize.getWidth()
-        );
-
-        backgroundImage.setFitHeight(
-                ScreenSize.getHeight()
-        );
-
-        backgroundImage.setMouseTransparent(
-                true
-        );
-
-        root.getChildren().add(
-                backgroundImage
-        );
 
 
         // =====================================================
@@ -167,6 +127,30 @@ public class GuardDashboard {
 
         BorderPane dashboardRoot =
                 new BorderPane();
+
+                 Image image = new Image(
+                    OwnerDashboard.class
+                            .getResource(
+                                    "/background-Dashboard5.jpeg"
+                            )
+                            .toExternalForm()
+            );
+
+                BackgroundImage bgImage = new BackgroundImage(
+                                image,
+                                BackgroundRepeat.NO_REPEAT,
+                                BackgroundRepeat.NO_REPEAT,
+                                BackgroundPosition.CENTER,
+                                new BackgroundSize(
+                                                100,
+                                                100,
+                                                true,
+                                                true,
+                                                false,
+                                                true));
+
+                dashboardRoot.setBackground(
+                                new Background(bgImage));
 
 
         // =====================================================
@@ -245,9 +229,7 @@ public class GuardDashboard {
                 18
         );
 
-        mainContent.setStyle(
-                "-fx-background-color: #e8ddd5;"
-        );
+      
 
 
         // =====================================================
@@ -739,7 +721,7 @@ public class GuardDashboard {
 
                 button.setStyle(
                         "-fx-background-color:#522c23;" +
-                        "-fx-text-fill:#E8F0E8;" +
+                        "-fx-text-fill: #E8F0E8;" +
                         "-fx-font-size:14px;" +
                         "-fx-font-weight:bold;" +
                         "-fx-background-radius:10;"

@@ -17,6 +17,7 @@ import javafx.stage.Stage;
 public class SecretarySidebar {
 
     private User loggedInUser;
+    private Button selectedButton = null;
 
     // ============================================================
     // CONSTRUCTOR WITH USER
@@ -228,7 +229,7 @@ public class SecretarySidebar {
 
         Label logo = new Label("Society360");
 
-        logo.setStyle(
+        logo.setStyle( "-fx-font-family:'Bodoni MT';" +
                 "-fx-text-fill:white;"
                         + "-fx-font-size:28px;"
                         + "-fx-font-weight:bold;"
@@ -259,9 +260,10 @@ public class SecretarySidebar {
         // ========================================================
 
         Button dashboardBtn =
-                createMenuButton("🏠Dashboard");
+                createMenuButton("🏠 Dashboard");
 
         dashboardBtn.setOnAction(e -> {
+                setButtonSelected(dashboardBtn);
 
             try {
 
@@ -283,9 +285,10 @@ public class SecretarySidebar {
         // ========================================================
 
         Button residentsBtn =
-                createMenuButton("Residents");
+                createMenuButton("👥 Residents");
 
         residentsBtn.setOnAction(e -> {
+                setButtonSelected(residentsBtn);
 
             try {
 
@@ -310,6 +313,7 @@ public class SecretarySidebar {
                 createMenuButton("Owners");
 
         ownersBtn.setOnAction(e -> {
+                 setButtonSelected(ownersBtn);
 
             try {
 
@@ -331,9 +335,10 @@ public class SecretarySidebar {
         // ========================================================
 
         Button guardsBtn =
-                createMenuButton("Guards");
+                createMenuButton("👤 Guards");
 
         guardsBtn.setOnAction(e -> {
+                 setButtonSelected(guardsBtn);
 
             try {
 
@@ -355,9 +360,10 @@ public class SecretarySidebar {
         // ========================================================
 
         Button noticesBtn =
-                createMenuButton("Notices");
+                createMenuButton("📢 Notices");
 
         noticesBtn.setOnAction(e -> {
+                  setButtonSelected(noticesBtn);
 
             try {
 
@@ -379,9 +385,10 @@ public class SecretarySidebar {
         // ========================================================
 
         Button complaintsBtn =
-                createMenuButton("Complaints");
+                createMenuButton("❗ Complaints");
 
         complaintsBtn.setOnAction(e -> {
+                setButtonSelected(complaintsBtn);
 
             try {
 
@@ -403,9 +410,11 @@ public class SecretarySidebar {
         // ========================================================
 
         Button maintenanceBtn =
-                createMenuButton("Maintenance");
+                createMenuButton("📅 Maintenance");
 
         maintenanceBtn.setOnAction(e -> {
+                   setButtonSelected(maintenanceBtn);
+
 
             try {
 
@@ -427,9 +436,11 @@ public class SecretarySidebar {
         // ========================================================
 
         Button paymentsBtn =
-                createMenuButton("Payments");
+                createMenuButton("💳 Payments");
 
         paymentsBtn.setOnAction(e -> {
+                  setButtonSelected(paymentsBtn);
+
 
             try {
 
@@ -451,9 +462,10 @@ public class SecretarySidebar {
         // ========================================================
 
         Button sosBtn =
-                createMenuButton("Emergency SOS");
+                createMenuButton("🆘 Emergency SOS");
 
         sosBtn.setOnAction(e -> {
+                  setButtonSelected(sosBtn);
 
             try {
 
@@ -475,9 +487,11 @@ public class SecretarySidebar {
         // ========================================================
 
         Button eventsBtn =
-                createMenuButton("Events");
+                createMenuButton("📢 Events");
 
         eventsBtn.setOnAction(e -> {
+                  setButtonSelected(eventsBtn);
+
 
             try {
 
@@ -499,9 +513,11 @@ public class SecretarySidebar {
         // ========================================================
 
         Button reportsBtn =
-                createMenuButton("Daily Reports");
+                createMenuButton("📊 Daily Reports");
 
         reportsBtn.setOnAction(e -> {
+                 setButtonSelected(reportsBtn);
+
 
             try {
 
@@ -523,9 +539,10 @@ public class SecretarySidebar {
         // ========================================================
 
         Button pollsBtn =
-                createMenuButton("Polls and Surveys");
+                createMenuButton("📄 Polls and Surveys");
 
         pollsBtn.setOnAction(e -> {
+                  setButtonSelected(pollsBtn);
 
             try {
 
@@ -547,9 +564,10 @@ public class SecretarySidebar {
         // ========================================================
 
         Button parkingBtn =
-                createMenuButton("Parking");
+                createMenuButton("🚗 Parking");
 
         parkingBtn.setOnAction(e -> {
+                setButtonSelected(parkingBtn);
 
             try {
 
@@ -575,9 +593,11 @@ public class SecretarySidebar {
         // ========================================================
 
         Button profileBtn =
-                createMenuButton("Profile");
+                createMenuButton("👤 Profile");
 
         profileBtn.setOnAction(e -> {
+                  setButtonSelected(profileBtn);
+
 
             try {
 
@@ -626,70 +646,133 @@ public class SecretarySidebar {
     // CREATE MENU BUTTON
     // ============================================================
 
-    private Button createMenuButton(String text) {
+   private Button createMenuButton(String text) {
 
-        Button button =
-                new Button(text);
+    Button button = new Button(text);
 
-        button.setMaxWidth(
-                Double.MAX_VALUE
-        );
+    button.setMaxWidth(Double.MAX_VALUE);
+    button.setPrefHeight(45);
 
-        button.setPrefHeight(45);
+    button.setAlignment(Pos.CENTER_LEFT);
 
-        button.setAlignment(
-                Pos.CENTER_LEFT
-        );
+    button.setPadding(
+            new Insets(
+                    0,
+                    15,
+                    0,
+                    20
+            )
+    );
 
-        button.setPadding(
-                new Insets(
-                        0,
-                        15,
-                        0,
-                        20
-                )
-        );
+    // ========================================================
+    // NORMAL STYLE
+    // ========================================================
 
-        button.setStyle(
-                "-fx-background-color:transparent;"
-                        + "-fx-text-fill:white;"
-                        + "-fx-font-size:15px;"
-                        + "-fx-font-weight:bold;"
-                        + "-fx-background-radius:8;"
-                        + "-fx-cursor:hand;"
-        );
+    String normalStyle =
+            "-fx-background-color:transparent;"
+                    + "-fx-text-fill:white;"
+                    + "-fx-font-size:15px;"
+                    + "-fx-font-weight:bold;"
+                    + "-fx-background-radius:8;"
+                    + "-fx-cursor:hand;";
 
-        // ========================================================
-        // HOVER
-        // ========================================================
+    // ========================================================
+    // SELECTED / HOVER STYLE
+    // ========================================================
 
-        button.setOnMouseEntered(e -> {
+    String activeStyle =
+            "-fx-background-color:#e7c3bb;"
+                    + "-fx-text-fill:#4e342e;"
+                    + "-fx-font-size:15px;"
+                    + "-fx-font-weight:bold;"
+                    + "-fx-background-radius:8;"
+                    + "-fx-cursor:hand;";
 
-            button.setStyle(
-                    "-fx-background-color: #e7c3bb;"
-                            + "-fx-text-fill:white;"
-                            + "-fx-font-size:15px;"
-                            + "-fx-font-weight:bold;"
-                            + "-fx-background-radius:8;"
-                            + "-fx-cursor:hand;"
-            );
-        });
+    button.setStyle(normalStyle);
 
-        button.setOnMouseExited(e -> {
+    // ========================================================
+    // MOUSE ENTERED
+    // ========================================================
 
-            button.setStyle(
-                    "-fx-background-color:transparent;"
-                            + "-fx-text-fill:white;"
-                            + "-fx-font-size:15px;"
-                            + "-fx-font-weight:bold;"
-                            + "-fx-background-radius:8;"
-                            + "-fx-cursor:hand;"
-            );
-        });
+    button.setOnMouseEntered(e -> {
 
-        return button;
+        button.setStyle(activeStyle);
+    });
+
+    // ========================================================
+    // MOUSE EXITED
+    // ========================================================
+
+    button.setOnMouseExited(e -> {
+
+        // जर हा button selected असेल तर activeच ठेवायचा
+        if (selectedButton == button) {
+
+            button.setStyle(activeStyle);
+
+        } else {
+
+            button.setStyle(normalStyle);
+        }
+    });
+
+    // ========================================================
+    // CLICK
+    // ========================================================
+
+    button.setOnAction(e -> {
+
+        // आधीचा selected button normal कर
+        if (selectedButton != null
+                && selectedButton != button) {
+
+            selectedButton.setStyle(normalStyle);
+        }
+
+        // नवीन button selected कर
+        selectedButton = button;
+
+        // selected button active ठेव
+        button.setStyle(activeStyle);
+    });
+
+    return button;
+}
+
+
+    private void setButtonSelected(Button button) {
+
+    String normalStyle =
+            "-fx-background-color:transparent;"
+                    + "-fx-text-fill:white;"
+                    + "-fx-font-size:15px;"
+                    + "-fx-font-weight:bold;"
+                    + "-fx-background-radius:8;"
+                    + "-fx-cursor:hand;";
+
+    String activeStyle =
+            "-fx-background-color:#e7c3bb;"
+                    + "-fx-text-fill:#4e342e;"
+                    + "-fx-font-size:15px;"
+                    + "-fx-font-weight:bold;"
+                    + "-fx-background-radius:8;"
+                    + "-fx-cursor:hand;";
+    
+
+    // Make previous button normal
+    if (selectedButton != null
+            && selectedButton != button) {
+
+        selectedButton.setStyle(normalStyle);
     }
 
+    // Set new selected button
+    selectedButton = button;
+
+    // Keep selected button active
+    button.setStyle(activeStyle);
+    
+} 
     // ============================================================
     // OLD GET SIDEBAR METHOD
     // ============================================================

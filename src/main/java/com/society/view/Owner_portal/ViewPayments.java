@@ -69,19 +69,21 @@ public class ViewPayments {
         // MAIN CONTENT
         // =====================================================
 
-        VBox mainContent =
-                new VBox();
+       VBox mainContent = new VBox();
 
-        mainContent.setPadding(
-                new Insets(25, 35, 25, 35)
-        );
+mainContent.setPadding(
+        new Insets(0, 0, 25, 0)
+);
 
-        mainContent.setSpacing(15);
+mainContent.setSpacing(18);
 
-        mainContent.setAlignment(
-                Pos.TOP_LEFT
-        );
+mainContent.setAlignment(
+        Pos.TOP_LEFT
+);
 
+mainContent.setStyle(
+        "-fx-background-color: #e8ddd5;"
+);
         // =====================================================
         // BACKGROUND IMAGE
         // =====================================================

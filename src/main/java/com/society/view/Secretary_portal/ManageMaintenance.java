@@ -146,7 +146,7 @@ public class ManageMaintenance {
                         "Manage Maintenance"
                 );
 
-        title.setStyle(
+        title.setStyle( "-fx-font-family:'Bodoni MT';" +
                 "-fx-font-size:20px;" +
                 "-fx-font-weight:bold;" +
                 "-fx-text-fill:white;"
@@ -157,7 +157,7 @@ public class ManageMaintenance {
                         "View and manage maintenance records of your society"
                 );
 
-        subtitle.setStyle(
+        subtitle.setStyle( "-fx-font-family:'Bodoni MT';" +
                 "-fx-font-size:13px;" +
                 "-fx-text-fill:white;"
         );

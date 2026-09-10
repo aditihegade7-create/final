@@ -243,7 +243,7 @@ public class ManageNotices {
                         "Manage Notices"
                 );
 
-        title.setStyle(
+        title.setStyle( "-fx-font-family:'Bodoni MT';" +
                 "-fx-font-size:20px;"
                         + "-fx-font-weight:bold;"
                         + "-fx-text-fill:white;"
@@ -254,7 +254,7 @@ public class ManageNotices {
                         "Create, edit and manage society notices"
                 );
 
-        subtitle.setStyle(
+        subtitle.setStyle( "-fx-font-family:'Bodoni MT';" +
                 "-fx-font-size:13px;"
                         + "-fx-text-fill:white;"
         );

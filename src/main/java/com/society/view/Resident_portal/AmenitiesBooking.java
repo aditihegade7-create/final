@@ -138,10 +138,12 @@ public class AmenitiesBooking {
                 heading.setStyle("-fx-background-color: #4e342e;");
 
                 Label title = new Label("Book Amenity");
+                title.setStyle( "-fx-font-family:'Bodoni MT';" );
                 title.setFont(Font.font("System", FontWeight.BOLD, 28));
                 title.setTextFill(Color.web("#fffdfc"));
 
                 Label subtitle = new Label("Reserve society amenities");
+                subtitle.setStyle( "-fx-font-family:'Bodoni MT';" );
                 subtitle.setFont(Font.font("System", 14));
                 subtitle.setTextFill(Color.web("#ffffff"));
 

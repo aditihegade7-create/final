@@ -281,6 +281,8 @@ header.setMaxHeight(80);
                         "My Profile"
                 );
 
+                headerMain.setStyle( "-fx-font-family:'Bodoni MT';" );
+
         headerMain.setFont(Font.font(
                         "System",
                         FontWeight.BOLD,
@@ -293,6 +295,8 @@ header.setMaxHeight(80);
 
 
         Label headerSubtitle = new Label("Manage your personal and account information");
+
+        headerSubtitle.setStyle( "-fx-font-family:'Bodoni MT';" );
 
         headerSubtitle.setFont(
                 Font.font(

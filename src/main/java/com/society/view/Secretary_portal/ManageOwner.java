@@ -104,6 +104,7 @@ Label greeting =
         new Label(
                 "Manage Owner"
         );
+        greeting.setStyle( "-fx-font-family:'Bodoni MT';" );
 
         greeting.setFont(
                 Font.font(
@@ -121,6 +122,8 @@ Label greeting =
         new Label(
                 "Manage your society owners"
         );
+
+        welcomeText.setStyle( "-fx-font-family:'Bodoni MT';" );
 
 welcomeText.setFont(
         Font.font(
