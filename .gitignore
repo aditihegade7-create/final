@@ -1,2 +1,6 @@
 target
-src/main/resources/java2026.json
+<<<<<<< HEAD
+src\main\resources\java.json
+=======
+src/main/resources/java.json
+>>>>>>> cec421d9aa34b73e6592334b30f8138b8c15a794

@@ -18,6 +18,12 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -60,6 +66,21 @@ public class ManagePayment {
             DateTimeFormatter.ofPattern("dd MMM yyyy");
 
     // =========================================================
+    // COLORS
+    // =========================================================
+
+    private static final String HEADER_COLOR = "#4e342e";
+    private static final String PAGE_BACKGROUND = "#F7F7F7";
+    private static final String TEXT_COLOR = "#3D322E";
+
+    // =========================================================
+    // BACKGROUND IMAGE
+    // =========================================================
+
+    private static final String BACKGROUND_IMAGE =
+            "/background-Dashboard5.jpeg";
+
+    // =========================================================
     // CREATE SCENE
     // =========================================================
 
@@ -78,36 +99,34 @@ public class ManagePayment {
         VBox sidebar =
                 sidebarObj.createSidebar(stage);
 
+        sidebar.setPrefWidth(280);
+        sidebar.setMinWidth(280);
+        sidebar.setMaxWidth(280);
+
         // =====================================================
         // MAIN
         // =====================================================
 
         VBox mainvb =
-                new VBox(14);
+                new VBox();
 
-        mainvb.setPadding(
-                new Insets(
-                        22,
-                        25,
-                        20,
-                        25
-                )
-        );
-
-        mainvb.setMaxWidth(
-                Double.MAX_VALUE
-        );
-
-        mainvb.setMaxHeight(
+        mainvb.setMaxSize(
+                Double.MAX_VALUE,
                 Double.MAX_VALUE
         );
 
         mainvb.setStyle(
-                "-fx-background-color:#E8DDD3;"
+                "-fx-background-color:" +
+                PAGE_BACKGROUND + ";"
+        );
+
+        HBox.setHgrow(
+                mainvb,
+                Priority.ALWAYS
         );
 
         // =====================================================
-        // HEADING
+        // HEADER
         // =====================================================
 
         Label heading =
@@ -115,10 +134,10 @@ public class ManagePayment {
                         "Manage Payment"
                 );
 
-        heading.setStyle(
+        heading.setStyle( "-fx-font-family:'Bodoni MT';" +
                 "-fx-font-size:26px;" +
                 "-fx-font-weight:bold;" +
-                "-fx-text-fill:#24456D;"
+                "-fx-text-fill:white;"
         );
 
         Label subtitle =
@@ -126,13 +145,17 @@ public class ManagePayment {
                         "Manage society amenities bookings and payments"
                 );
 
-        subtitle.setStyle(
-                "-fx-font-size:15px;" +
-                "-fx-text-fill:#666666;"
+        subtitle.setStyle( "-fx-font-family:'Bodoni MT';" +
+                "-fx-font-size:14px;" +
+                "-fx-text-fill:white;"
         );
 
         VBox headingBox =
-                new VBox(4);
+                new VBox(3);
+
+        headingBox.setAlignment(
+                Pos.CENTER_LEFT
+        );
 
         headingBox.getChildren().addAll(
                 heading,
@@ -140,7 +163,7 @@ public class ManagePayment {
         );
 
         // =====================================================
-        // ADD AMENITY
+        // ADD AMENITY BUTTON
         // =====================================================
 
         Button addAmenityButton =
@@ -152,31 +175,158 @@ public class ManagePayment {
         addAmenityButton.setPrefHeight(40);
 
         addAmenityButton.setStyle(
-                "-fx-background-color:#56342B;" +
-                "-fx-text-fill:white;" +
+                "-fx-background-color:white;" +
+                "-fx-text-fill:" + HEADER_COLOR + ";" +
                 "-fx-font-weight:bold;" +
                 "-fx-font-size:14px;" +
-                "-fx-background-radius:7;"
+                "-fx-background-radius:7;" +
+                "-fx-cursor:hand;"
         );
 
         addAmenityButton.setOnAction(
                 e -> openAddAmenityPopup()
         );
 
-        HBox addAmenityBox =
+        // =====================================================
+        // HEADER BOX
+        // =====================================================
+
+        HBox header =
                 new HBox();
 
-        addAmenityBox.setAlignment(
-                Pos.CENTER_RIGHT
+        header.setAlignment(
+                Pos.CENTER_LEFT
         );
 
-        addAmenityBox.setMaxWidth(
+        header.setPadding(
+                new Insets(
+                        0,
+                        30,
+                        0,
+                        30
+                )
+        );
+
+        header.setSpacing(20);
+
+        header.setPrefHeight(80);
+        header.setMinHeight(80);
+        header.setMaxHeight(80);
+
+        header.setMaxWidth(
                 Double.MAX_VALUE
         );
 
-        addAmenityBox.getChildren().add(
+        header.setStyle(
+                "-fx-background-color:" +
+                HEADER_COLOR + ";" +
+                "-fx-border-color:" +
+                HEADER_COLOR + ";" +
+                "-fx-border-width:0 0 1 0;"
+        );
+
+        HBox.setHgrow(
+                headingBox,
+                Priority.ALWAYS
+        );
+
+        header.getChildren().addAll(
+                headingBox,
                 addAmenityButton
         );
+
+        // =====================================================
+        // CONTENT
+        // =====================================================
+
+        VBox content =
+                new VBox(14);
+
+        content.setPadding(
+                new Insets(
+                        20,
+                        25,
+                        20,
+                        25
+                )
+        );
+
+        content.setMaxSize(
+                Double.MAX_VALUE,
+                Double.MAX_VALUE
+        );
+
+        VBox.setVgrow(
+                content,
+                Priority.ALWAYS
+        );
+
+        // =====================================================
+        // BACKGROUND IMAGE
+        // =====================================================
+
+        try {
+
+            if (getClass().getResource(
+                    BACKGROUND_IMAGE
+            ) != null) {
+
+                Image backgroundImage =
+                        new Image(
+                                getClass()
+                                        .getResource(
+                                                BACKGROUND_IMAGE
+                                        )
+                                        .toExternalForm()
+                        );
+
+                BackgroundImage bgImage =
+                        new BackgroundImage(
+                                backgroundImage,
+                                BackgroundRepeat.NO_REPEAT,
+                                BackgroundRepeat.NO_REPEAT,
+                                BackgroundPosition.CENTER,
+                                new BackgroundSize(
+                                        100,
+                                        100,
+                                        true,
+                                        true,
+                                        false,
+                                        true
+                                )
+                        );
+
+                content.setBackground(
+                        new Background(
+                                bgImage
+                        )
+                );
+
+            } else {
+
+                System.err.println(
+                        "Background image not found: "
+                                + BACKGROUND_IMAGE
+                );
+
+                content.setStyle(
+                        "-fx-background-color:" +
+                        PAGE_BACKGROUND + ";"
+                );
+            }
+
+        } catch (Exception e) {
+
+            System.err.println(
+                    "Background image could not be loaded: "
+                            + e.getMessage()
+            );
+
+            content.setStyle(
+                    "-fx-background-color:" +
+                    PAGE_BACKGROUND + ";"
+            );
+        }
 
         // =====================================================
         // AMENITIES TITLE
@@ -190,7 +340,8 @@ public class ManagePayment {
         amenitiesTitle.setStyle(
                 "-fx-font-size:20px;" +
                 "-fx-font-weight:bold;" +
-                "-fx-text-fill:#333333;"
+                "-fx-text-fill:" +
+                TEXT_COLOR + ";"
         );
 
         // =====================================================
@@ -250,11 +401,12 @@ public class ManagePayment {
         upcomingTitle.setStyle(
                 "-fx-font-size:20px;" +
                 "-fx-font-weight:bold;" +
-                "-fx-text-fill:#333333;"
+                "-fx-text-fill:" +
+                TEXT_COLOR + ";"
         );
 
         // =====================================================
-        // REFRESH
+        // REFRESH BUTTON
         // =====================================================
 
         Button refreshButton =
@@ -266,10 +418,12 @@ public class ManagePayment {
         refreshButton.setPrefHeight(38);
 
         refreshButton.setStyle(
-                "-fx-background-color:#56342B;" +
+                "-fx-background-color:" +
+                HEADER_COLOR + ";" +
                 "-fx-text-fill:white;" +
                 "-fx-font-weight:bold;" +
-                "-fx-background-radius:7;"
+                "-fx-background-radius:7;" +
+                "-fx-cursor:hand;"
         );
 
         refreshButton.setOnAction(
@@ -324,6 +478,10 @@ public class ManagePayment {
                 Double.MAX_VALUE
         );
 
+        bookingList.setStyle(
+                "-fx-background-color:transparent;"
+        );
+
         // =====================================================
         // LOAD BOOKINGS
         // =====================================================
@@ -331,7 +489,7 @@ public class ManagePayment {
         loadBookings();
 
         // =====================================================
-        // SCROLL
+        // BOOKING SCROLL
         // =====================================================
 
         ScrollPane bookingScroll =
@@ -350,19 +508,38 @@ public class ManagePayment {
         );
 
         bookingScroll.setPrefHeight(300);
+        bookingScroll.setMinHeight(300);
         bookingScroll.setMaxHeight(300);
 
+        // =====================================================
+        // INVISIBLE SCROLLBARS
+        // =====================================================
+
         bookingScroll.setVbarPolicy(
-                ScrollPane.ScrollBarPolicy.AS_NEEDED
+                ScrollPane.ScrollBarPolicy.NEVER
         );
 
         bookingScroll.setHbarPolicy(
                 ScrollPane.ScrollBarPolicy.NEVER
         );
 
+        // =====================================================
+        // TRANSPARENT SCROLLPANE
+        // =====================================================
+
         bookingScroll.setStyle(
                 "-fx-background-color:transparent;" +
-                "-fx-border-color:transparent;"
+                "-fx-background:transparent;" +
+                "-fx-border-color:transparent;" +
+                "-fx-padding:0;"
+        );
+
+        // =====================================================
+        // ALLOW SCROLLING
+        // =====================================================
+
+        bookingScroll.setPannable(
+                true
         );
 
         // =====================================================
@@ -386,19 +563,19 @@ public class ManagePayment {
                 Pos.CENTER
         );
 
+        footerBox.setMaxWidth(
+                Double.MAX_VALUE
+        );
+
         footerBox.getChildren().add(
                 footer
         );
 
         // =====================================================
-        // MAIN CONTENT
+        // ADD CONTENT
         // =====================================================
 
-        mainvb.getChildren().addAll(
-
-                headingBox,
-
-                addAmenityBox,
+        content.getChildren().addAll(
 
                 amenitiesTitle,
 
@@ -414,6 +591,20 @@ public class ManagePayment {
         );
 
         // =====================================================
+        // MAIN
+        // =====================================================
+
+        mainvb.getChildren().addAll(
+                header,
+                content
+        );
+
+        VBox.setVgrow(
+                content,
+                Priority.ALWAYS
+        );
+
+        // =====================================================
         // ROOT
         // =====================================================
 
@@ -423,6 +614,11 @@ public class ManagePayment {
         mainRoot.setMaxSize(
                 Double.MAX_VALUE,
                 Double.MAX_VALUE
+        );
+
+        mainRoot.setStyle(
+                "-fx-background-color:" +
+                PAGE_BACKGROUND + ";"
         );
 
         mainRoot.getChildren().addAll(
@@ -441,6 +637,11 @@ public class ManagePayment {
 
         StackPane root =
                 new StackPane();
+
+        root.setMaxSize(
+                Double.MAX_VALUE,
+                Double.MAX_VALUE
+        );
 
         root.getChildren().add(
                 mainRoot
@@ -489,8 +690,7 @@ public class ManagePayment {
             int column = 0;
             int row = 0;
 
-            for (Payment amenity
-                    : amenities) {
+            for (Payment amenity : amenities) {
 
                 if (amenity == null) {
                     continue;
@@ -587,7 +787,7 @@ public class ManagePayment {
         );
 
         card.setStyle(
-                "-fx-background-color:white;" +
+                "-fx-background-color:rgba(255,255,255,0.96);" +
                 "-fx-background-radius:8;" +
                 "-fx-border-color:#EEEEEE;" +
                 "-fx-border-radius:8;"
@@ -601,7 +801,8 @@ public class ManagePayment {
         name.setStyle(
                 "-fx-font-size:16px;" +
                 "-fx-font-weight:bold;" +
-                "-fx-text-fill:#18385E;"
+                "-fx-text-fill:" +
+                TEXT_COLOR + ";"
         );
 
         Label priceLabel =
@@ -657,7 +858,9 @@ public class ManagePayment {
                 Double.MAX_VALUE
         );
 
-        availabilityCombo.setPrefHeight(32);
+        availabilityCombo.setPrefHeight(
+                32
+        );
 
         card.getChildren().addAll(
                 name,
@@ -679,7 +882,9 @@ public class ManagePayment {
             return;
         }
 
-        bookingList.getChildren().clear();
+        bookingList
+                .getChildren()
+                .clear();
 
         Label loading =
                 new Label(
@@ -701,7 +906,9 @@ public class ManagePayment {
                     paymentController
                             .getAllBookings();
 
-            bookingList.getChildren().clear();
+            bookingList
+                    .getChildren()
+                    .clear();
 
             if (bookings == null
                     || bookings.isEmpty()) {
@@ -715,29 +922,23 @@ public class ManagePayment {
 
             int count = 0;
 
-            for (Payment payment
-                    : bookings) {
+            for (Payment payment : bookings) {
 
                 if (payment == null) {
                     continue;
                 }
 
                 System.out.println(
-                        "Displaying booking: "
-                                + payment
-                                        .getBookingId()
-                                + " | "
-                                + payment
-                                        .getEmail()
-                                + " | "
-                                + payment
-                                        .getAmenityName()
-                                + " | "
-                                + payment
-                                        .getBookingDate()
-                                + " | "
-                                + payment
-                                        .getStatus()
+                        "Displaying booking: " +
+                        payment.getBookingId() +
+                        " | " +
+                        payment.getEmail() +
+                        " | " +
+                        payment.getAmenityName() +
+                        " | " +
+                        payment.getBookingDate() +
+                        " | " +
+                        payment.getStatus()
                 );
 
                 HBox row =
@@ -763,7 +964,9 @@ public class ManagePayment {
 
             e.printStackTrace();
 
-            bookingList.getChildren().clear();
+            bookingList
+                    .getChildren()
+                    .clear();
 
             showNoBookings(
                     "Error while fetching bookings."
@@ -796,15 +999,11 @@ public class ManagePayment {
         );
 
         row.setStyle(
-                "-fx-background-color:white;" +
+                "-fx-background-color:rgba(255,255,255,0.96);" +
                 "-fx-background-radius:8;" +
                 "-fx-border-color:#DDDDDD;" +
                 "-fx-border-radius:8;"
         );
-
-        // =====================================================
-        // DETAILS
-        // =====================================================
 
         VBox residentBox =
                 createDetailBox(
@@ -877,10 +1076,6 @@ public class ManagePayment {
                         )
                 );
 
-        // =====================================================
-        // BOOKING STATUS
-        // =====================================================
-
         VBox statusBox =
                 new VBox(5);
 
@@ -903,10 +1098,6 @@ public class ManagePayment {
                                 .getStatus()
                 ).toUpperCase();
 
-        // =====================================================
-        // ACCEPTED
-        // =====================================================
-
         if (status.equals("ACCEPTED")) {
 
             statusLabel.setText(
@@ -920,13 +1111,8 @@ public class ManagePayment {
                     "-fx-padding:6px 10px;" +
                     "-fx-background-radius:15;"
             );
-        }
 
-        // =====================================================
-        // REJECTED
-        // =====================================================
-
-        else if (status.equals("REJECTED")) {
+        } else if (status.equals("REJECTED")) {
 
             statusLabel.setText(
                     "Rejected"
@@ -939,13 +1125,8 @@ public class ManagePayment {
                     "-fx-padding:6px 10px;" +
                     "-fx-background-radius:15;"
             );
-        }
 
-        // =====================================================
-        // PENDING
-        // =====================================================
-
-        else {
+        } else {
 
             statusLabel.setText(
                     "Pending"
@@ -965,10 +1146,6 @@ public class ManagePayment {
                 statusLabel
         );
 
-        // =====================================================
-        // ACTION
-        // =====================================================
-
         VBox actionBox =
                 new VBox(5);
 
@@ -985,10 +1162,6 @@ public class ManagePayment {
         HBox actionButtons =
                 new HBox(8);
 
-        // =====================================================
-        // ACCEPT
-        // =====================================================
-
         Button acceptButton =
                 new Button(
                         "Accept"
@@ -1001,12 +1174,9 @@ public class ManagePayment {
                 "-fx-background-color:#198754;" +
                 "-fx-text-fill:white;" +
                 "-fx-font-weight:bold;" +
-                "-fx-background-radius:5;"
+                "-fx-background-radius:5;" +
+                "-fx-cursor:hand;"
         );
-
-        // =====================================================
-        // REJECT
-        // =====================================================
 
         Button rejectButton =
                 new Button(
@@ -1020,28 +1190,16 @@ public class ManagePayment {
                 "-fx-background-color:#DC3545;" +
                 "-fx-text-fill:white;" +
                 "-fx-font-weight:bold;" +
-                "-fx-background-radius:5;"
+                "-fx-background-radius:5;" +
+                "-fx-cursor:hand;"
         );
-
-        // =====================================================
-        // DISABLE AFTER DECISION
-        // =====================================================
 
         if (status.equals("ACCEPTED")
                 || status.equals("REJECTED")) {
 
-            acceptButton.setDisable(
-                    true
-            );
-
-            rejectButton.setDisable(
-                    true
-            );
+            acceptButton.setDisable(true);
+            rejectButton.setDisable(true);
         }
-
-        // =====================================================
-        // ACCEPT
-        // =====================================================
 
         acceptButton.setOnAction(
                 e -> updateBookingStatus(
@@ -1049,10 +1207,6 @@ public class ManagePayment {
                         "ACCEPTED"
                 )
         );
-
-        // =====================================================
-        // REJECT
-        // =====================================================
 
         rejectButton.setOnAction(
                 e -> updateBookingStatus(
@@ -1071,10 +1225,6 @@ public class ManagePayment {
                 actionButtons
         );
 
-        // =====================================================
-        // WIDTH
-        // =====================================================
-
         residentBox.setPrefWidth(120);
         flatBox.setPrefWidth(70);
         amenityBox.setPrefWidth(125);
@@ -1084,10 +1234,6 @@ public class ManagePayment {
         paymentBox.setPrefWidth(85);
         statusBox.setPrefWidth(95);
         actionBox.setPrefWidth(165);
-
-        // =====================================================
-        // ADD
-        // =====================================================
 
         row.getChildren().addAll(
 
@@ -1134,10 +1280,6 @@ public class ManagePayment {
                 return;
             }
 
-            // =====================================================
-            // RESIDENT EMAIL
-            // =====================================================
-
             String email =
                     safe(
                             payment
@@ -1156,10 +1298,6 @@ public class ManagePayment {
                 return;
             }
 
-            // =====================================================
-            // BOOKING ID
-            // =====================================================
-
             String bookingId =
                     safe(
                             payment
@@ -1177,10 +1315,6 @@ public class ManagePayment {
                 return;
             }
 
-            // =====================================================
-            // STATUS
-            // =====================================================
-
             newStatus =
                     newStatus
                             .trim()
@@ -1195,27 +1329,20 @@ public class ManagePayment {
             );
 
             System.out.println(
-                    "Resident Email = "
-                            + email
+                    "Resident Email = " + email
             );
 
             System.out.println(
-                    "Booking ID = "
-                            + bookingId
+                    "Booking ID = " + bookingId
             );
 
             System.out.println(
-                    "New Status = "
-                            + newStatus
+                    "New Status = " + newStatus
             );
 
             System.out.println(
                     "======================================"
             );
-
-            // =====================================================
-            // DAO UPDATE THROUGH CONTROLLER
-            // =====================================================
 
             boolean updated =
                     paymentController
@@ -1225,15 +1352,7 @@ public class ManagePayment {
                                     newStatus
                             );
 
-            // =====================================================
-            // SUCCESS
-            // =====================================================
-
             if (updated) {
-
-                // Update local model also.
-                // This ensures UI has the new value
-                // immediately.
 
                 payment.setStatus(
                         newStatus
@@ -1242,26 +1361,16 @@ public class ManagePayment {
                 showAlert(
                         Alert.AlertType.INFORMATION,
                         "Booking Updated",
-                        "Booking has been "
-                                + displayStatus(
-                                        newStatus
-                                )
-                                + " successfully."
+                        "Booking has been " +
+                        displayStatus(
+                                newStatus
+                        ) +
+                        " successfully."
                 );
-
-                // =================================================
-                // RELOAD FROM FIRESTORE
-                // =================================================
 
                 loadBookings();
 
-            }
-
-            // =====================================================
-            // FAILURE
-            // =====================================================
-
-            else {
+            } else {
 
                 showAlert(
                         Alert.AlertType.ERROR,
@@ -1440,7 +1549,8 @@ public class ManagePayment {
         title.setStyle(
                 "-fx-font-size:21px;" +
                 "-fx-font-weight:bold;" +
-                "-fx-text-fill:#24456D;"
+                "-fx-text-fill:" +
+                HEADER_COLOR + ";"
         );
 
         // =====================================================
@@ -1540,7 +1650,8 @@ public class ManagePayment {
                 "-fx-background-color:#E5E7EB;" +
                 "-fx-text-fill:#333333;" +
                 "-fx-font-weight:bold;" +
-                "-fx-background-radius:8;"
+                "-fx-background-radius:8;" +
+                "-fx-cursor:hand;"
         );
 
         Button saveButton =
@@ -1552,10 +1663,12 @@ public class ManagePayment {
         saveButton.setPrefHeight(36);
 
         saveButton.setStyle(
-                "-fx-background-color:#56342B;" +
+                "-fx-background-color:" +
+                HEADER_COLOR + ";" +
                 "-fx-text-fill:white;" +
                 "-fx-font-weight:bold;" +
-                "-fx-background-radius:8;"
+                "-fx-background-radius:8;" +
+                "-fx-cursor:hand;"
         );
 
         HBox buttonBox =
@@ -1690,7 +1803,6 @@ public class ManagePayment {
                                 popupLayer
                         );
 
-                        // Refresh amenity cards
                         loadAmenities();
 
                     } else {

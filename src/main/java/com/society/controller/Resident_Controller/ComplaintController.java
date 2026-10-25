@@ -186,19 +186,26 @@ public class ComplaintController {
             String flatNumber,
             String category,
             String title,
-            Label description,
-            String selectedFile,
-            LocalDate preferredDateValue)
+            String description,
+            String imageFileName,
+            String preferredDate)
             throws Exception {
 
         return complaintService.createComplaint(
+
                 email,
+
                 flatNumber,
+
                 category,
+
                 title,
+
                 description,
-                selectedFile,
-                preferredDateValue
+
+                imageFileName,
+
+                preferredDate
         );
     }
 

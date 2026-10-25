@@ -1,3 +1,4 @@
+
 package com.society.model.Secretary_model;
 
 public class Owner {
@@ -9,7 +10,7 @@ public class Owner {
     private String id;
     private String name;
     private String flat;
-    private String mobile;
+    private String phone;
     private String email;
     private String status;
     private String society;
@@ -29,14 +30,14 @@ public class Owner {
     public Owner(
             String name,
             String flat,
-            String mobile,
+            String phone,
             String email,
             String status,
             String society) {
 
         this.name = name;
         this.flat = flat;
-        this.mobile = mobile;
+        this.phone = phone;
         this.email = email;
         this.status = status;
         this.society = society;
@@ -91,19 +92,21 @@ public class Owner {
     }
 
     // =========================================================
-    // GET MOBILE
+    // GET PHONE
+    // Firestore field: phone
     // =========================================================
 
-    public String getMobile() {
-        return mobile;
+    public String getPhone() {
+        return phone;
     }
 
     // =========================================================
-    // SET MOBILE
+    // SET PHONE
+    // Firestore field: phone
     // =========================================================
 
-    public void setMobile(String mobile) {
-        this.mobile = mobile;
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     // =========================================================
@@ -165,10 +168,11 @@ public class Owner {
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
                 ", flat='" + flat + '\'' +
-                ", mobile='" + mobile + '\'' +
+                ", phone='" + phone + '\'' +
                 ", email='" + email + '\'' +
                 ", status='" + status + '\'' +
                 ", society='" + society + '\'' +
                 '}';
     }
 }
+

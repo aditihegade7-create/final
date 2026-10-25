@@ -2,6 +2,7 @@ package com.society.view.Secretary_portal;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.society.controller.Secretary_Controller.MaintenanceController;
@@ -17,6 +18,12 @@ import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -51,10 +58,38 @@ public class ManageMaintenance {
     private VBox maintenanceList;
 
     // =========================================================
+    // ALL MAINTENANCE DATA
+    // =========================================================
+
+    private List<Maintenance> allMaintenanceData =
+            new ArrayList<>();
+
+    // =========================================================
     // CURRENT STATUS
     // =========================================================
 
     private String currentStatus = "Pending";
+
+    // =========================================================
+    // SEARCH FIELD
+    // =========================================================
+
+    private TextField searchField;
+
+    // =========================================================
+    // HEADER COLORS
+    // =========================================================
+
+    private static final String HEADER_COLOR = "#4E342E";
+
+    private static final String PAGE_BACKGROUND = "#F7F7F7";
+
+    // =========================================================
+    // BACKGROUND IMAGE
+    // =========================================================
+
+    private static final String BACKGROUND_IMAGE =
+            "/background-Dashboard5.jpeg";
 
     // =========================================================
     // CREATE SCENE
@@ -62,7 +97,8 @@ public class ManageMaintenance {
 
     public Scene createScene(Stage stage) {
 
-        maintenanceController = new MaintenanceController();
+        maintenanceController =
+                new MaintenanceController();
 
         // =====================================================
         // SIDEBAR
@@ -79,10 +115,10 @@ public class ManageMaintenance {
         // =====================================================
 
         VBox mainvb =
-                new VBox(20);
+                new VBox(0);
 
         mainvb.setPadding(
-                new Insets(25)
+                new Insets(0)
         );
 
         mainvb.setPrefWidth(1220);
@@ -96,26 +132,13 @@ public class ManageMaintenance {
         );
 
         mainvb.setStyle(
-                "-fx-background-color:#b3adad;"
+                "-fx-background-color:" +
+                        PAGE_BACKGROUND +
+                        ";"
         );
 
         // =====================================================
-        // HEADING
-        // =====================================================
-
-        Label heading =
-                new Label(
-                        "MANAGE MAINTENANCE"
-                );
-
-        heading.setStyle(
-                "-fx-font-size:18px;" +
-                "-fx-font-weight:bold;" +
-                "-fx-text-fill:#434141;"
-        );
-
-        // =====================================================
-        // TITLE
+        // HEADER
         // =====================================================
 
         Label title =
@@ -123,56 +146,32 @@ public class ManageMaintenance {
                         "Manage Maintenance"
                 );
 
-        title.setStyle(
+        title.setStyle( "-fx-font-family:'Bodoni MT';" +
                 "-fx-font-size:20px;" +
                 "-fx-font-weight:bold;" +
-                "-fx-text-fill:black;"
+                "-fx-text-fill:white;"
         );
-
-        // =====================================================
-        // SUBTITLE
-        // =====================================================
 
         Label subtitle =
                 new Label(
                         "View and manage maintenance records of your society"
                 );
 
-        subtitle.setStyle(
+        subtitle.setStyle( "-fx-font-family:'Bodoni MT';" +
                 "-fx-font-size:13px;" +
-                "-fx-text-fill:#777777;"
+                "-fx-text-fill:white;"
         );
 
         VBox titleBox =
-                new VBox(5);
+                new VBox(4);
+
+        titleBox.setAlignment(
+                Pos.CENTER_LEFT
+        );
 
         titleBox.getChildren().addAll(
                 title,
                 subtitle
-        );
-
-        // =====================================================
-        // ADD BUTTON
-        // =====================================================
-
-        Button addMaintenanceBtn =
-                new Button(
-                        "+ Add Maintenance"
-                );
-
-        addMaintenanceBtn.setPrefWidth(160);
-        addMaintenanceBtn.setPrefHeight(40);
-
-        addMaintenanceBtn.setStyle(
-                "-fx-background-color:#434141;" +
-                "-fx-text-fill:white;" +
-                "-fx-font-weight:bold;" +
-                "-fx-background-radius:7;" +
-                "-fx-cursor:hand;"
-        );
-
-        addMaintenanceBtn.setOnAction(
-                e -> openAddMaintenanceDialog()
         );
 
         // =====================================================
@@ -181,24 +180,32 @@ public class ManageMaintenance {
 
         Button refreshBtn =
                 new Button(
-                        "⟳ Refresh"
+                        "↻ Refresh"
                 );
 
         refreshBtn.setPrefWidth(100);
+
         refreshBtn.setPrefHeight(40);
 
         refreshBtn.setStyle(
-                "-fx-background-color:#ffffff;" +
-                "-fx-text-fill:#434141;" +
+                "-fx-background-color:white;" +
+                "-fx-text-fill:" +
+                        HEADER_COLOR +
+                        ";" +
                 "-fx-font-weight:bold;" +
                 "-fx-background-radius:7;" +
-                "-fx-border-color:#cccccc;" +
-                "-fx-border-radius:7;" +
                 "-fx-cursor:hand;"
         );
 
         refreshBtn.setOnAction(
-                e -> refreshCurrentMaintenance()
+                e -> {
+
+                    if (searchField != null) {
+                        searchField.clear();
+                    }
+
+                    refreshCurrentMaintenance();
+                }
         );
 
         // =====================================================
@@ -212,6 +219,21 @@ public class ManageMaintenance {
                 Pos.CENTER_LEFT
         );
 
+        maintenanceHeader.setPadding(
+                new Insets(
+                        15,
+                        25,
+                        15,
+                        25
+                )
+        );
+
+        maintenanceHeader.setPrefHeight(80);
+
+        maintenanceHeader.setMinHeight(80);
+
+        maintenanceHeader.setMaxHeight(80);
+
         HBox.setHgrow(
                 titleBox,
                 Priority.ALWAYS
@@ -219,7 +241,206 @@ public class ManageMaintenance {
 
         maintenanceHeader.getChildren().addAll(
                 titleBox,
-                refreshBtn,
+                refreshBtn
+        );
+
+        maintenanceHeader.setStyle(
+                "-fx-background-color:" +
+                        HEADER_COLOR +
+                        ";"
+        );
+
+        // =====================================================
+        // CONTENT AREA
+        // =====================================================
+
+        VBox contentBox =
+                new VBox(20);
+
+        contentBox.setPadding(
+                new Insets(25)
+        );
+
+        contentBox.setMaxWidth(
+                Double.MAX_VALUE
+        );
+
+        contentBox.setMaxHeight(
+                Double.MAX_VALUE
+        );
+
+        VBox.setVgrow(
+                contentBox,
+                Priority.ALWAYS
+        );
+
+        // =====================================================
+        // BACKGROUND IMAGE
+        // =====================================================
+
+        try {
+
+            if (getClass().getResource(
+                    BACKGROUND_IMAGE
+            ) != null) {
+
+                Image backgroundImage =
+                        new Image(
+                                getClass()
+                                        .getResource(
+                                                BACKGROUND_IMAGE
+                                        )
+                                        .toExternalForm()
+                        );
+
+                BackgroundImage bgImage =
+                        new BackgroundImage(
+                                backgroundImage,
+                                BackgroundRepeat.NO_REPEAT,
+                                BackgroundRepeat.NO_REPEAT,
+                                BackgroundPosition.CENTER,
+                                new BackgroundSize(
+                                        100,
+                                        100,
+                                        true,
+                                        true,
+                                        false,
+                                        true
+                                )
+                        );
+
+                contentBox.setBackground(
+                        new Background(
+                                bgImage
+                        )
+                );
+
+            } else {
+
+                System.err.println(
+                        "Background image not found: "
+                                + BACKGROUND_IMAGE
+                );
+
+                contentBox.setStyle(
+                        "-fx-background-color:"
+                                + PAGE_BACKGROUND
+                                + ";"
+                );
+            }
+
+        } catch (Exception e) {
+
+            System.err.println(
+                    "Background image could not be loaded: "
+                            + e.getMessage()
+            );
+
+            contentBox.setStyle(
+                    "-fx-background-color:"
+                            + PAGE_BACKGROUND
+                            + ";"
+            );
+        }
+
+        // =====================================================
+        // SEARCH + ADD MAINTENANCE
+        // =====================================================
+
+        HBox searchBox =
+                new HBox(10);
+
+        searchBox.setAlignment(
+                Pos.CENTER_LEFT
+        );
+
+        searchBox.setMaxWidth(
+                Double.MAX_VALUE
+        );
+
+        // =====================================================
+        // SEARCH FIELD
+        // =====================================================
+
+        searchField =
+                new TextField();
+
+        searchField.setPromptText(
+                "Search maintenance..."
+        );
+
+        searchField.setPrefHeight(
+                45
+        );
+
+        searchField.setPrefWidth(
+                650
+        );
+
+        searchField.setMaxWidth(
+                650
+        );
+
+        searchField.setStyle(
+                "-fx-background-color:white;" +
+                "-fx-background-radius:8;" +
+                "-fx-border-color:#E1E5E8;" +
+                "-fx-border-radius:8;" +
+                "-fx-padding:0 15 0 15;" +
+                "-fx-font-size:14px;"
+        );
+
+        // =====================================================
+        // ADD MAINTENANCE BUTTON
+        // RIGHT SIDE OF SEARCH BAR
+        // =====================================================
+
+        Button addMaintenanceBtn =
+                new Button(
+                        "+ Add Maintenance"
+                );
+
+        addMaintenanceBtn.setPrefWidth(
+                170
+        );
+
+        addMaintenanceBtn.setPrefHeight(
+                45
+        );
+
+        addMaintenanceBtn.setStyle(
+                "-fx-background-color:" +
+                        HEADER_COLOR +
+                        ";" +
+                "-fx-text-fill:white;" +
+                "-fx-font-weight:bold;" +
+                "-fx-background-radius:8;" +
+                "-fx-cursor:hand;"
+        );
+
+        addMaintenanceBtn.setOnAction(
+                e -> openAddMaintenanceDialog()
+        );
+
+        // =====================================================
+        // SEARCH ACTION
+        // =====================================================
+
+        searchField.textProperty().addListener(
+                (observable, oldValue, newValue) -> {
+
+                    filterMaintenance(
+                            newValue
+                    );
+                }
+        );
+
+        // =====================================================
+        // ADD TO SEARCH BOX
+        // =====================================================
+
+        searchBox.getChildren().addAll(
+                searchField,
                 addMaintenanceBtn
         );
 
@@ -237,11 +458,15 @@ public class ManageMaintenance {
                 new Button("Overdue");
 
         pendingBtn.setPrefWidth(150);
+
         paidBtn.setPrefWidth(150);
+
         overdueBtn.setPrefWidth(150);
 
         pendingBtn.setPrefHeight(40);
+
         paidBtn.setPrefHeight(40);
+
         overdueBtn.setPrefHeight(40);
 
         // =====================================================
@@ -257,16 +482,28 @@ public class ManageMaintenance {
 
         String activeStyle =
                 "-fx-background-color:transparent;" +
-                "-fx-text-fill:#123C36;" +
+                "-fx-text-fill:" +
+                        HEADER_COLOR +
+                        ";" +
                 "-fx-font-weight:bold;" +
                 "-fx-font-size:12px;" +
-                "-fx-border-color:#0B4F4A;" +
+                "-fx-border-color:" +
+                        HEADER_COLOR +
+                        ";" +
                 "-fx-border-width:0 0 2 0;" +
                 "-fx-cursor:hand;";
 
-        pendingBtn.setStyle(activeStyle);
-        paidBtn.setStyle(normalStyle);
-        overdueBtn.setStyle(normalStyle);
+        pendingBtn.setStyle(
+                activeStyle
+        );
+
+        paidBtn.setStyle(
+                normalStyle
+        );
+
+        overdueBtn.setStyle(
+                normalStyle
+        );
 
         // =====================================================
         // TABS
@@ -293,11 +530,20 @@ public class ManageMaintenance {
                 new VBox(15);
 
         maintenanceList.setPadding(
-                new Insets(5, 0, 5, 0)
+                new Insets(
+                        5,
+                        0,
+                        5,
+                        0
+                )
+        );
+
+        maintenanceList.setMaxWidth(
+                Double.MAX_VALUE
         );
 
         // =====================================================
-        // SCROLL
+        // SCROLL PANE
         // =====================================================
 
         ScrollPane scrollPane =
@@ -307,12 +553,38 @@ public class ManageMaintenance {
                 maintenanceList
         );
 
-        scrollPane.setFitToWidth(true);
+        scrollPane.setFitToWidth(
+                true
+        );
 
-        scrollPane.setPrefHeight(450);
+        scrollPane.setPrefHeight(
+                450
+        );
+
+        scrollPane.setMaxWidth(
+                Double.MAX_VALUE
+        );
+
+        VBox.setVgrow(
+                scrollPane,
+                Priority.ALWAYS
+        );
+
+        // =====================================================
+        // INVISIBLE SCROLL BARS
+        // =====================================================
+
+        scrollPane.setHbarPolicy(
+                ScrollPane.ScrollBarPolicy.NEVER
+        );
+
+        scrollPane.setVbarPolicy(
+                ScrollPane.ScrollBarPolicy.NEVER
+        );
 
         scrollPane.setStyle(
                 "-fx-background-color:transparent;" +
+                "-fx-background:transparent;" +
                 "-fx-border-color:transparent;"
         );
 
@@ -320,7 +592,8 @@ public class ManageMaintenance {
         // DEFAULT LOAD
         // =====================================================
 
-        currentStatus = "Pending";
+        currentStatus =
+                "Pending";
 
         loadMaintenanceByStatus(
                 currentStatus
@@ -332,15 +605,28 @@ public class ManageMaintenance {
 
         pendingBtn.setOnAction(e -> {
 
-            currentStatus = "Pending";
+            currentStatus =
+                    "Pending";
+
+            if (searchField != null) {
+                searchField.clear();
+            }
 
             loadMaintenanceByStatus(
                     currentStatus
             );
 
-            pendingBtn.setStyle(activeStyle);
-            paidBtn.setStyle(normalStyle);
-            overdueBtn.setStyle(normalStyle);
+            pendingBtn.setStyle(
+                    activeStyle
+            );
+
+            paidBtn.setStyle(
+                    normalStyle
+            );
+
+            overdueBtn.setStyle(
+                    normalStyle
+            );
         });
 
         // =====================================================
@@ -349,15 +635,28 @@ public class ManageMaintenance {
 
         paidBtn.setOnAction(e -> {
 
-            currentStatus = "Paid";
+            currentStatus =
+                    "Paid";
+
+            if (searchField != null) {
+                searchField.clear();
+            }
 
             loadMaintenanceByStatus(
                     currentStatus
             );
 
-            pendingBtn.setStyle(normalStyle);
-            paidBtn.setStyle(activeStyle);
-            overdueBtn.setStyle(normalStyle);
+            pendingBtn.setStyle(
+                    normalStyle
+            );
+
+            paidBtn.setStyle(
+                    activeStyle
+            );
+
+            overdueBtn.setStyle(
+                    normalStyle
+            );
         });
 
         // =====================================================
@@ -366,15 +665,28 @@ public class ManageMaintenance {
 
         overdueBtn.setOnAction(e -> {
 
-            currentStatus = "Overdue";
+            currentStatus =
+                    "Overdue";
+
+            if (searchField != null) {
+                searchField.clear();
+            }
 
             loadMaintenanceByStatus(
                     currentStatus
             );
 
-            pendingBtn.setStyle(normalStyle);
-            paidBtn.setStyle(normalStyle);
-            overdueBtn.setStyle(activeStyle);
+            pendingBtn.setStyle(
+                    normalStyle
+            );
+
+            paidBtn.setStyle(
+                    normalStyle
+            );
+
+            overdueBtn.setStyle(
+                    activeStyle
+            );
         });
 
         // =====================================================
@@ -390,10 +702,14 @@ public class ManageMaintenance {
                 Double.MAX_VALUE
         );
 
-        viewAllBtn.setPrefHeight(40);
+        viewAllBtn.setPrefHeight(
+                40
+        );
 
         viewAllBtn.setStyle(
-                "-fx-background-color:#434141;" +
+                "-fx-background-color:" +
+                        HEADER_COLOR +
+                        ";" +
                 "-fx-text-fill:white;" +
                 "-fx-font-weight:bold;" +
                 "-fx-background-radius:7;" +
@@ -405,15 +721,28 @@ public class ManageMaintenance {
         );
 
         // =====================================================
+        // CONTENT
+        // =====================================================
+
+        contentBox.getChildren().addAll(
+                searchBox,
+                tabs,
+                scrollPane,
+                viewAllBtn
+        );
+
+        // =====================================================
         // MAIN CONTENT
         // =====================================================
 
         mainvb.getChildren().addAll(
-                heading,
                 maintenanceHeader,
-                tabs,
-                scrollPane,
-                viewAllBtn
+                contentBox
+        );
+
+        VBox.setVgrow(
+                contentBox,
+                Priority.ALWAYS
         );
 
         // =====================================================
@@ -434,7 +763,9 @@ public class ManageMaintenance {
         );
 
         mainRoot.setStyle(
-                "-fx-background-color:#434141;"
+                "-fx-background-color:" +
+                        HEADER_COLOR +
+                        ";"
         );
 
         HBox.setHgrow(
@@ -481,7 +812,8 @@ public class ManageMaintenance {
         if (currentStatus == null ||
                 currentStatus.trim().isEmpty()) {
 
-            currentStatus = "Pending";
+            currentStatus =
+                    "Pending";
         }
 
         loadMaintenanceByStatus(
@@ -519,24 +851,31 @@ public class ManageMaintenance {
                             + requiredStatus
             );
 
-            // =================================================
-            // FETCH FROM CONTROLLER
-            // =================================================
-
             List<Maintenance> data =
                     maintenanceController
                             .getAllMaintenance();
 
             System.out.println(
                     "Total Maintenance Fetched = "
-                            + (data == null
-                            ? 0
-                            : data.size())
+                            + (
+                                data == null
+                                        ? 0
+                                        : data.size()
+                            )
             );
 
             System.out.println(
                     "=============================================="
             );
+
+            allMaintenanceData.clear();
+
+            if (data != null) {
+
+                allMaintenanceData.addAll(
+                        data
+                );
+            }
 
             boolean found = false;
 
@@ -569,7 +908,9 @@ public class ManageMaintenance {
 
                         maintenanceList
                                 .getChildren()
-                                .add(card);
+                                .add(
+                                        card
+                                );
 
                         found = true;
                     }
@@ -619,6 +960,119 @@ public class ManageMaintenance {
                     .getChildren()
                     .add(
                             error
+                    );
+        }
+    }
+
+    // =========================================================
+    // FILTER MAINTENANCE
+    // =========================================================
+
+    private void filterMaintenance(
+            String searchText) {
+
+        if (maintenanceList == null) {
+            return;
+        }
+
+        String query =
+                searchText == null
+                        ? ""
+                        : searchText
+                                .trim()
+                                .toLowerCase();
+
+        maintenanceList
+                .getChildren()
+                .clear();
+
+        boolean found = false;
+
+        for (Maintenance maintenance :
+                allMaintenanceData) {
+
+            if (maintenance == null) {
+                continue;
+            }
+
+            String status =
+                    safeValue(
+                            maintenance.getStatus()
+                    );
+
+            // =================================================
+            // CURRENT STATUS TAB
+            // =================================================
+
+            if (!status.equalsIgnoreCase(
+                    currentStatus
+            )) {
+                continue;
+            }
+
+            String amount =
+                    safeValue(
+                            maintenance.getAmount()
+                    ).toLowerCase();
+
+            String month =
+                    safeValue(
+                            maintenance.getMonth()
+                    ).toLowerCase();
+
+            String date =
+                    safeValue(
+                            maintenance.getDate()
+                    ).toLowerCase();
+
+            String statusLower =
+                    status.toLowerCase();
+
+            boolean matches =
+                    query.isEmpty()
+                            || amount.contains(query)
+                            || month.contains(query)
+                            || date.contains(query)
+                            || statusLower.contains(query);
+
+            if (matches) {
+
+                maintenanceList
+                        .getChildren()
+                        .add(
+                                createMaintenance(
+                                        maintenance
+                                )
+                        );
+
+                found = true;
+            }
+        }
+
+        // =====================================================
+        // NO RESULT
+        // =====================================================
+
+        if (!found) {
+
+            Label noResult =
+                    new Label(
+                            query.isEmpty()
+                                    ? "No "
+                                        + currentStatus
+                                        + " maintenance records found."
+                                    : "No matching maintenance records found."
+                    );
+
+            noResult.setStyle(
+                    "-fx-font-size:16px;" +
+                    "-fx-text-fill:#555555;"
+            );
+
+            maintenanceList
+                    .getChildren()
+                    .add(
+                            noResult
                     );
         }
     }
@@ -679,7 +1133,9 @@ public class ManageMaintenance {
         popupTitle.setStyle(
                 "-fx-font-size:22px;" +
                 "-fx-font-weight:bold;" +
-                "-fx-text-fill:#123C36;"
+                "-fx-text-fill:" +
+                        HEADER_COLOR +
+                        ";"
         );
 
         Region spacer =
@@ -736,7 +1192,9 @@ public class ManageMaintenance {
         // =====================================================
 
         Label paymentLabel =
-                new Label("Payment");
+                new Label(
+                        "Payment"
+                );
 
         paymentLabel.setStyle(
                 "-fx-font-size:12px;" +
@@ -758,7 +1216,9 @@ public class ManageMaintenance {
         // =====================================================
 
         Label monthLabel =
-                new Label("Month");
+                new Label(
+                        "Month"
+                );
 
         monthLabel.setStyle(
                 "-fx-font-size:12px;" +
@@ -782,7 +1242,9 @@ public class ManageMaintenance {
         // =====================================================
 
         Label dateLabel =
-                new Label("Date");
+                new Label(
+                        "Date"
+                );
 
         dateLabel.setStyle(
                 "-fx-font-size:12px;" +
@@ -837,7 +1299,9 @@ public class ManageMaintenance {
         // =====================================================
 
         Label statusLabel =
-                new Label("Status");
+                new Label(
+                        "Status"
+                );
 
         statusLabel.setStyle(
                 "-fx-font-size:12px;" +
@@ -869,9 +1333,12 @@ public class ManageMaintenance {
         // =====================================================
 
         Button cancelButton =
-                new Button("Cancel");
+                new Button(
+                        "Cancel"
+                );
 
         cancelButton.setPrefWidth(100);
+
         cancelButton.setPrefHeight(40);
 
         cancelButton.setStyle(
@@ -882,9 +1349,12 @@ public class ManageMaintenance {
         );
 
         Button saveButton =
-                new Button("Save");
+                new Button(
+                        "Save"
+                );
 
         saveButton.setPrefWidth(120);
+
         saveButton.setPrefHeight(40);
 
         saveButton.setStyle(
@@ -1040,7 +1510,9 @@ public class ManageMaintenance {
 
             try {
 
-                saveButton.setDisable(true);
+                saveButton.setDisable(
+                        true
+                );
 
                 boolean success =
                         maintenanceController
@@ -1057,19 +1529,13 @@ public class ManageMaintenance {
 
                 if (success) {
 
-                    /*
-                     * IMPORTANT:
-                     * Maintenance Firestore मध्ये save झाल्यावर
-                     * लगेच पुन्हा getAllMaintenance() call होतो.
-                     */
-
                     removeOverlay(
                             overlay
                     );
 
-                    // =================================================
-                    // REFRESH FROM FIRESTORE
-                    // =================================================
+                    if (searchField != null) {
+                        searchField.clear();
+                    }
 
                     currentStatus =
                             status.trim();
@@ -1085,7 +1551,9 @@ public class ManageMaintenance {
 
                 } else {
 
-                    saveButton.setDisable(false);
+                    saveButton.setDisable(
+                            false
+                    );
 
                     showMessage(
                             "Maintenance could not be added.\n\n"
@@ -1097,7 +1565,9 @@ public class ManageMaintenance {
 
                 ex.printStackTrace();
 
-                saveButton.setDisable(false);
+                saveButton.setDisable(
+                        false
+                );
 
                 showMessage(
                         "Error while adding maintenance:\n"
@@ -1180,7 +1650,9 @@ public class ManageMaintenance {
         popupTitle.setStyle(
                 "-fx-font-size:22px;" +
                 "-fx-font-weight:bold;" +
-                "-fx-text-fill:#123C36;"
+                "-fx-text-fill:" +
+                        HEADER_COLOR +
+                        ";"
         );
 
         Region spacer =
@@ -1239,9 +1711,11 @@ public class ManageMaintenance {
 
             System.out.println(
                     "Fetched Records = "
-                            + (data == null
-                            ? 0
-                            : data.size())
+                            + (
+                                data == null
+                                        ? 0
+                                        : data.size()
+                            )
             );
 
             System.out.println(
@@ -1317,12 +1791,25 @@ public class ManageMaintenance {
                 allMaintenance
         );
 
-        popupScroll.setFitToWidth(true);
+        popupScroll.setFitToWidth(
+                true
+        );
 
-        popupScroll.setPrefHeight(400);
+        popupScroll.setPrefHeight(
+                400
+        );
+
+        popupScroll.setHbarPolicy(
+                ScrollPane.ScrollBarPolicy.NEVER
+        );
+
+        popupScroll.setVbarPolicy(
+                ScrollPane.ScrollBarPolicy.NEVER
+        );
 
         popupScroll.setStyle(
                 "-fx-background-color:transparent;" +
+                "-fx-background:transparent;" +
                 "-fx-border-color:transparent;"
         );
 
@@ -1331,13 +1818,18 @@ public class ManageMaintenance {
         // =====================================================
 
         Button closeBtn =
-                new Button("Close");
+                new Button(
+                        "Close"
+                );
 
         closeBtn.setPrefWidth(100);
+
         closeBtn.setPrefHeight(40);
 
         closeBtn.setStyle(
-                "-fx-background-color:#434141;" +
+                "-fx-background-color:" +
+                        HEADER_COLOR +
+                        ";" +
                 "-fx-text-fill:white;" +
                 "-fx-font-weight:bold;" +
                 "-fx-background-radius:8;" +
@@ -1349,7 +1841,9 @@ public class ManageMaintenance {
         );
 
         HBox buttonBox =
-                new HBox(closeBtn);
+                new HBox(
+                        closeBtn
+                );
 
         buttonBox.setAlignment(
                 Pos.CENTER_RIGHT
@@ -1389,7 +1883,9 @@ public class ManageMaintenance {
                 new Insets(18)
         );
 
-        card.setMaxWidth(1180);
+        card.setMaxWidth(
+                1180
+        );
 
         card.setStyle(
                 "-fx-background-color:white;" +
@@ -1413,7 +1909,9 @@ public class ManageMaintenance {
         amount.setStyle(
                 "-fx-font-size:14px;" +
                 "-fx-font-weight:bold;" +
-                "-fx-text-fill:#123C36;"
+                "-fx-text-fill:" +
+                        HEADER_COLOR +
+                        ";"
         );
 
         // =====================================================
@@ -1461,7 +1959,8 @@ public class ManageMaintenance {
             statusColor =
                     "#2E9D63";
 
-        } else if (statusText != null &&
+        } else if (
+                statusText != null &&
                 statusText.equalsIgnoreCase(
                         "Overdue"
                 )) {
@@ -1600,13 +2099,18 @@ public class ManageMaintenance {
         );
 
         Button okBtn =
-                new Button("OK");
+                new Button(
+                        "OK"
+                );
 
         okBtn.setPrefWidth(80);
+
         okBtn.setPrefHeight(35);
 
         okBtn.setStyle(
-                "-fx-background-color:#434141;" +
+                "-fx-background-color:" +
+                        HEADER_COLOR +
+                        ";" +
                 "-fx-text-fill:white;" +
                 "-fx-background-radius:7;" +
                 "-fx-cursor:hand;"

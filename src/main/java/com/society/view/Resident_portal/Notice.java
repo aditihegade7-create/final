@@ -1,3 +1,4 @@
+
 package com.society.view.Resident_portal;
 
 import com.society.controller.Resident_Controller.NoticeController;
@@ -12,12 +13,6 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundImage;
-import javafx.scene.layout.BackgroundPosition;
-import javafx.scene.layout.BackgroundRepeat;
-import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -67,66 +62,51 @@ public class Notice {
         // ROOT
         // =====================================================
 
-        BorderPane root =new BorderPane();
-
-                Image backgroundImage = new Image(
-                getClass()
-                        .getResource("/background-Dashboard5.jpeg")
-                        .toExternalForm()
-        );
-
-        BackgroundSize backgroundSize = new BackgroundSize(
-                100,
-                100,
-                true,
-                true,
-                false,
-                true
-        );
-
-        BackgroundImage bgImage = new BackgroundImage(
-                backgroundImage,
-                BackgroundRepeat.NO_REPEAT,
-                BackgroundRepeat.NO_REPEAT,
-                BackgroundPosition.CENTER,
-                backgroundSize
-        );
-
-        root.setBackground(
-                new Background(bgImage)
-        );
+        BorderPane root =
+                new BorderPane();
 
         // =====================================================
         // SIDEBAR
         // =====================================================
 
-        panel panelobj = new panel(stage,residentEmail );
+        panel panelobj =
+                new panel(
+                        stage,
+                        residentEmail
+                );
 
-        root.setLeft(panelobj.getSidebar());
+        root.setLeft(
+                panelobj.getSidebar()
+        );
 
         // =====================================================
         // MAIN CONTENT
         // =====================================================
 
-      
+        VBox mainContent = new VBox();
+
+mainContent.setPadding(
+        new Insets(0, 0, 25, 0)
+);
+
+mainContent.setSpacing(18);
+
+mainContent.setAlignment(
+        Pos.TOP_LEFT
+);
+
+mainContent.setStyle(
+        "-fx-background-color: #e8ddd5;"
+);
 
         // =====================================================
         // HEADING
         // =====================================================
 
-         BorderPane mainArea = new BorderPane();
+        Label title =
+                new Label("Notices");
 
-         VBox heading =new VBox(3);
-
-        heading.setPadding(
-                new Insets(15,20, 15, 20)
-        );
-
-        heading.setStyle(
-                "-fx-background-color: #4e342e;"
-        );
-
-        Label title =new Label("Notices");
+                title.setStyle( "-fx-font-family:'Bodoni MT';" );
 
         title.setFont(
                 Font.font(
@@ -140,9 +120,12 @@ public class Notice {
                 Color.WHITE
         );
 
-        Label subtitle =new Label(
+        Label subtitle =
+                new Label(
                         "Important announcements from society management"
                 );
+
+                subtitle.setStyle( "-fx-font-family:'Bodoni MT';" );
 
         subtitle.setFont(
                 Font.font(
@@ -151,27 +134,33 @@ public class Notice {
                 )
         );
 
-        subtitle.setTextFill(Color.web("#ffffff"));
-        //subtitle.setTextFill(Color.web( #4e342e));
+        subtitle.setTextFill(
+                Color.WHITE
+        );
 
-       
+        VBox heading =
+                new VBox(5);
+
+         heading.setPadding(new Insets(
+                        15,
+                        30,
+                        15,
+                        30
+                )
+        );
+
+        heading.setMaxWidth(
+                Double.MAX_VALUE
+        );
+
+        heading.setStyle(
+                "-fx-background-color: #4e342e;"
+        );
 
         heading.getChildren().addAll(
                 title,
                 subtitle
         );
-
-         mainArea.setTop(heading);
-
-         VBox mainContent =new VBox(20);
-
-        mainContent.setPadding(new Insets(27, 38, 30, 38)
-        );
-
-        mainContent.setStyle(
-                "-fx-background-color: #e8ddd5;"
-);
-        
 
         // =====================================================
         // FILTER
@@ -203,7 +192,8 @@ public class Notice {
                 180
         );
 
-        TextField search =new TextField();
+        TextField search =
+                new TextField();
 
         search.setPromptText(
                 "Search notices..."
@@ -290,7 +280,7 @@ public class Notice {
         // =====================================================
 
         mainContent.getChildren().addAll(
-               // heading,
+                heading,
                 filterBox,
                 scrollPane
         );
@@ -300,7 +290,7 @@ public class Notice {
         // =====================================================
 
         root.setCenter(
-                mainArea
+                mainContent
         );
 
         // =====================================================

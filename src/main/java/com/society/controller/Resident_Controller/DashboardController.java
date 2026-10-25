@@ -1,8 +1,11 @@
 package com.society.controller.Resident_Controller;
 
 import com.society.config.FirebaseConfig;
+import com.google.cloud.firestore.DocumentSnapshot;
+import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.QuerySnapshot;
 import com.society.dao.Resident_dao.ComplaintDAO;
-import com.society.dao.Resident_dao.MaintenanceDAO;
+import com.society.dao.Resident_dao.ElectricityDAO;
 import com.society.dao.Resident_dao.PollDao;
 import com.society.dao.Resident_dao.VisitorDAO;
 import com.society.model.Resident_model.ComplaintModel;
@@ -40,7 +43,10 @@ import java.util.Set;
  * visitors/{residentEmail}/visitor_records/{visitorId}
  *
  * Maintenance:
- * maintenance/{residentEmail}/bills/{month}
+ * Maintenance/{residentEmail}/records/{recordId}
+ *
+ * Electricity:
+ * electricity/{residentEmail}/bills/{billId}
  *
  * Polls:
  * Polls/{secretaryEmail}/polls/{pollId}
@@ -56,7 +62,7 @@ public class DashboardController {
 
     private final ComplaintDAO complaintDAO;
     private final VisitorDAO visitorDAO;
-    private final MaintenanceDAO maintenanceDAO;
+    private final ElectricityDAO electricityDAO;
     private final PollDao pollDao;
     private final NoticeController noticeController;
 
@@ -76,13 +82,8 @@ public class DashboardController {
                         FirebaseConfig.getFirestore()
                 );
 
-        /*
-         * IMPORTANT:
-         *
-         * This is the ACTUAL maintenance DAO in your project.
-         */
-        this.maintenanceDAO =
-                new MaintenanceDAO();
+        this.electricityDAO =
+                new ElectricityDAO();
 
         this.pollDao =
                 new PollDao(
@@ -151,32 +152,41 @@ public class DashboardController {
                 visitors.size();
 
         // =====================================================
-        // MAINTENANCE
+        // MAINTENANCE + ELECTRICITY BILLS
         // =====================================================
 
         List<Map<String, Object>>
                 maintenanceBills =
                 fetchMaintenance(email);
 
-        double totalBills =
-                calculateTotalMaintenance(
-                        maintenanceBills
-                );
+        List<Map<String, Object>>
+                electricityBills =
+                fetchElectricity(email);
 
         double outstandingMaintenance =
-                calculateOutstandingMaintenance(
+                calculateOutstandingAmount(
                         maintenanceBills
                 );
 
-        Map<String, Object>
-                nextDueBill =
+        double outstandingElectricity =
+                calculateOutstandingAmount(
+                        electricityBills
+                );
+
+        // Total Bills shown on Resident Dashboard
+        // means total currently outstanding amount.
+        double totalBills =
+                outstandingMaintenance
+                        + outstandingElectricity;
+
+        Map<String, Object> nextMaintenanceBill =
                 findNextOutstandingBill(
                         maintenanceBills
                 );
 
         String maintenanceDueDate =
                 getString(
-                        nextDueBill,
+                        nextMaintenanceBill,
                         "date"
                 );
 
@@ -223,6 +233,21 @@ public class DashboardController {
         );
 
         System.out.println(
+                "Electricity bills    : "
+                        + electricityBills.size()
+        );
+
+        System.out.println(
+                "Outstanding maintenance : "
+                        + outstandingMaintenance
+        );
+
+        System.out.println(
+                "Outstanding electricity : "
+                        + outstandingElectricity
+        );
+
+        System.out.println(
                 "Total bills          : "
                         + totalBills
         );
@@ -261,6 +286,7 @@ public class DashboardController {
                 complaints,
                 visitors,
                 maintenanceBills,
+                electricityBills,
                 notices,
                 polls
         );
@@ -442,28 +468,244 @@ public class DashboardController {
     }
 
     // =========================================================
-    // MAINTENANCE FETCH
+    // MAINTENANCE FETCH - EXISTING FIRESTORE STRUCTURE
     // =========================================================
+    /*
+     * Existing Firestore structure:
+     *
+     * Maintenance
+     *   ├── residentEmail1
+     *   │     ├── email
+     *   │     ├── society
+     *   │     └── records
+     *   │           └── recordId
+     *   │                ├── amount
+     *   │                ├── date
+     *   │                ├── maintenanceId
+     *   │                ├── month
+     *   │                ├── society
+     *   │                └── status
+     *   └── residentEmail2
+     *        └── ...
+     *
+     * We do not modify the Firestore structure.
+     *
+     * We first get the logged-in resident's society from Residents,
+     * then scan the existing Maintenance parent documents and take
+     * only records belonging to the same society.
+     */
+    private List<Map<String, Object>> fetchMaintenance(
+            String email
+    ) {
 
-    private List<Map<String, Object>>
-    fetchMaintenance(
+        List<Map<String, Object>> bills =
+                new ArrayList<>();
+
+        if (email == null || email.trim().isEmpty()) {
+            return bills;
+        }
+
+        try {
+
+            Firestore db =
+                    FirebaseConfig.getFirestore();
+
+            String currentEmail =
+                    normalizeEmail(email);
+
+            // -------------------------------------------------
+            // 1. LOGGED-IN RESIDENT
+            // -------------------------------------------------
+            DocumentSnapshot residentDocument =
+                    db.collection("Residents")
+                            .document(currentEmail)
+                            .get()
+                            .get();
+
+            // Fallback if collection is lowercase.
+            if (!residentDocument.exists()) {
+                residentDocument =
+                        db.collection("residents")
+                                .document(currentEmail)
+                                .get()
+                                .get();
+            }
+
+            if (!residentDocument.exists()) {
+
+                System.err.println(
+                        "Resident document not found for: "
+                                + currentEmail
+                );
+
+                return bills;
+            }
+
+            // -------------------------------------------------
+            // 2. SOCIETY
+            // -------------------------------------------------
+            String residentSociety =
+                    residentDocument.getString("society");
+
+            if (residentSociety == null ||
+                    residentSociety.trim().isEmpty()) {
+
+                residentSociety =
+                        residentDocument.getString(
+                                "societyName"
+                        );
+            }
+
+            if (residentSociety == null ||
+                    residentSociety.trim().isEmpty()) {
+
+                System.err.println(
+                        "Society not found for resident: "
+                                + currentEmail
+                );
+
+                return bills;
+            }
+
+            residentSociety =
+                    residentSociety.trim();
+
+            System.out.println(
+                    "Dashboard resident = "
+                            + currentEmail
+                            + " | society = "
+                            + residentSociety
+            );
+
+            // -------------------------------------------------
+            // 3. ALL MAINTENANCE PARENTS
+            // -------------------------------------------------
+            QuerySnapshot parentSnapshot =
+                    db.collection("Maintenance")
+                            .get()
+                            .get();
+
+            // Fallback for lowercase collection name.
+            if (parentSnapshot.isEmpty()) {
+                QuerySnapshot lowercaseSnapshot =
+                        db.collection("maintenance")
+                                .get()
+                                .get();
+
+                if (!lowercaseSnapshot.isEmpty()) {
+                    parentSnapshot =
+                            lowercaseSnapshot;
+                }
+            }
+
+            // -------------------------------------------------
+            // 4. SAME-SOCIETY PARENTS ONLY
+            // -------------------------------------------------
+            for (DocumentSnapshot parent :
+                    parentSnapshot.getDocuments()) {
+
+                String parentSociety =
+                        parent.getString("society");
+
+                if (parentSociety == null ||
+                        parentSociety.trim().isEmpty()) {
+                    continue;
+                }
+
+                if (!residentSociety.equalsIgnoreCase(
+                        parentSociety.trim()
+                )) {
+                    continue;
+                }
+
+                // -------------------------------------------------
+                // 5. records SUBCOLLECTION
+                // -------------------------------------------------
+                QuerySnapshot recordSnapshot =
+                        parent.getReference()
+                                .collection("records")
+                                .get()
+                                .get();
+
+                for (DocumentSnapshot record :
+                        recordSnapshot.getDocuments()) {
+
+                    Map<String, Object> data =
+                            record.getData();
+
+                    if (data == null) {
+                        continue;
+                    }
+
+                    data =
+                            new java.util.HashMap<>(data);
+
+                    String recordSociety =
+                            String.valueOf(
+                                    data.getOrDefault(
+                                            "society",
+                                            parentSociety
+                                    )
+                            ).trim();
+
+                    if (!residentSociety.equalsIgnoreCase(
+                            recordSociety
+                    )) {
+                        continue;
+                    }
+
+                    String billId =
+                            String.valueOf(
+                                    data.getOrDefault(
+                                            "maintenanceId",
+                                            record.getId()
+                                    )
+                            ).trim();
+
+                    data.put("billId", billId);
+
+                    if (!data.containsKey("status") ||
+                            data.get("status") == null ||
+                            String.valueOf(
+                                    data.get("status")
+                            ).trim().isEmpty()) {
+
+                        data.put("status", "Pending");
+                    }
+
+                    bills.add(data);
+                }
+            }
+
+            System.out.println(
+                    "Dashboard maintenance records fetched = "
+                            + bills.size()
+            );
+
+        } catch (Exception e) {
+
+            System.err.println(
+                    "Dashboard maintenance fetch failed."
+            );
+
+            e.printStackTrace();
+        }
+
+        return bills;
+    }
+
+    // =========================================================
+    // ELECTRICITY FETCH
+    // =========================================================
+    private List<Map<String, Object>> fetchElectricity(
             String email
     ) {
 
         try {
 
-            /*
-             * ACTUAL METHOD FROM YOUR MaintenanceDAO:
-             *
-             * getMaintenanceByEmail(String email)
-             *
-             * Return type:
-             *
-             * List<Map<String,Object>>
-             */
             List<Map<String, Object>> bills =
-                    maintenanceDAO
-                            .getMaintenanceByEmail(
+                    electricityDAO
+                            .getElectricityBillsByEmail(
                                     email
                             );
 
@@ -476,13 +718,47 @@ public class DashboardController {
         } catch (Exception e) {
 
             System.err.println(
-                    "Dashboard maintenance fetch failed."
+                    "Dashboard electricity fetch failed."
             );
 
             e.printStackTrace();
 
             return Collections.emptyList();
         }
+    }
+
+    // =========================================================
+    // CALCULATE OUTSTANDING AMOUNT
+    // =========================================================
+    private double calculateOutstandingAmount(
+            List<Map<String, Object>> bills
+    ) {
+
+        if (bills == null || bills.isEmpty()) {
+            return 0.0;
+        }
+
+        double total = 0.0;
+
+        for (Map<String, Object> bill : bills) {
+
+            if (bill == null) {
+                continue;
+            }
+
+            String status =
+                    getString(bill, "status");
+
+            if (!isOutstanding(status)) {
+                continue;
+            }
+
+            total += parseAmount(
+                    getString(bill, "amount")
+            );
+        }
+
+        return total;
     }
 
     // =========================================================
@@ -660,16 +936,27 @@ public class DashboardController {
             return LocalDate.MAX;
         }
 
-        try {
+        String[] patterns = {
+                "dd-MM-yyyy",
+                "dd-MM-yy",
+                "yyyy-MM-dd"
+        };
 
-            return LocalDate.parse(
-                    date
-            );
+        for (String pattern : patterns) {
 
-        } catch (DateTimeParseException e) {
+            try {
 
-            return LocalDate.MAX;
+                return LocalDate.parse(
+                        date,
+                        DateTimeFormatter.ofPattern(pattern)
+                );
+
+            } catch (DateTimeParseException ignored) {
+                // Try the next format.
+            }
         }
+
+        return LocalDate.MAX;
     }
 
     // =========================================================
@@ -874,6 +1161,9 @@ public class DashboardController {
         private final List<Map<String, Object>>
                 maintenanceBills;
 
+        private final List<Map<String, Object>>
+                electricityBills;
+
         private final List<NoticeModel>
                 notices;
 
@@ -896,6 +1186,8 @@ public class DashboardController {
                         visitors,
                 List<Map<String, Object>>
                         maintenanceBills,
+                List<Map<String, Object>>
+                        electricityBills,
                 List<NoticeModel> notices,
                 List<PollModel> polls
         ) {
@@ -942,6 +1234,15 @@ public class DashboardController {
                             : Collections.unmodifiableList(
                                     new ArrayList<>(
                                             maintenanceBills
+                                    )
+                            );
+
+            this.electricityBills =
+                    electricityBills == null
+                            ? Collections.emptyList()
+                            : Collections.unmodifiableList(
+                                    new ArrayList<>(
+                                            electricityBills
                                     )
                             );
 
@@ -1005,6 +1306,11 @@ public class DashboardController {
         public List<Map<String, Object>>
         getMaintenanceBills() {
             return maintenanceBills;
+        }
+
+        public List<Map<String, Object>>
+        getElectricityBills() {
+            return electricityBills;
         }
 
         public List<NoticeModel>

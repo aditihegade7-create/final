@@ -1,3 +1,4 @@
+
 package com.society.dao.Secretary_dao;
 
 import java.util.List;
@@ -40,7 +41,7 @@ public interface OwnerDao {
             String email,
             String name,
             String flat,
-            String mobile,
+            String phone,
             String status,
             String society
     );
@@ -51,3 +52,4 @@ public interface OwnerDao {
 
     boolean deleteOwner(String email);
 }
+

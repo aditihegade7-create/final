@@ -15,6 +15,12 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tooltip;
+import javafx.scene.image.Image;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -30,18 +36,43 @@ public class ManageComplaints {
     private String currentFilter = "ALL";
 
     // =====================================================
+    // COLORS
+    // =====================================================
+
+    private static final String HEADER_COLOR =
+            "#4E342E";
+
+    private static final String PAGE_BACKGROUND =
+            "#F7F7F7";
+
+    // =====================================================
     // CONSTRUCTOR
     // =====================================================
 
     public ManageComplaints() {
 
-        complaintController = new ComplaintController();
+        complaintController =
+                new ComplaintController();
 
-        System.out.println("======================================");
-        System.out.println("MANAGE COMPLAINTS");
-        System.out.println("ComplaintController initialized");
-        System.out.println("Society-wise complaint filtering enabled");
-        System.out.println("======================================");
+        System.out.println(
+                "======================================"
+        );
+
+        System.out.println(
+                "MANAGE COMPLAINTS"
+        );
+
+        System.out.println(
+                "ComplaintController initialized"
+        );
+
+        System.out.println(
+                "Society-wise complaint filtering enabled"
+        );
+
+        System.out.println(
+                "======================================"
+        );
     }
 
     // =====================================================
@@ -65,32 +96,27 @@ public class ManageComplaints {
         // =================================================
 
         VBox mainvb =
-                new VBox(20);
+                new VBox(0);
 
+        mainvb.setMaxSize(
+                Double.MAX_VALUE,
+                Double.MAX_VALUE
+        );
+
+        /*
+         * No unnecessary gap on left/right.
+         * Header touches the edges.
+         */
         mainvb.setPadding(
-                new Insets(25)
+                new Insets(
+                        0,
+                        0,
+                        20,
+                        0
+                )
         );
 
         mainvb.setPrefWidth(1220);
-
-        mainvb.setStyle(
-                "-fx-background-color:#b3adad;"
-        );
-
-        // =================================================
-        // HEADING
-        // =================================================
-
-        Label heading =
-                new Label(
-                        "MANAGE COMPLAINTS"
-                );
-
-        heading.setStyle(
-                "-fx-font-size:18px;" +
-                "-fx-font-weight:bold;" +
-                "-fx-text-fill:#434141;"
-        );
 
         // =================================================
         // TITLE
@@ -101,28 +127,45 @@ public class ManageComplaints {
                         "Manage Complaints"
                 );
 
-        title.setStyle(
-                "-fx-font-size:20px;" +
-                "-fx-font-weight:bold;" +
-                "-fx-text-fill:black;"
+        title.setStyle( "-fx-font-family:'Bodoni MT';" +
+                "-fx-font-size:20px;"
+                        + "-fx-font-weight:bold;"
+                        + "-fx-text-fill:white;"
         );
+
+        // =================================================
+        // SUBTITLE
+        // =================================================
 
         Label subtitle =
                 new Label(
                         "View and manage complaints submitted by residents of your society"
                 );
 
-        subtitle.setStyle(
-                "-fx-font-size:13px;" +
-                "-fx-text-fill:#777777;"
+        subtitle.setStyle( "-fx-font-family:'Bodoni MT';" +
+                "-fx-font-size:13px;"
+                        + "-fx-text-fill:white;"
         );
+
+        // =================================================
+        // TITLE BOX
+        // =================================================
 
         VBox titleBox =
                 new VBox(5);
 
+        titleBox.setAlignment(
+                Pos.CENTER_LEFT
+        );
+
         titleBox.getChildren().addAll(
                 title,
                 subtitle
+        );
+
+        HBox.setHgrow(
+                titleBox,
+                Priority.ALWAYS
         );
 
         // =================================================
@@ -130,10 +173,21 @@ public class ManageComplaints {
         // =================================================
 
         Button refreshBtn =
-                new Button("↻");
+                new Button(
+                        "↻ Refresh"
+                );
 
-        refreshBtn.setPrefWidth(45);
+        refreshBtn.setPrefWidth(105);
+
         refreshBtn.setPrefHeight(40);
+
+        refreshBtn.setMinWidth(105);
+
+        refreshBtn.setMinHeight(40);
+
+        refreshBtn.setMaxWidth(105);
+
+        refreshBtn.setMaxHeight(40);
 
         refreshBtn.setTooltip(
                 new Tooltip(
@@ -142,44 +196,134 @@ public class ManageComplaints {
         );
 
         refreshBtn.setStyle(
-                "-fx-background-color:#434141;" +
-                "-fx-text-fill:white;" +
-                "-fx-font-size:22px;" +
-                "-fx-font-weight:bold;" +
-                "-fx-background-radius:7;"
+                "-fx-background-color: #FFFFFF;"
+                        + "-fx-text-fill:"
+                        + HEADER_COLOR
+                        + ";"
+                        + "-fx-font-size:14px;"
+                        + "-fx-font-weight:bold;"
+                        + "-fx-background-radius:7;"
+                        + "-fx-border-color:#FFFFFF;"
+                        + "-fx-border-radius:7;"
+                        + "-fx-cursor:hand;"
         );
 
         // =================================================
         // HEADER
+        // HEIGHT = 80px
         // =================================================
 
-        HBox rightButtons =
-                new HBox(10);
-
-        rightButtons.setAlignment(
-                Pos.CENTER_RIGHT
-        );
-
-        rightButtons.getChildren().add(
-                refreshBtn
-        );
-
         HBox complaintHeader =
-                new HBox();
+                new HBox(10);
 
         complaintHeader.setAlignment(
                 Pos.CENTER_LEFT
         );
 
-        HBox.setHgrow(
-                titleBox,
-                Priority.ALWAYS
+        complaintHeader.setPrefHeight(80);
+
+        complaintHeader.setMinHeight(80);
+
+        complaintHeader.setMaxHeight(80);
+
+        complaintHeader.setMaxWidth(
+                Double.MAX_VALUE
         );
+
+        complaintHeader.setPadding(
+                new Insets(
+                        20
+                )
+        );
+
+        complaintHeader.setStyle(
+                "-fx-background-color:"
+                        + HEADER_COLOR
+                        + ";"
+        );
+
+        // =================================================
+        // HEADER CONTENT
+        // =================================================
 
         complaintHeader.getChildren().addAll(
                 titleBox,
-                rightButtons
+                refreshBtn
         );
+
+        // =================================================
+        // CONTENT AREA
+        // =================================================
+
+        VBox contentArea =
+                new VBox(15);
+
+        contentArea.setMaxSize(
+                Double.MAX_VALUE,
+                Double.MAX_VALUE
+        );
+
+        /*
+         * Content has padding so that complaint cards
+         * and tabs do not touch the sidebar.
+         */
+        contentArea.setPadding(
+                new Insets(
+                        20,
+                        25,
+                        0,
+                        25
+                )
+        );
+
+        // =================================================
+        // BACKGROUND IMAGE
+        // =================================================
+
+        try {
+
+            Image backgroundImage =
+                    new Image(
+                            getClass()
+                                    .getResource(
+                                            "/background-Dashboard5.jpeg"
+                                    )
+                                    .toExternalForm()
+                    );
+
+            BackgroundImage bgImage =
+                    new BackgroundImage(
+                            backgroundImage,
+                            BackgroundRepeat.NO_REPEAT,
+                            BackgroundRepeat.NO_REPEAT,
+                            BackgroundPosition.CENTER,
+                            new BackgroundSize(
+                                    100,
+                                    100,
+                                    true,
+                                    true,
+                                    false,
+                                    true
+                            )
+                    );
+
+            contentArea.setBackground(
+                    new Background(bgImage)
+            );
+
+        } catch (Exception e) {
+
+            System.err.println(
+                    "Background image could not be loaded: "
+                            + e.getMessage()
+            );
+
+            contentArea.setStyle(
+                    "-fx-background-color:"
+                            + PAGE_BACKGROUND
+                            + ";"
+            );
+        }
 
         // =================================================
         // SOCIETY INFO
@@ -191,9 +335,12 @@ public class ManageComplaints {
                 );
 
         societyInfo.setStyle(
-                "-fx-font-size:12px;" +
-                "-fx-font-weight:bold;" +
-                "-fx-text-fill:#123C36;"
+                "-fx-font-size:12px;"
+                        + "-fx-font-weight:bold;"
+                        + "-fx-text-fill:#123C36;"
+                        + "-fx-background-color:rgba(255,255,255,0.80);"
+                        + "-fx-padding:8 12 8 12;"
+                        + "-fx-background-radius:6;"
         );
 
         // =================================================
@@ -213,13 +360,19 @@ public class ManageComplaints {
                 new Button("Closed");
 
         allBtn.setPrefWidth(130);
+
         progressBtn.setPrefWidth(150);
+
         resolvedBtn.setPrefWidth(130);
+
         closedBtn.setPrefWidth(130);
 
         allBtn.setPrefHeight(40);
+
         progressBtn.setPrefHeight(40);
+
         resolvedBtn.setPrefHeight(40);
+
         closedBtn.setPrefHeight(40);
 
         // =================================================
@@ -227,23 +380,34 @@ public class ManageComplaints {
         // =================================================
 
         String normalStyle =
-                "-fx-background-color:transparent;" +
-                "-fx-text-fill:#777777;" +
-                "-fx-font-weight:bold;" +
-                "-fx-font-size:12px;";
+                "-fx-background-color:transparent;"
+                        + "-fx-text-fill:#777777;"
+                        + "-fx-font-weight:bold;"
+                        + "-fx-font-size:12px;";
 
         String activeStyle =
-                "-fx-background-color:transparent;" +
-                "-fx-text-fill:#123C36;" +
-                "-fx-font-weight:bold;" +
-                "-fx-font-size:12px;" +
-                "-fx-border-color:#0B4F4A;" +
-                "-fx-border-width:0 0 2 0;";
+                "-fx-background-color:transparent;"
+                        + "-fx-text-fill:#3E2723;"
+                        + "-fx-font-weight:bold;"
+                        + "-fx-font-size:12px;"
+                        + "-fx-border-color:#3E2723;"
+                        + "-fx-border-width:0 0 2 0;";
 
-        allBtn.setStyle(activeStyle);
-        progressBtn.setStyle(normalStyle);
-        resolvedBtn.setStyle(normalStyle);
-        closedBtn.setStyle(normalStyle);
+        allBtn.setStyle(
+                activeStyle
+        );
+
+        progressBtn.setStyle(
+                normalStyle
+        );
+
+        resolvedBtn.setStyle(
+                normalStyle
+        );
+
+        closedBtn.setStyle(
+                normalStyle
+        );
 
         HBox tabs =
                 new HBox(20);
@@ -267,7 +431,12 @@ public class ManageComplaints {
                 new VBox(15);
 
         complaintList.setPadding(
-                new Insets(5, 0, 5, 0)
+                new Insets(
+                        5,
+                        0,
+                        5,
+                        0
+                )
         );
 
         // =================================================
@@ -293,9 +462,27 @@ public class ManageComplaints {
 
         scrollPane.setPrefHeight(480);
 
+        /*
+         * Completely invisible scrollbars.
+         * Scrolling still works using mouse wheel.
+         */
+        scrollPane.setHbarPolicy(
+                ScrollPane.ScrollBarPolicy.NEVER
+        );
+
+        scrollPane.setVbarPolicy(
+                ScrollPane.ScrollBarPolicy.NEVER
+        );
+
         scrollPane.setStyle(
-                "-fx-background-color:transparent;" +
-                "-fx-border-color:transparent;"
+                "-fx-background-color:transparent;"
+                        + "-fx-background:transparent;"
+                        + "-fx-border-color:transparent;"
+        );
+
+        VBox.setVgrow(
+                scrollPane,
+                Priority.ALWAYS
         );
 
         // =================================================
@@ -304,7 +491,8 @@ public class ManageComplaints {
 
         allBtn.setOnAction(e -> {
 
-            currentFilter = "ALL";
+            currentFilter =
+                    "ALL";
 
             System.out.println(
                     "Selected filter = ALL"
@@ -515,10 +703,13 @@ public class ManageComplaints {
         viewAllBtn.setPrefHeight(40);
 
         viewAllBtn.setStyle(
-                "-fx-background-color:#434141;" +
-                "-fx-text-fill:white;" +
-                "-fx-font-weight:bold;" +
-                "-fx-background-radius:7;"
+                "-fx-background-color:"
+                        + HEADER_COLOR
+                        + ";"
+                        + "-fx-text-fill:white;"
+                        + "-fx-font-weight:bold;"
+                        + "-fx-background-radius:7;"
+                        + "-fx-cursor:hand;"
         );
 
         viewAllBtn.setOnAction(
@@ -529,13 +720,30 @@ public class ManageComplaints {
         // MAIN CONTENT
         // =================================================
 
-        mainvb.getChildren().addAll(
-                heading,
-                complaintHeader,
+        contentArea.getChildren().addAll(
                 societyInfo,
                 tabs,
                 scrollPane,
                 viewAllBtn
+        );
+
+        VBox.setVgrow(
+                contentArea,
+                Priority.ALWAYS
+        );
+
+        // =================================================
+        // MAIN CONTAINER CONTENT
+        // =================================================
+
+        mainvb.getChildren().addAll(
+                complaintHeader,
+                contentArea
+        );
+
+        VBox.setVgrow(
+                contentArea,
+                Priority.ALWAYS
         );
 
         // =================================================
@@ -550,8 +758,15 @@ public class ManageComplaints {
                 mainvb
         );
 
+        root.setMaxSize(
+                Double.MAX_VALUE,
+                Double.MAX_VALUE
+        );
+
         root.setStyle(
-                "-fx-background-color:#434141;"
+                "-fx-background-color:"
+                        + PAGE_BACKGROUND
+                        + ";"
         );
 
         HBox.setHgrow(
@@ -593,20 +808,6 @@ public class ManageComplaints {
 
             if (currentFilter.equals("ALL")) {
 
-                /*
-                 * IMPORTANT:
-                 *
-                 * ComplaintController.getAllComplaints()
-                 * now automatically fetches only complaints
-                 * belonging to the currently logged-in
-                 * Secretary's society.
-                 *
-                 * Firestore query:
-                 *
-                 * collectionGroup("complaints")
-                 *      .whereEqualTo("society", secretarySociety)
-                 */
-
                 complaints =
                         complaintController
                                 .getAllComplaints();
@@ -618,13 +819,6 @@ public class ManageComplaints {
             // -------------------------------------------------
 
             else {
-
-                /*
-                 * getAllComplaintsByStatus()
-                 * first gets only current Secretary's
-                 * society complaints and then filters
-                 * them by status.
-                 */
 
                 complaints =
                         complaintController
@@ -650,10 +844,10 @@ public class ManageComplaints {
                     "Complaints received by UI = "
                             +
                             (
-                            complaints == null
-                                    ? "NULL"
-                                    : complaints.size()
-                    )
+                                    complaints == null
+                                            ? "NULL"
+                                            : complaints.size()
+                            )
             );
 
             System.out.println(
@@ -681,9 +875,9 @@ public class ManageComplaints {
                     );
 
             error.setStyle(
-                    "-fx-font-size:14px;" +
-                    "-fx-text-fill:#B00020;" +
-                    "-fx-font-weight:bold;"
+                    "-fx-font-size:14px;"
+                            + "-fx-text-fill:#B00020;"
+                            + "-fx-font-weight:bold;"
             );
 
             complaintList.getChildren().add(
@@ -714,9 +908,9 @@ public class ManageComplaints {
                     );
 
             error.setStyle(
-                    "-fx-font-size:14px;" +
-                    "-fx-text-fill:#B00020;" +
-                    "-fx-font-weight:bold;"
+                    "-fx-font-size:14px;"
+                            + "-fx-text-fill:#B00020;"
+                            + "-fx-font-weight:bold;"
             );
 
             complaintList.getChildren().add(
@@ -738,8 +932,10 @@ public class ManageComplaints {
                     );
 
             noData.setStyle(
-                    "-fx-font-size:14px;" +
-                    "-fx-text-fill:#777777;"
+                    "-fx-font-size:14px;"
+                            + "-fx-text-fill:#777777;"
+                            + "-fx-background-color:rgba(255,255,255,0.80);"
+                            + "-fx-padding:10;"
             );
 
             complaintList.getChildren().add(
@@ -794,10 +990,10 @@ public class ManageComplaints {
         card.setMaxWidth(1180);
 
         card.setStyle(
-                "-fx-background-color:white;" +
-                "-fx-background-radius:10;" +
-                "-fx-border-color:#EEEEEE;" +
-                "-fx-border-radius:10;"
+                "-fx-background-color:white;"
+                        + "-fx-background-radius:10;"
+                        + "-fx-border-color:#EEEEEE;"
+                        + "-fx-border-radius:10;"
         );
 
         // =================================================
@@ -812,9 +1008,9 @@ public class ManageComplaints {
                 );
 
         title.setStyle(
-                "-fx-font-size:15px;" +
-                "-fx-font-weight:bold;" +
-                "-fx-text-fill:#123C36;"
+                "-fx-font-size:15px;"
+                        + "-fx-font-weight:bold;"
+                        + "-fx-text-fill:#123C36;"
         );
 
         // =================================================
@@ -831,8 +1027,8 @@ public class ManageComplaints {
                 );
 
         email.setStyle(
-                "-fx-font-size:11px;" +
-                "-fx-text-fill:#555555;"
+                "-fx-font-size:11px;"
+                        + "-fx-text-fill:#555555;"
         );
 
         // =================================================
@@ -849,9 +1045,9 @@ public class ManageComplaints {
                 );
 
         society.setStyle(
-                "-fx-font-size:11px;" +
-                "-fx-font-weight:bold;" +
-                "-fx-text-fill:#123C36;"
+                "-fx-font-size:11px;"
+                        + "-fx-font-weight:bold;"
+                        + "-fx-text-fill:#123C36;"
         );
 
         // =================================================
@@ -868,8 +1064,8 @@ public class ManageComplaints {
                 );
 
         category.setStyle(
-                "-fx-font-size:11px;" +
-                "-fx-text-fill:#555555;"
+                "-fx-font-size:11px;"
+                        + "-fx-text-fill:#555555;"
         );
 
         // =================================================
@@ -890,8 +1086,8 @@ public class ManageComplaints {
         description.setMaxWidth(1050);
 
         description.setStyle(
-                "-fx-font-size:11px;" +
-                "-fx-text-fill:#777777;"
+                "-fx-font-size:11px;"
+                        + "-fx-text-fill:#777777;"
         );
 
         // =================================================
@@ -914,8 +1110,8 @@ public class ManageComplaints {
                 );
 
         details.setStyle(
-                "-fx-font-size:11px;" +
-                "-fx-text-fill:#777777;"
+                "-fx-font-size:11px;"
+                        + "-fx-text-fill:#777777;"
         );
 
         // =================================================
@@ -928,9 +1124,9 @@ public class ManageComplaints {
                 );
 
         statusLabel.setStyle(
-                "-fx-font-size:11px;" +
-                "-fx-font-weight:bold;" +
-                "-fx-text-fill:#555555;"
+                "-fx-font-size:11px;"
+                        + "-fx-font-weight:bold;"
+                        + "-fx-text-fill:#555555;"
         );
 
         // =================================================
@@ -960,8 +1156,8 @@ public class ManageComplaints {
         statusCombo.setPrefHeight(32);
 
         statusCombo.setStyle(
-                "-fx-font-size:11px;" +
-                "-fx-font-weight:bold;"
+                "-fx-font-size:11px;"
+                        + "-fx-font-weight:bold;"
         );
 
         // =================================================
@@ -1350,9 +1546,9 @@ public class ManageComplaints {
                     );
 
             popupTitle.setStyle(
-                    "-fx-font-size:24px;" +
-                    "-fx-font-weight:bold;" +
-                    "-fx-text-fill:#123C36;"
+                    "-fx-font-size:24px;"
+                            + "-fx-font-weight:bold;"
+                            + "-fx-text-fill:#123C36;"
             );
 
             // =================================================
@@ -1365,9 +1561,9 @@ public class ManageComplaints {
                     );
 
             popupSociety.setStyle(
-                    "-fx-font-size:12px;" +
-                    "-fx-font-weight:bold;" +
-                    "-fx-text-fill:#777777;"
+                    "-fx-font-size:12px;"
+                            + "-fx-font-weight:bold;"
+                            + "-fx-text-fill:#777777;"
             );
 
             // =================================================
@@ -1386,8 +1582,8 @@ public class ManageComplaints {
                         );
 
                 noData.setStyle(
-                        "-fx-font-size:14px;" +
-                        "-fx-text-fill:#777777;"
+                        "-fx-font-size:14px;"
+                                + "-fx-text-fill:#777777;"
                 );
 
                 allComplaints.getChildren().add(
@@ -1439,10 +1635,13 @@ public class ManageComplaints {
             closeBtn.setPrefHeight(40);
 
             closeBtn.setStyle(
-                    "-fx-background-color:#434141;" +
-                    "-fx-text-fill:white;" +
-                    "-fx-font-weight:bold;" +
-                    "-fx-background-radius:8;"
+                    "-fx-background-color:"
+                            + HEADER_COLOR
+                            + ";"
+                            + "-fx-text-fill:white;"
+                            + "-fx-font-weight:bold;"
+                            + "-fx-background-radius:8;"
+                            + "-fx-cursor:hand;"
             );
 
             closeBtn.setOnAction(

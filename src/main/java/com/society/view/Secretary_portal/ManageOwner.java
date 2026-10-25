@@ -2,6 +2,9 @@ package com.society.view.Secretary_portal;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 import com.society.controller.Secretary_Controller.OwnerController;
 import com.society.model.Secretary_model.Owner;
@@ -16,6 +19,12 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
+import javafx.scene.image.Image;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -27,118 +36,221 @@ import javafx.stage.Stage;
 
 public class ManageOwner {
 
-    // =====================================================
-    // SCENE
-    // =====================================================
-
     private Scene ownerScene;
-
-    // =====================================================
-    // ROOT
-    // =====================================================
-
     private StackPane rootStack;
-
-    // =====================================================
-    // CONTROLLER
-    // =====================================================
-
     private OwnerController ownerController;
 
-    // =====================================================
-    // OWNER LIST
-    // =====================================================
-
     private VBox ownerList;
-
-    // =====================================================
-    // SEARCH
-    // =====================================================
-
     private TextField search;
 
-    // =====================================================
-    // OWNER CACHE
-    // =====================================================
+    private List<Owner> allOwners = new ArrayList<>();
 
-    private List<Owner> allOwners =
-            new ArrayList<>();
+    private static final String BACKGROUND_IMAGE =
+            "/background-Dashboard5.jpeg";
 
-    // =====================================================
-    // CREATE SCENE
-    // =====================================================
+    private static final String PAGE_BACKGROUND =
+            "#b3adad";
 
     public Scene createScene(Stage stage) {
 
-        // =====================================================
-        // CONTROLLER
-        // =====================================================
+        ownerController = new OwnerController();
 
-        ownerController =
-                new OwnerController();
+        /* ================= SIDEBAR ================= */
 
-        // =====================================================
-        // SIDEBAR
-        // =====================================================
+        SecretarySidebar sidebarObj = new SecretarySidebar();
+        VBox sidebar = sidebarObj.createSidebar(stage);
 
-        SecretarySidebar sidebarObj =
-                new SecretarySidebar();
+        /* ================= MAIN ================= */
 
-        VBox sidebar =
-                sidebarObj.createSidebar(stage);
-
-        // =====================================================
-        // MAIN CONTENT
-        // =====================================================
-
-        VBox mainvb =
-                new VBox(10);
+        VBox mainvb = new VBox(10);
 
         mainvb.setMaxSize(
                 Double.MAX_VALUE,
                 Double.MAX_VALUE
         );
 
+        /*
+         * Header touches sidebar from left
+         * and screen edge from right.
+         */
         mainvb.setPadding(
-                new Insets(20)
+                new Insets(0, 0, 20, 0)
         );
 
         mainvb.setSpacing(10);
 
-        mainvb.setStyle(
-                "-fx-background-color:#b3adad;"
+        /* ================= HEADER ================= */
+
+        HBox header = new HBox();
+
+        header.setAlignment(
+                Pos.CENTER_LEFT
         );
 
-        // =====================================================
-        // TITLE
-        // =====================================================
+        header.setPrefHeight(75);
 
-        Label title =
-                new Label("Manage Owners");
-
-        title.setStyle(
-                "-fx-font-size:28px;" +
-                "-fx-font-weight:bold;" +
-                "-fx-text-fill:black;"
+        header.setMaxWidth(
+                Double.MAX_VALUE
         );
 
-        // =====================================================
-        // SUBTITLE
-        // =====================================================
+        header.setStyle(
+                "-fx-background-color: #4e342e;" +
+                "-fx-padding:15 20 15 20;"
+        );
 
-        Label subtitle =
-                new Label(
-                        "View and manage owners of your society"
+        VBox greetingBox =
+                new VBox(3);
+Label greeting =
+        new Label(
+                "Manage Owner"
+        );
+        greeting.setStyle( "-fx-font-family:'Bodoni MT';" );
+
+        greeting.setFont(
+                Font.font(
+                        "Arial",
+                        FontWeight.BOLD,
+                        22
+                )
+        );
+
+        greeting.setStyle(
+                "-fx-text-fill:white;"
+        );
+
+        Label welcomeText =
+        new Label(
+                "Manage your society owners"
+        );
+
+        welcomeText.setStyle( "-fx-font-family:'Bodoni MT';" );
+
+welcomeText.setFont(
+        Font.font(
+                "Arial",
+                FontWeight.NORMAL,
+                13
+        )
+);
+
+welcomeText.setStyle(
+        "-fx-text-fill:#D7CCC8;"
+        );
+
+        
+
+        greetingBox.getChildren().addAll(
+                greeting,
+                welcomeText
+        );
+
+        Region headerSpacer =
+                new Region();
+
+        HBox.setHgrow(
+                headerSpacer,
+                Priority.ALWAYS
+        );
+
+        VBox notificationBox =
+                new VBox();
+
+        notificationBox.setAlignment(
+                Pos.CENTER
+        );
+
+        notificationBox.setPadding(
+                new Insets(0, 15, 0, 10)
+        );
+
+        Label notification =
+                new Label("🔔");
+
+        notification.setFont(
+                Font.font(22)
+        );
+
+        notification.setStyle(
+                "-fx-text-fill:white;"
+        );
+
+        notification.setTooltip(
+                new Tooltip("Notifications")
+        );
+
+        notificationBox.getChildren().add(
+                notification
+        );
+
+        VBox dateBox =
+                new VBox(2);
+
+        dateBox.setAlignment(
+                Pos.CENTER_RIGHT
+        );
+
+        LocalDate today =
+                LocalDate.now();
+
+        String day =
+                today.format(
+                        DateTimeFormatter.ofPattern("EEEE")
                 );
 
-        subtitle.setStyle(
-                "-fx-font-size:14px;" +
-                "-fx-text-fill:#777777;"
+        String date =
+                today.format(
+                        DateTimeFormatter.ofPattern(
+                                "dd MMMM yyyy"
+                        )
+                );
+
+        Label dayLabel =
+                new Label(day);
+
+        dayLabel.setFont(
+                Font.font(
+                        "Arial",
+                        FontWeight.BOLD,
+                        13
+                )
         );
 
-        // =====================================================
-        // SEARCH
-        // =====================================================
+        dayLabel.setStyle(
+                "-fx-text-fill:white;"
+        );
+
+        Label dateLabel =
+                new Label(date);
+
+        dateLabel.setFont(
+                Font.font(
+                        "Arial",
+                        FontWeight.NORMAL,
+                        12
+                )
+        );
+
+        dateLabel.setStyle(
+                "-fx-text-fill:#D7CCC8;"
+        );
+
+        dateBox.getChildren().addAll(
+                dayLabel,
+                dateLabel
+        );
+
+        header.getChildren().addAll(
+                greetingBox,
+                headerSpacer,
+                notificationBox,
+                dateBox
+        );
+
+        /* ================= PAGE TITLE ================= */
+
+        
+
+        /* ================= SEARCH BAR ================= */
 
         search =
                 new TextField();
@@ -149,87 +261,83 @@ public class ManageOwner {
 
         search.setPrefHeight(45);
 
-        search.setPrefWidth(600);
-
         search.setMaxWidth(
                 Double.MAX_VALUE
         );
 
         search.setStyle(
-                "-fx-background-color:#F8F9FA;" +
-                "-fx-border-color:#E1E5E8;" +
-                "-fx-border-radius:8;" +
-                "-fx-background-radius:8;" +
-                "-fx-font-size:14px;"
+                "-fx-background-color:white;" +
+                "-fx-background-radius:10;" +
+                "-fx-border-color:#D7CCC8;" +
+                "-fx-border-radius:10;" +
+                "-fx-border-width:1;" +
+                "-fx-padding:0 15 0 15;" +
+                "-fx-font-size:14;"
         );
-
-        HBox.setHgrow(
-                search,
-                Priority.ALWAYS
-        );
-
-        // =====================================================
-        // ADD OWNER BUTTON
-        // =====================================================
 
         Button addOwnerBtn =
-                new Button("+ Add New Owner");
-
-        addOwnerBtn.setPrefWidth(180);
+                new Button(
+                        "+ Add New Owner"
+                );
 
         addOwnerBtn.setPrefHeight(45);
 
         addOwnerBtn.setStyle(
-                "-fx-background-color:#434141;" +
+                "-fx-background-color:#6D4C41;" +
                 "-fx-text-fill:white;" +
                 "-fx-font-weight:bold;" +
-                "-fx-background-radius:8;" +
+                "-fx-background-radius:10;" +
+                "-fx-padding:0 18 0 18;" +
                 "-fx-cursor:hand;"
         );
-
-        // =====================================================
-        // REFRESH BUTTON
-        // =====================================================
 
         Button refreshBtn =
                 new Button("⟳");
 
-        refreshBtn.setPrefWidth(45);
-        refreshBtn.setPrefHeight(45);
-
-        refreshBtn.setMinWidth(45);
-        refreshBtn.setMinHeight(45);
-
-        refreshBtn.setMaxWidth(45);
-        refreshBtn.setMaxHeight(45);
+        refreshBtn.setPrefSize(
+                45,
+                45
+        );
 
         refreshBtn.setStyle(
-                "-fx-background-color:#56342B;" +
+                "-fx-background-color:#5D4037;" +
                 "-fx-text-fill:white;" +
-                "-fx-font-size:24px;" +
+                "-fx-font-size:20;" +
                 "-fx-font-weight:bold;" +
-                "-fx-background-radius:8;" +
-                "-fx-cursor:hand;" +
-                "-fx-padding:0;"
+                "-fx-background-radius:10;" +
+                "-fx-cursor:hand;"
         );
 
         refreshBtn.setTooltip(
                 new Tooltip("Refresh")
         );
 
-        // =====================================================
-        // SEARCH BOX
-        // =====================================================
-
         HBox searchBox =
-                new HBox(12);
+                new HBox(10);
 
         searchBox.setAlignment(
                 Pos.CENTER_LEFT
         );
 
-        searchBox.setMaxWidth(
-                Double.MAX_VALUE
+        /*
+         * Left gap from sidebar.
+         * Right gap from screen edge.
+         */
+        searchBox.setPadding(
+                new Insets(0, 20, 0, 15)
+        );
+
+        /*
+         * Search bar slightly lower.
+         */
+        VBox.setMargin(
+                searchBox,
+                new Insets(10, 0, 0, 0)
+        );
+
+        HBox.setHgrow(
+                search,
+                Priority.ALWAYS
         );
 
         searchBox.getChildren().addAll(
@@ -238,35 +346,30 @@ public class ManageOwner {
                 refreshBtn
         );
 
-        // =====================================================
-        // OWNER LIST
-        // =====================================================
+        /* ================= OWNER LIST ================= */
 
         ownerList =
                 new VBox(15);
 
-        ownerList.setPadding(
-                new Insets(15, 0, 20, 0)
+        ownerList.setFillWidth(
+                true
         );
 
-        ownerList.setFillWidth(true);
+        ownerList.setPadding(
+                new Insets(0, 20, 0, 15)
+        );
 
-        // =====================================================
-        // SCROLL PANE
-        // =====================================================
+        /* ================= INVISIBLE SCROLL PANE ================= */
 
         ScrollPane scrollPane =
-                new ScrollPane();
+                new ScrollPane(ownerList);
 
-        scrollPane.setContent(
-                ownerList
+        scrollPane.setFitToWidth(
+                true
         );
 
-        scrollPane.setFitToWidth(true);
-
-        scrollPane.setStyle(
-                "-fx-background-color:transparent;" +
-                "-fx-border-color:transparent;"
+        scrollPane.setFitToHeight(
+                false
         );
 
         scrollPane.setHbarPolicy(
@@ -274,7 +377,21 @@ public class ManageOwner {
         );
 
         scrollPane.setVbarPolicy(
-                ScrollPane.ScrollBarPolicy.AS_NEEDED
+                ScrollPane.ScrollBarPolicy.NEVER
+        );
+
+        scrollPane.setPannable(
+                true
+        );
+
+        scrollPane.setMaxWidth(
+                Double.MAX_VALUE
+        );
+
+        scrollPane.setStyle(
+                "-fx-background-color:transparent;" +
+                "-fx-background:transparent;" +
+                "-fx-border-color:transparent;"
         );
 
         VBox.setVgrow(
@@ -282,9 +399,79 @@ public class ManageOwner {
                 Priority.ALWAYS
         );
 
-        // =====================================================
-        // MAIN ROOT
-        // =====================================================
+        /* ================= CONTENT AREA ================= */
+
+        VBox contentArea =
+                new VBox(5);
+
+        contentArea.setMaxSize(
+                Double.MAX_VALUE,
+                Double.MAX_VALUE
+        );
+
+        /*
+         * Right side spacing for content.
+         */
+        contentArea.setPadding(
+                new Insets(0, 0, 0, 0)
+        );
+
+        contentArea.getChildren().addAll(
+               
+                searchBox,
+                scrollPane
+        );
+
+        VBox.setVgrow(
+                scrollPane,
+                Priority.ALWAYS
+        );
+
+        /* ================= BACKGROUND IMAGE ================= */
+
+        try {
+
+            Image bgImage =
+                    new Image(
+                            getClass()
+                                    .getResource(
+                                            BACKGROUND_IMAGE
+                                    )
+                                    .toExternalForm()
+                    );
+
+            BackgroundImage backgroundImage =
+                    new BackgroundImage(
+                            bgImage,
+                            BackgroundRepeat.NO_REPEAT,
+                            BackgroundRepeat.NO_REPEAT,
+                            BackgroundPosition.CENTER,
+                            new BackgroundSize(
+                                    100,
+                                    100,
+                                    true,
+                                    true,
+                                    false,
+                                    true
+                            )
+                    );
+
+            contentArea.setBackground(
+                    new Background(
+                            backgroundImage
+                    )
+            );
+
+        } catch (Exception e) {
+
+            contentArea.setStyle(
+                    "-fx-background-color:" +
+                    PAGE_BACKGROUND +
+                    ";"
+            );
+        }
+
+        /* ================= MAIN ROOT ================= */
 
         HBox mainRoot =
                 new HBox();
@@ -294,173 +481,113 @@ public class ManageOwner {
                 Double.MAX_VALUE
         );
 
-        mainRoot.getChildren().addAll(
-                sidebar,
-                mainvb
-        );
-
-        mainRoot.setStyle(
-                "-fx-background-color:#434141;"
-        );
-
         HBox.setHgrow(
                 mainvb,
                 Priority.ALWAYS
         );
 
-        // =====================================================
-        // ROOT STACKPANE
-        // =====================================================
+        mainvb.getChildren().addAll(
+                header,
+                contentArea
+        );
+
+        VBox.setVgrow(
+                contentArea,
+                Priority.ALWAYS
+        );
+
+        mainRoot.getChildren().addAll(
+                sidebar,
+                mainvb
+        );
+
+        /* ================= ROOT STACK ================= */
 
         rootStack =
                 new StackPane();
+
+        rootStack.setMaxSize(
+                Double.MAX_VALUE,
+                Double.MAX_VALUE
+        );
 
         rootStack.getChildren().add(
                 mainRoot
         );
 
-        // =====================================================
-        // ADD OWNER
-        // =====================================================
+        /* ================= BUTTON ACTIONS ================= */
 
         addOwnerBtn.setOnAction(
                 e -> openAddOwnerDialog()
         );
 
-        // =====================================================
-        // REFRESH
-        // =====================================================
-
         refreshBtn.setOnAction(e -> {
 
             search.clear();
-
             loadOwners();
 
-            System.out.println(
-                    "Owner data refreshed."
-            );
         });
 
-        // =====================================================
-        // SEARCH
-        // =====================================================
-
         search.textProperty().addListener(
-                (observable, oldValue, newValue) -> {
-
-                    filterOwners(newValue);
-                }
+                (obs, oldValue, newValue) ->
+                        filterOwners(newValue)
         );
 
-        // =====================================================
-        // MAIN CONTENT
-        // =====================================================
-
-        mainvb.getChildren().addAll(
-                title,
-                subtitle,
-                searchBox,
-                scrollPane
-        );
-
-        // =====================================================
-        // LOAD DATA
-        // =====================================================
+        /* ================= LOAD DATA ================= */
 
         loadOwners();
 
-        // =====================================================
-        // SCENE
-        // =====================================================
+        /* ================= SCENE ================= */
 
-        Scene scene =
+        ownerScene =
                 new Scene(
                         rootStack,
                         ScreenSize.getWidth(),
                         ScreenSize.getHeight()
                 );
 
-        ownerScene = scene;
-
         return ownerScene;
     }
 
-    // =====================================================
-    // LOAD OWNERS
-    //
-    // IMPORTANT:
-    // Only logged-in Secretary's society owners
-    // =====================================================
+    /* =========================================================
+                         LOAD OWNERS
+       ========================================================= */
 
     private void loadOwners() {
 
         ownerList.getChildren().clear();
 
-        try {
+        allOwners =
+                ownerController.getOwnersBySociety();
 
-            /*
-             * DO NOT USE:
-             *
-             * ownerController.getAllOwners()
-             *
-             * because that returns owners from
-             * every society.
-             */
+        if (allOwners == null) {
+            allOwners = new ArrayList<>();
+        }
 
-            allOwners =
-                    ownerController
-                            .getOwnersBySociety();
-
-            if (allOwners == null) {
-
-                allOwners =
-                        new ArrayList<>();
-            }
-
-            System.out.println(
-                    "Owners of logged-in Secretary's society: "
-                            + allOwners.size()
-            );
-
-            if (allOwners.isEmpty()) {
-
-                showEmptyMessage(
-                        "No owners found in your society."
-                );
-
-                return;
-            }
-
-            for (Owner owner : allOwners) {
-
-                if (owner == null) {
-                    continue;
-                }
-
-                ownerList.getChildren().add(
-                        createOwnerRow(owner)
-                );
-            }
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
+        if (allOwners.isEmpty()) {
 
             showEmptyMessage(
-                    "Unable to load owners."
+                    "No owners found in your society."
+            );
+
+            return;
+        }
+
+        for (Owner owner : allOwners) {
+
+            ownerList.getChildren().add(
+                    createOwnerRow(owner)
             );
         }
     }
 
-    // =====================================================
-    // FILTER OWNERS
-    //
-    // Local search on already loaded society owners
-    // =====================================================
+    /* =========================================================
+                         FILTER OWNERS
+       ========================================================= */
 
     private void filterOwners(
-            String searchText) {
+            String searchText
+    ) {
 
         ownerList.getChildren().clear();
 
@@ -468,30 +595,12 @@ public class ManageOwner {
                 searchText == null
                         ? ""
                         : searchText
-                                .toLowerCase()
-                                .trim();
-
-        // =====================================================
-        // EMPTY SEARCH
-        // =====================================================
+                                .trim()
+                                .toLowerCase();
 
         if (text.isEmpty()) {
 
-            if (allOwners == null ||
-                    allOwners.isEmpty()) {
-
-                showEmptyMessage(
-                        "No owners found in your society."
-                );
-
-                return;
-            }
-
             for (Owner owner : allOwners) {
-
-                if (owner == null) {
-                    continue;
-                }
 
                 ownerList.getChildren().add(
                         createOwnerRow(owner)
@@ -501,63 +610,50 @@ public class ManageOwner {
             return;
         }
 
-        // =====================================================
-        // SEARCH CACHE
-        // =====================================================
-
         boolean found = false;
 
-        if (allOwners != null) {
+        for (Owner owner : allOwners) {
 
-            for (Owner owner : allOwners) {
+            String name =
+                    safe(owner.getName())
+                            .toLowerCase();
 
-                if (owner == null) {
-                    continue;
-                }
+            String flat =
+                    safe(owner.getFlat())
+                            .toLowerCase();
 
-                String name =
-                        safe(owner.getName())
-                                .toLowerCase();
+            String phone =
+                    safe(owner.getPhone())
+                            .toLowerCase();
 
-                String flat =
-                        safe(owner.getFlat())
-                                .toLowerCase();
+            String email =
+                    safe(owner.getEmail())
+                            .toLowerCase();
 
-                String mobile =
-                        safe(owner.getMobile())
-                                .toLowerCase();
+            String status =
+                    safe(owner.getStatus())
+                            .toLowerCase();
 
-                String email =
-                        safe(owner.getEmail())
-                                .toLowerCase();
+            String society =
+                    safe(owner.getSociety())
+                            .toLowerCase();
 
-                String status =
-                        safe(owner.getStatus())
-                                .toLowerCase();
+            if (
+                    name.contains(text)
+                    || flat.contains(text)
+                    || phone.contains(text)
+                    || email.contains(text)
+                    || status.contains(text)
+                    || society.contains(text)
+            ) {
 
-                String society =
-                        safe(owner.getSociety())
-                                .toLowerCase();
+                ownerList.getChildren().add(
+                        createOwnerRow(owner)
+                );
 
-                if (name.contains(text)
-                        || flat.contains(text)
-                        || mobile.contains(text)
-                        || email.contains(text)
-                        || status.contains(text)
-                        || society.contains(text)) {
-
-                    ownerList.getChildren().add(
-                            createOwnerRow(owner)
-                    );
-
-                    found = true;
-                }
+                found = true;
             }
         }
-
-        // =====================================================
-        // NOTHING FOUND
-        // =====================================================
 
         if (!found) {
 
@@ -567,73 +663,75 @@ public class ManageOwner {
         }
     }
 
-    // =====================================================
-    // CREATE OWNER ROW
-    // =====================================================
+    /* =========================================================
+                         OWNER ROW
+       ========================================================= */
 
     private HBox createOwnerRow(
-            Owner owner) {
+            Owner owner
+    ) {
 
-        HBox ownerRow =
-                new HBox(10);
+        HBox row =
+                new HBox(18);
 
-        ownerRow.setPrefHeight(90);
-
-        ownerRow.setMaxWidth(
-                Double.MAX_VALUE
-        );
-
-        ownerRow.setAlignment(
+        row.setAlignment(
                 Pos.CENTER_LEFT
         );
 
-        ownerRow.setPadding(
-                new Insets(15)
+        row.setPrefHeight(90);
+
+        row.setMinHeight(90);
+
+        row.setMaxWidth(
+                Double.MAX_VALUE
         );
 
-        ownerRow.setStyle(
+        row.setPadding(
+                new Insets(
+                        12,
+                        15,
+                        12,
+                        15
+                )
+        );
+
+        row.setStyle(
                 "-fx-background-color:white;" +
-                "-fx-background-radius:10;"
+                "-fx-background-radius:12;" +
+                "-fx-border-color:#E0D6D2;" +
+                "-fx-border-radius:12;"
         );
-
-        // =====================================================
-        // PROFILE
-        // =====================================================
 
         Label profile =
                 new Label("👤");
 
-        profile.setPrefWidth(45);
-        profile.setPrefHeight(45);
-
-        profile.setAlignment(
-                Pos.CENTER
+        profile.setFont(
+                Font.font(30)
         );
 
-        profile.setStyle(
-                "-fx-background-color:#E5E7EB;" +
-                "-fx-background-radius:50%;" +
-                "-fx-font-size:21px;"
-        );
+        /* ================= NAME ================= */
 
-        // =====================================================
-        // OWNER DETAILS
-        // =====================================================
+        VBox nameBox =
+                new VBox(4);
 
-        VBox ownerDetails =
-                new VBox(3);
-
-        ownerDetails.setPrefWidth(220);
+        nameBox.setPrefWidth(210);
+        nameBox.setMinWidth(210);
 
         Label name =
                 new Label(
                         safe(owner.getName())
                 );
 
+        name.setFont(
+                Font.font(
+                        "Arial",
+                        FontWeight.BOLD,
+                        16
+                )
+        );
+
         name.setStyle(
-                "-fx-font-size:15px;" +
-                "-fx-font-weight:bold;" +
-                "-fx-text-fill:#123C36;"
+                "-fx-text-fill:#3E2723;"
         );
 
         Label email =
@@ -641,29 +739,44 @@ public class ManageOwner {
                         safe(owner.getEmail())
                 );
 
-        email.setStyle(
-                "-fx-font-size:12px;" +
-                "-fx-text-fill:#666666;"
+        email.setFont(
+                Font.font(
+                        "Arial",
+                        FontWeight.NORMAL,
+                        12
+                )
         );
 
-        ownerDetails.getChildren().addAll(
+        email.setStyle(
+                "-fx-text-fill:#795548;"
+        );
+
+        nameBox.getChildren().addAll(
                 name,
                 email
         );
 
-        // =====================================================
-        // FLAT
-        // =====================================================
+        /* ================= FLAT ================= */
 
         VBox flatBox =
-                new VBox(2);
+                new VBox(3);
+
+        flatBox.setPrefWidth(90);
+        flatBox.setMinWidth(90);
 
         Label flatTitle =
                 new Label("Flat");
 
+        flatTitle.setFont(
+                Font.font(
+                        "Arial",
+                        FontWeight.BOLD,
+                        11
+                )
+        );
+
         flatTitle.setStyle(
-                "-fx-font-size:11px;" +
-                "-fx-text-fill:#777777;"
+                "-fx-text-fill:#8D6E63;"
         );
 
         Label flat =
@@ -671,10 +784,16 @@ public class ManageOwner {
                         safe(owner.getFlat())
                 );
 
+        flat.setFont(
+                Font.font(
+                        "Arial",
+                        FontWeight.BOLD,
+                        13
+                )
+        );
+
         flat.setStyle(
-                "-fx-font-size:14px;" +
-                "-fx-font-weight:bold;" +
-                "-fx-text-fill:#555555;"
+                "-fx-text-fill:#3E2723;"
         );
 
         flatBox.getChildren().addAll(
@@ -682,53 +801,72 @@ public class ManageOwner {
                 flat
         );
 
-        flatBox.setPrefWidth(100);
+        /* ================= MOBILE ================= */
 
-        // =====================================================
-        // MOBILE
-        // =====================================================
+        VBox phoneBox =
+                new VBox(3);
 
-        VBox mobileBox =
-                new VBox(2);
+        phoneBox.setPrefWidth(130);
+        phoneBox.setMinWidth(130);
 
-        Label mobileTitle =
+        Label phoneTitle =
                 new Label("Mobile");
 
-        mobileTitle.setStyle(
-                "-fx-font-size:11px;" +
-                "-fx-text-fill:#777777;"
+        phoneTitle.setFont(
+                Font.font(
+                        "Arial",
+                        FontWeight.BOLD,
+                        11
+                )
         );
 
-        Label mobile =
+        phoneTitle.setStyle(
+                "-fx-text-fill:#8D6E63;"
+        );
+
+        Label phone =
                 new Label(
-                        safe(owner.getMobile())
+                        safe(owner.getPhone())
                 );
 
-        mobile.setStyle(
-                "-fx-font-size:13px;" +
-                "-fx-text-fill:#555555;"
+        phone.setFont(
+                Font.font(
+                        "Arial",
+                        FontWeight.BOLD,
+                        13
+                )
         );
 
-        mobileBox.getChildren().addAll(
-                mobileTitle,
-                mobile
+        phone.setStyle(
+                "-fx-text-fill:#3E2723;"
         );
 
-        mobileBox.setPrefWidth(150);
+        phoneBox.getChildren().addAll(
+                phoneTitle,
+                phone
+        );
 
-        // =====================================================
-        // SOCIETY
-        // =====================================================
+        /* ================= SOCIETY ================= */
 
         VBox societyBox =
-                new VBox(2);
+                new VBox(3);
+
+        societyBox.setPrefWidth(145);
+        societyBox.setMinWidth(145);
 
         Label societyTitle =
                 new Label("Society");
 
+        societyTitle.setFont(
+                Font.font(
+                        "Arial",
+                        FontWeight.BOLD,
+                        11
+                )
+        );
+
         societyTitle.setStyle(
-                "-fx-font-size:11px;" +
-                "-fx-text-fill:#777777;"
+                "-fx-text-fill:#8D6E63;"
         );
 
         Label society =
@@ -736,10 +874,16 @@ public class ManageOwner {
                         safe(owner.getSociety())
                 );
 
+        society.setFont(
+                Font.font(
+                        "Arial",
+                        FontWeight.BOLD,
+                        13
+                )
+        );
+
         society.setStyle(
-                "-fx-font-size:13px;" +
-                "-fx-font-weight:bold;" +
-                "-fx-text-fill:#56342B;"
+                "-fx-text-fill:#3E2723;"
         );
 
         societyBox.getChildren().addAll(
@@ -747,21 +891,27 @@ public class ManageOwner {
                 society
         );
 
-        societyBox.setPrefWidth(180);
-
-        // =====================================================
-        // STATUS
-        // =====================================================
+        /* ================= STATUS ================= */
 
         VBox statusBox =
-                new VBox(2);
+                new VBox(3);
+
+        statusBox.setPrefWidth(90);
+        statusBox.setMinWidth(90);
 
         Label statusTitle =
                 new Label("Status");
 
+        statusTitle.setFont(
+                Font.font(
+                        "Arial",
+                        FontWeight.BOLD,
+                        11
+                )
+        );
+
         statusTitle.setStyle(
-                "-fx-font-size:11px;" +
-                "-fx-text-fill:#777777;"
+                "-fx-text-fill:#8D6E63;"
         );
 
         Label status =
@@ -769,10 +919,16 @@ public class ManageOwner {
                         safe(owner.getStatus())
                 );
 
+        status.setFont(
+                Font.font(
+                        "Arial",
+                        FontWeight.BOLD,
+                        13
+                )
+        );
+
         status.setStyle(
-                "-fx-font-size:13px;" +
-                "-fx-font-weight:bold;" +
-                "-fx-text-fill:#2E9D63;"
+                "-fx-text-fill:#2E7D32;"
         );
 
         statusBox.getChildren().addAll(
@@ -780,27 +936,31 @@ public class ManageOwner {
                 status
         );
 
-        statusBox.setPrefWidth(100);
+        /*
+         * Status slightly towards left.
+         */
+        Region spacer =
+                new Region();
 
-        // =====================================================
-        // ADD TO ROW
-        // =====================================================
+        spacer.setPrefWidth(5);
+        spacer.setMinWidth(5);
 
-        ownerRow.getChildren().addAll(
+        row.getChildren().addAll(
                 profile,
-                ownerDetails,
+                nameBox,
                 flatBox,
-                mobileBox,
+                phoneBox,
                 societyBox,
+                spacer,
                 statusBox
         );
 
-        return ownerRow;
+        return row;
     }
 
-    // =====================================================
-    // ADD OWNER POPUP
-    // =====================================================
+    /* =========================================================
+                         ADD OWNER DIALOG
+       ========================================================= */
 
     private void openAddOwnerDialog() {
 
@@ -808,23 +968,14 @@ public class ManageOwner {
                 new StackPane();
 
         overlay.setStyle(
-                "-fx-background-color:rgba(0,0,0,0.5);"
+                "-fx-background-color:" +
+                "rgba(0,0,0,0.45);"
         );
-
-        // =====================================================
-        // FORM BOX
-        // =====================================================
 
         VBox formBox =
-                new VBox(7);
-
-        formBox.setPadding(
-                new Insets(18)
-        );
+                new VBox(12);
 
         formBox.setPrefWidth(430);
-
-        formBox.setMaxWidth(430);
 
         formBox.setMaxHeight(
                 Math.min(
@@ -833,291 +984,153 @@ public class ManageOwner {
                 )
         );
 
+        formBox.setPadding(
+                new Insets(25)
+        );
+
         formBox.setStyle(
                 "-fx-background-color:white;" +
-                "-fx-background-radius:15;" +
-                "-fx-effect:dropshadow(" +
-                "gaussian, rgba(0,0,0,0.3)," +
-                "20,0.2,0,5);"
+                "-fx-background-radius:15;"
         );
 
-        // =====================================================
-        // HEADER
-        // =====================================================
-
-        HBox headerRow =
-                new HBox();
-
-        headerRow.setAlignment(
-                Pos.CENTER_LEFT
-        );
-
-        Label popupTitle =
+        Label formTitle =
                 new Label(
                         "Add New Owner"
                 );
 
-        popupTitle.setFont(
-                Font.font(
-                        "Georgia",
-                        FontWeight.BOLD,
-                        21
-                )
-        );
-
-        popupTitle.setStyle(
-                "-fx-text-fill:#123C36;"
-        );
-
-        Region spacer =
-                new Region();
-
-        HBox.setHgrow(
-                spacer,
-                Priority.ALWAYS
-        );
-
-        Button closeBtn =
-                new Button("✕");
-
-        closeBtn.setFont(
+        formTitle.setFont(
                 Font.font(
                         "Arial",
                         FontWeight.BOLD,
-                        15
+                        22
                 )
         );
 
-        closeBtn.setStyle(
-                "-fx-background-color:transparent;" +
-                "-fx-text-fill:#555555;" +
-                "-fx-cursor:hand;"
+        formTitle.setStyle(
+                "-fx-text-fill:#3E2723;"
         );
-
-        headerRow.getChildren().addAll(
-                popupTitle,
-                spacer,
-                closeBtn
-        );
-
-        // =====================================================
-        // SOCIETY
-        // =====================================================
-
-        Label societyLabel =
-                createFormLabel(
-                        "Society Name"
-                );
 
         TextField societyField =
                 new TextField();
 
         societyField.setPromptText(
-                "Enter society name"
+                "Society"
         );
-
-        societyField.setPrefHeight(35);
-
-        // =====================================================
-        // OWNER NAME
-        // =====================================================
-
-        Label nameLabel =
-                createFormLabel(
-                        "Owner Name"
-                );
 
         TextField nameField =
                 new TextField();
 
         nameField.setPromptText(
-                "Enter owner name"
+                "Owner Name"
         );
-
-        nameField.setPrefHeight(35);
-
-        // =====================================================
-        // FLAT
-        // =====================================================
-
-        Label flatLabel =
-                createFormLabel(
-                        "Flat Number"
-                );
 
         TextField flatField =
                 new TextField();
 
         flatField.setPromptText(
-                "Enter flat number"
+                "Flat Number"
         );
 
-        flatField.setPrefHeight(35);
-
-        // =====================================================
-        // MOBILE
-        // =====================================================
-
-        Label mobileLabel =
-                createFormLabel(
-                        "Mobile Number"
-                );
-
-        TextField mobileField =
+        TextField phoneField =
                 new TextField();
 
-        mobileField.setPromptText(
-                "Enter mobile number"
+        phoneField.setPromptText(
+                "Phone"
         );
-
-        mobileField.setPrefHeight(35);
-
-        // =====================================================
-        // EMAIL
-        // =====================================================
-
-        Label emailLabel =
-                createFormLabel(
-                        "Email"
-                );
 
         TextField emailField =
                 new TextField();
 
         emailField.setPromptText(
-                "Enter email"
+                "Email"
         );
-
-        emailField.setPrefHeight(35);
-
-        // =====================================================
-        // STATUS
-        // =====================================================
-
-        Label statusLabel =
-                createFormLabel(
-                        "Status"
-                );
 
         TextField statusField =
                 new TextField();
 
         statusField.setPromptText(
-                "Active / Inactive"
+                "Status"
         );
 
-        statusField.setPrefHeight(35);
+        VBox societyBox =
+                new VBox(
+                        5,
+                        createFormLabel("Society"),
+                        societyField
+                );
 
-        // =====================================================
-        // BUTTONS
-        // =====================================================
+        VBox nameBox =
+                new VBox(
+                        5,
+                        createFormLabel("Owner Name"),
+                        nameField
+                );
 
-        Button cancelBtn =
-                new Button("Cancel");
+        VBox flatBox =
+                new VBox(
+                        5,
+                        createFormLabel("Flat Number"),
+                        flatField
+                );
 
-        cancelBtn.setPrefWidth(100);
+        VBox phoneBox =
+                new VBox(
+                        5,
+                        createFormLabel("Phone"),
+                        phoneField
+                );
 
-        cancelBtn.setPrefHeight(38);
+        VBox emailBox =
+                new VBox(
+                        5,
+                        createFormLabel("Email"),
+                        emailField
+                );
 
-        cancelBtn.setStyle(
-                "-fx-background-color:#E5E7EB;" +
-                "-fx-text-fill:#333333;" +
-                "-fx-background-radius:8;" +
-                "-fx-cursor:hand;"
-        );
+        VBox statusBox =
+                new VBox(
+                        5,
+                        createFormLabel("Status"),
+                        statusField
+                );
 
         Button saveBtn =
-                new Button("Save Owner");
+                new Button(
+                        "Save Owner"
+                );
 
-        saveBtn.setPrefWidth(130);
+        saveBtn.setPrefHeight(42);
 
-        saveBtn.setPrefHeight(38);
+        saveBtn.setMaxWidth(
+                Double.MAX_VALUE
+        );
 
         saveBtn.setStyle(
-                "-fx-background-color:#2E9D63;" +
+                "-fx-background-color:#6D4C41;" +
                 "-fx-text-fill:white;" +
                 "-fx-font-weight:bold;" +
                 "-fx-background-radius:8;" +
                 "-fx-cursor:hand;"
         );
 
-        HBox buttonBox =
-                new HBox(10);
+        Button cancelBtn =
+                new Button(
+                        "Cancel"
+                );
 
-        buttonBox.setAlignment(
-                Pos.CENTER_RIGHT
+        cancelBtn.setPrefHeight(42);
+
+        cancelBtn.setMaxWidth(
+                Double.MAX_VALUE
         );
 
-        buttonBox.getChildren().addAll(
-                cancelBtn,
-                saveBtn
+        cancelBtn.setStyle(
+                "-fx-background-color:#E0E0E0;" +
+                "-fx-text-fill:#3E2723;" +
+                "-fx-font-weight:bold;" +
+                "-fx-background-radius:8;" +
+                "-fx-cursor:hand;"
         );
-
-        // =====================================================
-        // FORM
-        // =====================================================
-
-        formBox.getChildren().addAll(
-
-                headerRow,
-
-                societyLabel,
-                societyField,
-
-                nameLabel,
-                nameField,
-
-                flatLabel,
-                flatField,
-
-                mobileLabel,
-                mobileField,
-
-                emailLabel,
-                emailField,
-
-                statusLabel,
-                statusField,
-
-                buttonBox
-        );
-
-        // =====================================================
-        // OVERLAY
-        // =====================================================
-
-        overlay.getChildren().add(
-                formBox
-        );
-
-        StackPane.setAlignment(
-                formBox,
-                Pos.CENTER
-        );
-
-        rootStack.getChildren().add(
-                overlay
-        );
-
-        // =====================================================
-        // CLOSE
-        // =====================================================
-
-        closeBtn.setOnAction(
-                e -> removeOverlay(overlay)
-        );
-
-        // =====================================================
-        // CANCEL
-        // =====================================================
-
-        cancelBtn.setOnAction(
-                e -> removeOverlay(overlay)
-        );
-
-        // =====================================================
-        // SAVE OWNER
-        // =====================================================
 
         saveBtn.setOnAction(e -> {
 
@@ -1136,48 +1149,43 @@ public class ManageOwner {
                             .getText()
                             .trim();
 
-            String mobile =
-                    mobileField
+            String phone =
+                    phoneField
                             .getText()
                             .trim();
 
             String email =
                     emailField
                             .getText()
-                            .trim()
-                            .toLowerCase();
+                            .trim();
 
             String status =
                     statusField
                             .getText()
                             .trim();
 
-            // =================================================
-            // VALIDATION
-            // =================================================
-
-            if (society.isEmpty()
+            if (
+                    society.isEmpty()
                     || name.isEmpty()
                     || flat.isEmpty()
-                    || mobile.isEmpty()
+                    || phone.isEmpty()
                     || email.isEmpty()
-                    || status.isEmpty()) {
+                    || status.isEmpty()
+            ) {
 
                 showAlert(
                         Alert.AlertType.WARNING,
-                        "Validation Error",
+                        "Validation",
                         "Please fill all fields."
                 );
 
                 return;
             }
 
-            // =================================================
-            // EMAIL VALIDATION
-            // =================================================
-
-            if (!email.contains("@")
-                    || !email.contains(".")) {
+            if (
+                    !email.contains("@")
+                    || !email.contains(".")
+            ) {
 
                 showAlert(
                         Alert.AlertType.WARNING,
@@ -1188,46 +1196,32 @@ public class ManageOwner {
                 return;
             }
 
-            // =================================================
-            // ADD OWNER
-            // =================================================
-
             boolean success =
                     ownerController.addOwner(
                             name,
                             flat,
-                            mobile,
+                            phone,
                             email,
                             status,
                             society
                     );
-
-            // =================================================
-            // SUCCESS
-            // =================================================
 
             if (success) {
 
                 showAlert(
                         Alert.AlertType.INFORMATION,
                         "Success",
-                        "Owner saved successfully!"
+                        "Owner added successfully."
                 );
 
-                removeOverlay(
-                        overlay
-                );
+                removeOverlay(overlay);
 
                 societyField.clear();
                 nameField.clear();
                 flatField.clear();
-                mobileField.clear();
+                phoneField.clear();
                 emailField.clear();
                 statusField.clear();
-
-                // -------------------------------------------------
-                // Reload only logged-in Secretary's society
-                // -------------------------------------------------
 
                 loadOwners();
 
@@ -1236,98 +1230,184 @@ public class ManageOwner {
                 showAlert(
                         Alert.AlertType.ERROR,
                         "Error",
-                        "Failed to save owner.\n"
-                                + "This email may already exist."
+                        "Unable to add owner. " +
+                        "Email may already exist."
                 );
             }
         });
+
+        cancelBtn.setOnAction(
+                e -> removeOverlay(overlay)
+        );
+
+        formBox.getChildren().addAll(
+                formTitle,
+                societyBox,
+                nameBox,
+                flatBox,
+                phoneBox,
+                emailBox,
+                statusBox,
+                saveBtn,
+                cancelBtn
+        );
+
+        overlay.getChildren().add(
+                formBox
+        );
+
+        StackPane.setAlignment(
+                formBox,
+                Pos.CENTER
+        );
+
+        rootStack.getChildren().add(
+                overlay
+        );
     }
 
-    // =====================================================
-    // FORM LABEL
-    // =====================================================
+    /* =========================================================
+                         FORM LABEL
+       ========================================================= */
 
     private Label createFormLabel(
-            String text) {
+            String text
+    ) {
 
         Label label =
                 new Label(text);
 
+        label.setFont(
+                Font.font(
+                        "Arial",
+                        FontWeight.BOLD,
+                        12
+                )
+        );
+
         label.setStyle(
-                "-fx-font-weight:bold;" +
-                "-fx-text-fill:#333333;" +
-                "-fx-font-size:13px;"
+                "-fx-text-fill:#5D4037;"
         );
 
         return label;
     }
 
-    // =====================================================
-    // REMOVE OVERLAY
-    // =====================================================
+    /* =========================================================
+                         REMOVE OVERLAY
+       ========================================================= */
 
     private void removeOverlay(
-            StackPane overlay) {
+            StackPane overlay
+    ) {
 
-        if (rootStack != null) {
-
-            rootStack.getChildren()
-                    .remove(overlay);
-        }
+        rootStack
+                .getChildren()
+                .remove(overlay);
     }
 
-    // =====================================================
-    // EMPTY MESSAGE
-    // =====================================================
+    /* =========================================================
+                         EMPTY MESSAGE
+       ========================================================= */
 
     private void showEmptyMessage(
-            String message) {
+            String message
+    ) {
 
-        ownerList.getChildren().clear();
-
-        Label emptyLabel =
+        Label label =
                 new Label(message);
 
-        emptyLabel.setStyle(
-                "-fx-font-size:16px;" +
-                "-fx-text-fill:#555555;"
+        label.setFont(
+                Font.font(
+                        "Arial",
+                        FontWeight.BOLD,
+                        15
+                )
+        );
+
+        label.setStyle(
+                "-fx-text-fill:#5D4037;"
+        );
+
+        label.setAlignment(
+                Pos.CENTER
+        );
+
+        label.setMaxWidth(
+                Double.MAX_VALUE
+        );
+
+        VBox.setMargin(
+                label,
+                new Insets(
+                        20,
+                        0,
+                        0,
+                        15
+                )
         );
 
         ownerList.getChildren().add(
-                emptyLabel
+                label
         );
     }
 
-    // =====================================================
-    // ALERT
-    // =====================================================
+    /* =========================================================
+                         ALERT
+       ========================================================= */
 
     private void showAlert(
             Alert.AlertType type,
             String title,
-            String message) {
+            String message
+    ) {
 
         Alert alert =
                 new Alert(type);
 
         alert.setTitle(title);
-
         alert.setHeaderText(null);
-
         alert.setContentText(message);
 
         alert.showAndWait();
     }
 
-    // =====================================================
-    // SAFE STRING
-    // =====================================================
+    /* =========================================================
+                         SAFE STRING
+       ========================================================= */
 
     private String safe(
-            String value) {
+            String value
+    ) {
 
         return value == null
                 ? ""
                 : value;
+    }
+
+    /* =========================================================
+                         GREETING
+       ========================================================= */
+
+    private String getGreeting() {
+
+        int hour =
+                LocalTime.now().getHour();
+
+        if (hour >= 5 && hour < 12) {
+
+            return "Good Morning";
+
+        } else if (hour >= 12 && hour < 17) {
+
+            return "Good Afternoon";
+
+        } else if (hour >= 17 && hour < 21) {
+
+            return "Good Evening";
+
+        } else {
+
+            return "Good Night";
+        }
     }
 }

@@ -65,6 +65,10 @@ public class OwnerDashboard {
     // SCENE
     // ============================================================
 
+    public static Scene createScene(Stage stage) {
+        return createScene(stage, null);
+    }
+
     public static Scene createScene(
             Stage stage,
             String ownerEmail) {
@@ -1862,6 +1866,14 @@ public class OwnerDashboard {
 
                 DateTimeFormatter.ofPattern(
                         "d/M/yyyy"
+                ),
+
+                DateTimeFormatter.ofPattern(
+                        "dd-MM-yyyy"
+                ),
+
+                DateTimeFormatter.ofPattern(
+                        "d-M-yyyy"
                 ),
 
                 DateTimeFormatter.ofPattern(

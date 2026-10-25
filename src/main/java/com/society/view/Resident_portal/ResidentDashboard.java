@@ -45,2247 +45,1930 @@ import java.util.Map;
  * Resident Dashboard.
  *
  * Existing navigation is preserved.
- * Dashboard values are loaded from Firestore through
- * the existing controller/DAO structure.
+ * Dashboard values are loaded dynamically from Firestore.
+ * Maintenance uses the existing Maintenance structure and is
+ * filtered by the logged-in resident's society. Electricity uses
+ * the existing ElectricityDAO.
  */
 public class ResidentDashboard {
 
-    private static final ZoneId INDIA_ZONE =
-            ZoneId.of("Asia/Kolkata");
+        private static final ZoneId INDIA_ZONE = ZoneId.of("Asia/Kolkata");
 
-    private Scene residentDashboardScene;
+        private Scene residentDashboardScene;
 
-    private String residentName = "Resident";
-    private String flatNo = "N/A";
-    private String LognEmail = "";
+        private String residentName = "Resident";
+        private String flatNo = "N/A";
+        private String LognEmail = "";
 
-    private Label totalBillsLabel;
-    private Label maintenanceBillsLabel;
-    private Label maintenanceBottomLabel;
-    private Label complaintCountLabel;
-    private Label visitorCountLabel;
+        private Label totalBillsLabel;
+        private Label maintenanceBillsLabel;
+        private Label maintenanceBottomLabel;
+        private Label complaintCountLabel;
+        private Label visitorCountLabel;
 
-    private VBox upcomingBox;
-    private VBox noticeContent;
-    private VBox pollContent;
-
-    // =========================================================
-    // GET DASHBOARD SCENE
-    // =========================================================
-
-    public Scene getResidentDashboardScene(Stage stage) {
-
-        UserController userController =
-                new UserController();
-
-        String loggedInEmail =
-                UserDao.getLoggedInEmail();
-
-        this.LognEmail =
-                loggedInEmail == null
-                        ? ""
-                        : loggedInEmail.trim().toLowerCase();
-
-        User resident = null;
-
-        if (!this.LognEmail.isEmpty()) {
-
-            resident =
-                    userController.getUserByEmail(
-                            this.LognEmail
-                    );
-        }
-
-        if (resident != null) {
-
-            residentName =
-                    safe(resident.getName());
-
-            flatNo =
-                    safe(resident.getFlatNo());
-
-            if (residentName.isEmpty()) {
-                residentName = "Resident";
-            }
-
-            if (flatNo.isEmpty()) {
-                flatNo = "N/A";
-            }
-        }
-
-        // =====================================================
-        // SIDEBAR
-        // =====================================================
-
-        panel panelobj =
-                new panel(
-                        stage,
-                        this.LognEmail
-                );
-
-        BorderPane root =
-                new BorderPane();
-
-        // =====================================================
-        // FULL ROOT BACKGROUND IMAGE
-        // =====================================================
-
-        URL imageURL =
-                getClass().getResource(
-                        "/background-Dashboard5.jpeg"
-                );
-
-        if (imageURL != null) {
-
-            Image backgroundImage =
-                    new Image(
-                            imageURL.toExternalForm()
-                    );
-
-            BackgroundImage background =
-                    new BackgroundImage(
-                            backgroundImage,
-
-                            BackgroundRepeat.NO_REPEAT,
-
-                            BackgroundRepeat.NO_REPEAT,
-
-                            BackgroundPosition.CENTER,
-
-                            new BackgroundSize(
-                                    100,
-                                    100,
-                                    true,
-                                    true,
-                                    false,
-                                    true
-                            )
-                    );
-
-            root.setBackground(
-                    new Background(background)
-            );
-
-        } else {
-
-            System.out.println(
-                    "❌ Background image NOT FOUND: "
-                            + "/background-Dashboard5.jpeg"
-            );
-        }
-
-        // Sidebar remains SOLID
-        root.setLeft(
-                panelobj.getSidebar()
-        );
-
-        // =====================================================
-        // MAIN CONTENT
-        // =====================================================
-
-        VBox mainContent =
-                new VBox(20);
-
-        mainContent.setPadding(
-                new Insets(
-                        25,
-                        30,
-                        25,
-                        30
-                )
-        );
-
-        /*
-         * IMPORTANT:
-         * Transparent so root background image
-         * can be visible.
-         */
-        mainContent.setStyle(
-                "-fx-background-color: transparent;"
-        );
+        private VBox upcomingBox;
+        private VBox noticeContent;
+        private VBox pollContent;
 
         // =========================================================
-        // MAIN PAGE FADE-IN ANIMATION
-        // Sidebar and Header are NOT animated
-        // Only main page content is animated
+        // GET DASHBOARD SCENE
         // =========================================================
 
-        FadeTransition pageFade =
-                new FadeTransition(
-                        Duration.millis(700),
-                        mainContent
-                );
+        public Scene getResidentDashboardScene(Stage stage) {
 
-        pageFade.setFromValue(0.0);
-        pageFade.setToValue(1.0);
-        pageFade.setCycleCount(1);
-        pageFade.play();
+                UserController userController = new UserController();
 
-        // =====================================================
-        // HEADER
-        // =====================================================
+                String loggedInEmail = UserDao.getLoggedInEmail();
 
-        HBox header =
-                new HBox();
+                this.LognEmail = loggedInEmail == null
+                                ? ""
+                                : loggedInEmail.trim().toLowerCase();
 
-        header.setAlignment(
-                Pos.CENTER_LEFT
-        );
+                User resident = null;
 
-        /*
-         * HEADER REMAINS SOLID
-         */
-        header.setStyle(
-                "-fx-background-color: #4e342e;"
-        );
+                if (!this.LognEmail.isEmpty()) {
 
-        header.setPadding(
-                new Insets(
-                        0,
-                        15,
-                        0,
-                        15
-                )
-        );
+                        resident = userController.getUserByEmail(
+                                        this.LognEmail);
+                }
 
-        VBox welcomeBox =
-                new VBox(4);
+                if (resident != null) {
 
-        Label welcome =
-                new Label(
-                        getGreeting()
-                                + ", "
-                                + residentName
-                                + " 👋"
-                );
+                        residentName = safe(resident.getName());
 
-        welcome.setFont(
-                Font.font(
-                        "System",
-                        FontWeight.BOLD,
-                        25
-                )
-        );
+                        flatNo = safe(resident.getFlatNo());
 
-        welcome.setTextFill(
-                Color.WHITE
-        );
+                        if (residentName.isEmpty()) {
+                                residentName = "Resident";
+                        }
 
-        Label flat =
-                new Label(
-                        "Flat "
-                                + flatNo
-                                + getTowerText(resident)
-                );
+                        if (flatNo.isEmpty()) {
+                                flatNo = "N/A";
+                        }
+                }
 
-        flat.setFont(
-                Font.font(
-                        "System",
-                        13
-                )
-        );
+                // =====================================================
+                // SIDEBAR
+                // =====================================================
 
-        flat.setTextFill(
-                Color.WHITE
-        );
+                panel panelobj = new panel(
+                                stage,
+                                this.LognEmail);
 
-        welcomeBox.getChildren().addAll(
-                welcome,
-                flat
-        );
+                BorderPane root = new BorderPane();
 
-        Region headerSpace =
-                new Region();
+                // =====================================================
+                // FULL ROOT BACKGROUND IMAGE
+                // =====================================================
 
-        HBox.setHgrow(
-                headerSpace,
-                Priority.ALWAYS
-        );
+                URL imageURL = getClass().getResource(
+                                "/background-Dashboard5.jpeg");
 
-        LocalDate today =
-                LocalDate.now(
-                        INDIA_ZONE
-                );
+                if (imageURL != null) {
 
-        Label date =
-                new Label(
-                        today.format(
-                                DateTimeFormatter.ofPattern(
-                                        "dd MMMM yyyy"
-                                )
-                        )
-                                + "\n"
-                                + today.format(
-                                DateTimeFormatter.ofPattern(
-                                        "EEEE"
-                                )
-                        )
-                );
+                        Image backgroundImage = new Image(
+                                        imageURL.toExternalForm());
 
-        date.setTextFill(
-                Color.WHITE
-        );
+                        BackgroundImage background = new BackgroundImage(
+                                        backgroundImage,
 
-        date.setFont(
-                Font.font(
-                        "System",
-                        FontWeight.BOLD,
-                        13
-                )
-        );
+                                        BackgroundRepeat.NO_REPEAT,
 
-        date.setAlignment(
-                Pos.CENTER_RIGHT
-        );
+                                        BackgroundRepeat.NO_REPEAT,
 
-        header.getChildren().addAll(
-                welcomeBox,
-                headerSpace,
-                date
-        );
+                                        BackgroundPosition.CENTER,
 
-        // =====================================================
-        // SUMMARY CARDS
-        // =====================================================
+                                        new BackgroundSize(
+                                                        100,
+                                                        100,
+                                                        true,
+                                                        true,
+                                                        false,
+                                                        true));
 
-        HBox summaryCards =
-                new HBox(15);
+                        root.setBackground(
+                                        new Background(background));
 
-        VBox totalBills =
-                createSummaryCard(
-                        "Total Bills",
-                        "₹ 0",
-                        "Loading..."
-                );
+                } else {
 
-        VBox maintenanceBills =
-                createSummaryCard(
-                        "Maintenance Bills",
-                        "₹ 0",
-                        "Loading..."
-                );
+                        System.out.println(
+                                        "❌ Background image NOT FOUND: "
+                                                        + "/background-Dashboard5.jpeg");
+                }
 
-        VBox complaints =
-                createSummaryCard(
-                        "Active Complaints",
-                        "0",
-                        "View Status"
-                );
+                // Sidebar remains SOLID
+                root.setLeft(
+                                panelobj.getSidebar());
 
-        VBox visitors =
-                createSummaryCard(
-                        "Visitors Today",
-                        "0",
-                        "View Log"
-                );
+                // =====================================================
+                // MAIN CONTENT
+                // =====================================================
 
-        totalBillsLabel =
-                getAmountLabel(
-                        totalBills
-                );
+                VBox mainContent = new VBox();
 
-        maintenanceBillsLabel =
-                getAmountLabel(
-                        maintenanceBills
-                );
+                mainContent.setPadding(
+                                new Insets(20));
 
-        maintenanceBottomLabel =
-                getBottomLabel(
-                        maintenanceBills
-                );
+                mainContent.setSpacing(18);
 
-        complaintCountLabel =
-                getAmountLabel(
-                        complaints
-                );
+                mainContent.setAlignment(
+                                Pos.TOP_LEFT);
 
-        visitorCountLabel =
-                getAmountLabel(
-                        visitors
-                );
+                
+                // =========================================================
+                // MAIN PAGE FADE-IN ANIMATION
+                // Sidebar and Header are NOT animated
+                // Only main page content is animated
+                // =========================================================
 
-        // =====================================================
-        // SUMMARY CARD ACTIONS
-        // =====================================================
+                FadeTransition pageFade = new FadeTransition(
+                                Duration.millis(700),
+                                mainContent);
 
-        Button totalDetails =
-                getBottomButton(
-                        totalBills
-                );
+                pageFade.setFromValue(0.0);
+                pageFade.setToValue(1.0);
+                pageFade.setCycleCount(1);
+                pageFade.play();
 
-        if (totalDetails != null) {
+                // =====================================================
+                // HEADER
+                // =====================================================
 
-            totalDetails.setOnAction(
-                    e -> openMyBills(stage)
-            );
+                HBox header = new HBox();
+
+                header.setAlignment(
+                                Pos.CENTER_LEFT);
+
+                /*
+                 * HEADER REMAINS SOLID
+                 */
+                header.setStyle(
+                                "-fx-background-color: #4e342e;");
+
+                header.setPadding(
+                                new Insets(
+                                               20));
+
+                VBox welcomeBox = new VBox(4);
+
+                Label welcome = new Label(
+                                getGreeting()
+                                                + ", "
+                                                + residentName
+                                                + " 👋");
+
+                welcome.setStyle(
+                                "-fx-font-family:'Bodoni MT';");
+
+                welcome.setFont(
+                                Font.font(
+                                                "System",
+                                                FontWeight.BOLD,
+                                                25));
+
+                welcome.setTextFill(
+                                Color.WHITE);
+
+                Label flat = new Label(
+                                "Flat "
+                                                + flatNo
+                                                + getTowerText(resident));
+
+                flat.setFont(
+                                Font.font(
+                                                "System",
+                                                13));
+
+                flat.setTextFill(
+                                Color.WHITE);
+
+                welcomeBox.getChildren().addAll(
+                                welcome,
+                                flat);
+
+                Region headerSpace = new Region();
+
+                HBox.setHgrow(
+                                headerSpace,
+                                Priority.ALWAYS);
+
+                LocalDate today = LocalDate.now(
+                                INDIA_ZONE);
+
+                Label date = new Label(
+                                today.format(
+                                                DateTimeFormatter.ofPattern(
+                                                                "dd MMMM yyyy"))
+                                                + "\n"
+                                                + today.format(
+                                                                DateTimeFormatter.ofPattern(
+                                                                                "EEEE")));
+
+                date.setTextFill(
+                                Color.WHITE);
+
+                date.setFont(
+                                Font.font(
+                                                "System",
+                                                FontWeight.BOLD,
+                                                13));
+
+                date.setAlignment(
+                                Pos.CENTER_RIGHT);
+
+                header.getChildren().addAll(
+                                welcomeBox,
+                                headerSpace,
+                                date);
+
+                // =====================================================
+                // SUMMARY CARDS
+                // =====================================================
+
+                HBox summaryCards = new HBox(15);
+
+                VBox totalBills = createSummaryCard(
+                                "Total Bills",
+                                "₹ 0",
+                                "Loading...");
+
+                VBox maintenanceBills = createSummaryCard(
+                                "Maintenance Bills",
+                                "₹ 0",
+                                "Loading...");
+
+                VBox complaints = createSummaryCard(
+                                "Active Complaints",
+                                "0",
+                                "View Status");
+
+                VBox visitors = createSummaryCard(
+                                "Visitors Today",
+                                "0",
+                                "View Log");
+
+                totalBillsLabel = getAmountLabel(
+                                totalBills);
+
+                maintenanceBillsLabel = getAmountLabel(
+                                maintenanceBills);
+
+                maintenanceBottomLabel = getBottomLabel(
+                                maintenanceBills);
+
+                complaintCountLabel = getAmountLabel(
+                                complaints);
+
+                visitorCountLabel = getAmountLabel(
+                                visitors);
+
+                // =====================================================
+                // SUMMARY CARD ACTIONS
+                // =====================================================
+
+                Button totalDetails = getBottomButton(
+                                totalBills);
+
+                if (totalDetails != null) {
+
+                        totalDetails.setOnAction(
+                                        e -> openMyBills(stage));
+                }
+
+                Button maintenanceDetails = getBottomButton(
+                                maintenanceBills);
+
+                if (maintenanceDetails != null) {
+
+                        maintenanceDetails.setOnAction(
+                                        e -> openMyBills(stage));
+                }
+
+                Button complaintDetails = getBottomButton(
+                                complaints);
+
+                if (complaintDetails != null) {
+
+                        complaintDetails.setOnAction(
+                                        e -> openComplaints(stage));
+                }
+
+                Button visitorDetails = getBottomButton(
+                                visitors);
+
+                if (visitorDetails != null) {
+
+                        visitorDetails.setOnAction(
+                                        e -> openVisitors(stage));
+                }
+
+                summaryCards.getChildren().addAll(
+                                totalBills,
+                                maintenanceBills,
+                                complaints,
+                                visitors);
+
+                // =====================================================
+                // QUICK ACTIONS
+                // =====================================================
+
+                Label quickTitle = createSectionTitle(
+                                "Quick Actions");
+
+                GridPane quickActions = new GridPane();
+
+                quickActions.setHgap(15);
+                quickActions.setVgap(15);
+
+                Button payMaintenance = createActionButton(
+                                "Pay Maintenance",
+                                "Secure Online Payment");
+
+                payMaintenance.setOnAction(
+                                e -> openMyBills(stage));
+
+                Button raiseComplaint = createActionButton(
+                                "Raise Complaint",
+                                "Report an issue");
+
+                raiseComplaint.setOnAction(
+                                e -> openComplaints(stage));
+
+                Button bookAmenity = createActionButton(
+                                "Book Amenity",
+                                "Hall, Court, Guest Room");
+
+                bookAmenity.setOnAction(e -> {
+
+                        AmenitiesBooking booking = new AmenitiesBooking(
+                                        residentName,
+                                        flatNo,
+                                        this.LognEmail);
+
+                        stage.setScene(
+                                        booking.getAminityScene(stage));
+
+                        stage.show();
+                });
+
+                Button inviteVisitor = createActionButton(
+                                "Invite Visitor",
+                                "Pre-approve entry");
+
+                inviteVisitor.setOnAction(
+                                e -> openVisitors(stage));
+
+                quickActions.add(
+                                payMaintenance,
+                                0,
+                                0);
+
+                quickActions.add(
+                                raiseComplaint,
+                                1,
+                                0);
+
+                quickActions.add(
+                                bookAmenity,
+                                0,
+                                1);
+
+                quickActions.add(
+                                inviteVisitor,
+                                1,
+                                1);
+
+                // =====================================================
+                // UPCOMING / DUE
+                // =====================================================
+
+                upcomingBox = new VBox(12);
+
+                upcomingBox.setPadding(
+                                new Insets(18));
+
+                upcomingBox.setStyle(
+                                "-fx-background-color: white;"
+                                                + "-fx-background-radius: 10;");
+
+                Label upcomingTitle = new Label(
+                                "Upcoming / Due");
+
+                upcomingTitle.setFont(
+                                Font.font(
+                                                "System",
+                                                FontWeight.BOLD,
+                                                17));
+
+                upcomingTitle.setTextFill(
+                                Color.web("#263238"));
+
+                upcomingBox.getChildren().add(
+                                upcomingTitle);
+
+                addLoadingDueRows();
+
+                // =====================================================
+                // MIDDLE SECTION
+                // =====================================================
+
+                HBox middleSection = new HBox(20);
+
+                VBox quickBox = new VBox(10);
+
+                quickBox.setPadding(
+                                new Insets(18));
+
+                quickBox.setStyle(
+                                "-fx-background-color: white;"
+                                                + "-fx-background-radius: 10;");
+
+                quickBox.getChildren().addAll(
+                                quickTitle,
+                                quickActions);
+
+                HBox.setHgrow(
+                                quickBox,
+                                Priority.ALWAYS);
+
+                HBox.setHgrow(
+                                upcomingBox,
+                                Priority.ALWAYS);
+
+                middleSection.getChildren().addAll(
+                                quickBox,
+                                upcomingBox);
+
+                // =====================================================
+                // BOTTOM SECTION
+                // =====================================================
+
+                HBox bottomSection = new HBox(20);
+
+                // =====================================================
+                // NOTICES
+                // =====================================================
+
+                VBox noticesBox = new VBox(12);
+
+                noticesBox.setPadding(
+                                new Insets(18));
+
+                noticesBox.setStyle(
+                                "-fx-background-color: white;"
+                                                + "-fx-background-radius: 10;");
+
+                Label noticesTitle = new Label(
+                                "Society Notices");
+
+                noticesTitle.setFont(
+                                Font.font(
+                                                "System",
+                                                FontWeight.BOLD,
+                                                17));
+
+                noticesTitle.setTextFill(
+                                Color.web("#263238"));
+
+                noticeContent = new VBox(10);
+
+                noticeContent.setFillWidth(true);
+
+                Label noticeLoading = new Label(
+                                "Loading notices...");
+
+                noticeLoading.setFont(
+                                Font.font(
+                                                "System",
+                                                13));
+
+                noticeLoading.setTextFill(
+                                Color.web("#789098"));
+
+                noticeContent.getChildren().add(
+                                noticeLoading);
+
+                noticesBox.getChildren().addAll(
+                                noticesTitle,
+                                noticeContent);
+
+                // =====================================================
+                // POLL
+                // =====================================================
+
+                VBox pollBox = new VBox(12);
+
+                pollBox.setPadding(
+                                new Insets(18));
+
+                pollBox.setStyle(
+                                "-fx-background-color: white;"
+                                                + "-fx-background-radius: 10;");
+
+                Label pollTitle = new Label(
+                                "Community Poll");
+
+                pollTitle.setFont(
+                                Font.font(
+                                                "System",
+                                                FontWeight.BOLD,
+                                                17));
+
+                pollTitle.setTextFill(
+                                Color.web("#263238"));
+
+                pollContent = new VBox(10);
+
+                Label pollLoading = new Label(
+                                "Loading poll...");
+
+                pollLoading.setFont(
+                                Font.font(
+                                                "System",
+                                                13));
+
+                pollLoading.setTextFill(
+                                Color.web("#789098"));
+
+                pollContent.getChildren().add(
+                                pollLoading);
+
+                pollBox.getChildren().addAll(
+                                pollTitle,
+                                pollContent);
+
+                HBox.setHgrow(
+                                noticesBox,
+                                Priority.ALWAYS);
+
+                HBox.setHgrow(
+                                pollBox,
+                                Priority.ALWAYS);
+
+                bottomSection.getChildren().addAll(
+                                noticesBox,
+                                pollBox);
+
+                // =====================================================
+                // ADD CONTENT
+                // =====================================================
+
+                mainContent.getChildren().addAll(
+                                summaryCards,
+                                middleSection,
+                                bottomSection);
+
+                // =====================================================
+                // MAIN AREA
+                // =====================================================
+
+                BorderPane mainArea = new BorderPane();
+
+                mainArea.setTop(header);
+                mainArea.setCenter(mainContent);
+
+                /*
+                 * IMPORTANT:
+                 * MainArea transparent so background image
+                 * from root can be seen.
+                 *
+                 * Header is NOT transparent.
+                 */
+                mainArea.setStyle(
+                                "-fx-background-color: transparent;");
+
+                root.setCenter(mainArea);
+
+                // =====================================================
+                // SCENE
+                // =====================================================
+
+                residentDashboardScene = new Scene(
+                                root,
+                                ScreenSize.getWidth(),
+                                ScreenSize.getHeight());
+
+                // =====================================================
+                // FETCH FIRESTORE DATA
+                // =====================================================
+
+                loadDashboardData();
+
+                return residentDashboardScene;
         }
 
-        Button maintenanceDetails =
-                getBottomButton(
-                        maintenanceBills
-                );
+        // =========================================================
+        // LOAD DASHBOARD DATA
+        // =========================================================
 
-        if (maintenanceDetails != null) {
+        private void loadDashboardData() {
 
-            maintenanceDetails.setOnAction(
-                    e -> openMyBills(stage)
-            );
-        }
-
-        Button complaintDetails =
-                getBottomButton(
-                        complaints
-                );
-
-        if (complaintDetails != null) {
-
-            complaintDetails.setOnAction(
-                    e -> openComplaints(stage)
-            );
-        }
-
-        Button visitorDetails =
-                getBottomButton(
-                        visitors
-                );
-
-        if (visitorDetails != null) {
-
-            visitorDetails.setOnAction(
-                    e -> openVisitors(stage)
-            );
-        }
-
-        summaryCards.getChildren().addAll(
-                totalBills,
-                maintenanceBills,
-                complaints,
-                visitors
-        );
-
-        // =====================================================
-        // QUICK ACTIONS
-        // =====================================================
-
-        Label quickTitle =
-                createSectionTitle(
-                        "Quick Actions"
-                );
-
-        GridPane quickActions =
-                new GridPane();
-
-        quickActions.setHgap(15);
-        quickActions.setVgap(15);
-
-        Button payMaintenance =
-                createActionButton(
-                        "Pay Maintenance",
-                        "Secure Online Payment"
-                );
-
-        payMaintenance.setOnAction(
-                e -> openMyBills(stage)
-        );
-
-        Button raiseComplaint =
-                createActionButton(
-                        "Raise Complaint",
-                        "Report an issue"
-                );
-
-        raiseComplaint.setOnAction(
-                e -> openComplaints(stage)
-        );
-
-        Button bookAmenity =
-                createActionButton(
-                        "Book Amenity",
-                        "Hall, Court, Guest Room"
-                );
-
-        bookAmenity.setOnAction(e -> {
-
-            AmenitiesBooking booking =
-                    new AmenitiesBooking(
-                            residentName,
-                            flatNo,
-                            this.LognEmail
-                    );
-
-            stage.setScene(
-                    booking.getAminityScene(stage)
-            );
-
-            stage.show();
-        });
-
-        Button inviteVisitor =
-                createActionButton(
-                        "Invite Visitor",
-                        "Pre-approve entry"
-                );
-
-        inviteVisitor.setOnAction(
-                e -> openVisitors(stage)
-        );
-
-        quickActions.add(
-                payMaintenance,
-                0,
-                0
-        );
-
-        quickActions.add(
-                raiseComplaint,
-                1,
-                0
-        );
-
-        quickActions.add(
-                bookAmenity,
-                0,
-                1
-        );
-
-        quickActions.add(
-                inviteVisitor,
-                1,
-                1
-        );
-
-        // =====================================================
-        // UPCOMING / DUE
-        // =====================================================
-
-        upcomingBox =
-                new VBox(12);
-
-        upcomingBox.setPadding(
-                new Insets(18)
-        );
-
-        upcomingBox.setStyle(
-                "-fx-background-color: white;"
-                        + "-fx-background-radius: 10;"
-        );
-
-        Label upcomingTitle =
-                new Label(
-                        "Upcoming / Due"
-                );
-
-        upcomingTitle.setFont(
-                Font.font(
-                        "System",
-                        FontWeight.BOLD,
-                        17
-                )
-        );
-
-        upcomingTitle.setTextFill(
-                Color.web("#263238")
-        );
-
-        upcomingBox.getChildren().add(
-                upcomingTitle
-        );
-
-        addLoadingDueRows();
-
-        // =====================================================
-        // MIDDLE SECTION
-        // =====================================================
-
-        HBox middleSection =
-                new HBox(20);
-
-        VBox quickBox =
-                new VBox(10);
-
-        quickBox.setPadding(
-                new Insets(18)
-        );
-
-        quickBox.setStyle(
-                "-fx-background-color: white;"
-                        + "-fx-background-radius: 10;"
-        );
-
-        quickBox.getChildren().addAll(
-                quickTitle,
-                quickActions
-        );
-
-        HBox.setHgrow(
-                quickBox,
-                Priority.ALWAYS
-        );
-
-        HBox.setHgrow(
-                upcomingBox,
-                Priority.ALWAYS
-        );
-
-        middleSection.getChildren().addAll(
-                quickBox,
-                upcomingBox
-        );
-
-        // =====================================================
-        // BOTTOM SECTION
-        // =====================================================
-
-        HBox bottomSection =
-                new HBox(20);
-
-        // =====================================================
-        // NOTICES
-        // =====================================================
-
-        VBox noticesBox =
-                new VBox(12);
-
-        noticesBox.setPadding(
-                new Insets(18)
-        );
-
-        noticesBox.setStyle(
-                "-fx-background-color: white;"
-                        + "-fx-background-radius: 10;"
-        );
-
-        Label noticesTitle =
-                new Label(
-                        "Society Notices"
-                );
-
-        noticesTitle.setFont(
-                Font.font(
-                        "System",
-                        FontWeight.BOLD,
-                        17
-                )
-        );
-
-        noticesTitle.setTextFill(
-                Color.web("#263238")
-        );
-
-        noticeContent =
-                new VBox(10);
-
-        noticeContent.setFillWidth(true);
-
-        Label noticeLoading =
-                new Label(
-                        "Loading notices..."
-                );
-
-        noticeLoading.setFont(
-                Font.font(
-                        "System",
-                        13
-                )
-        );
-
-        noticeLoading.setTextFill(
-                Color.web("#789098")
-        );
-
-        noticeContent.getChildren().add(
-                noticeLoading
-        );
-
-        noticesBox.getChildren().addAll(
-                noticesTitle,
-                noticeContent
-        );
-
-        // =====================================================
-        // POLL
-        // =====================================================
-
-        VBox pollBox =
-                new VBox(12);
-
-        pollBox.setPadding(
-                new Insets(18)
-        );
-
-        pollBox.setStyle(
-                "-fx-background-color: white;"
-                        + "-fx-background-radius: 10;"
-        );
-
-        Label pollTitle =
-                new Label(
-                        "Community Poll"
-                );
-
-        pollTitle.setFont(
-                Font.font(
-                        "System",
-                        FontWeight.BOLD,
-                        17
-                )
-        );
-
-        pollTitle.setTextFill(
-                Color.web("#263238")
-        );
-
-        pollContent =
-                new VBox(10);
-
-        Label pollLoading =
-                new Label(
-                        "Loading poll..."
-                );
-
-        pollLoading.setFont(
-                Font.font(
-                        "System",
-                        13
-                )
-        );
-
-        pollLoading.setTextFill(
-                Color.web("#789098")
-        );
-
-        pollContent.getChildren().add(
-                pollLoading
-        );
-
-        pollBox.getChildren().addAll(
-                pollTitle,
-                pollContent
-        );
-
-        HBox.setHgrow(
-                noticesBox,
-                Priority.ALWAYS
-        );
-
-        HBox.setHgrow(
-                pollBox,
-                Priority.ALWAYS
-        );
-
-        bottomSection.getChildren().addAll(
-                noticesBox,
-                pollBox
-        );
-
-        // =====================================================
-        // ADD CONTENT
-        // =====================================================
-
-        mainContent.getChildren().addAll(
-                summaryCards,
-                middleSection,
-                bottomSection
-        );
-
-        // =====================================================
-        // MAIN AREA
-        // =====================================================
-
-        BorderPane mainArea =
-                new BorderPane();
-
-        mainArea.setTop(header);
-        mainArea.setCenter(mainContent);
-
-        /*
-         * IMPORTANT:
-         * MainArea transparent so background image
-         * from root can be seen.
-         *
-         * Header is NOT transparent.
-         */
-        mainArea.setStyle(
-                "-fx-background-color: transparent;"
-        );
-
-        root.setCenter(mainArea);
-
-        // =====================================================
-        // SCENE
-        // =====================================================
-
-        residentDashboardScene =
-                new Scene(
-                        root,
-                        ScreenSize.getWidth(),
-                        ScreenSize.getHeight()
-                );
-
-        // =====================================================
-        // FETCH FIRESTORE DATA
-        // =====================================================
-
-        loadDashboardData();
-
-        return residentDashboardScene;
-    }
-
-    // =========================================================
-    // LOAD DASHBOARD DATA
-    // =========================================================
-
-    private void loadDashboardData() {
-
-        if (this.LognEmail.isEmpty()) {
-
-            Platform.runLater(() -> {
-
-                setAmount(
-                        complaintCountLabel,
-                        "0"
-                );
-
-                setAmount(
-                        visitorCountLabel,
-                        "0"
-                );
-
-                showNoticeMessage(
-                        "Unable to load dashboard data."
-                );
-
-                showPollMessage(
-                        "Unable to load dashboard data."
-                );
-
-                showDueMessage(
-                        "No resident session found."
-                );
-            });
-
-            return;
-        }
-
-        final String email =
-                this.LognEmail;
-
-        Thread thread =
-                new Thread(() -> {
-
-                    try {
-
-                        DashboardController controller =
-                                new DashboardController();
-
-                        DashboardController.DashboardData data =
-                                controller.loadDashboardData(
-                                        email
-                                );
-
-                        Platform.runLater(
-                                () -> updateDashboard(data)
-                        );
-
-                    } catch (Exception e) {
-
-                        e.printStackTrace();
+                if (this.LognEmail.isEmpty()) {
 
                         Platform.runLater(() -> {
 
-                            setAmount(
-                                    complaintCountLabel,
-                                    "0"
-                            );
+                                setAmount(
+                                                complaintCountLabel,
+                                                "0");
 
-                            setAmount(
-                                    visitorCountLabel,
-                                    "0"
-                            );
+                                setAmount(
+                                                visitorCountLabel,
+                                                "0");
 
-                            setAmount(
-                                    totalBillsLabel,
-                                    "₹ 0"
-                            );
+                                showNoticeMessage(
+                                                "Unable to load dashboard data.");
 
-                            setAmount(
-                                    maintenanceBillsLabel,
-                                    "₹ 0"
-                            );
+                                showPollMessage(
+                                                "Unable to load dashboard data.");
 
-                            setBottom(
-                                    maintenanceBottomLabel,
-                                    "Unable to load"
-                            );
-
-                            showNoticeMessage(
-                                    "Unable to load society notices."
-                            );
-
-                            showPollMessage(
-                                    "Unable to load community poll."
-                            );
-
-                            showDueMessage(
-                                    "Unable to load due information."
-                            );
+                                showDueMessage(
+                                                "No resident session found.");
                         });
-                    }
+
+                        return;
+                }
+
+                final String email = this.LognEmail;
+
+                Thread thread = new Thread(() -> {
+
+                        try {
+
+                                DashboardController controller = new DashboardController();
+
+                                DashboardController.DashboardData data = controller.loadDashboardData(
+                                                email);
+
+                                Platform.runLater(
+                                                () -> updateDashboard(data));
+
+                        } catch (Exception e) {
+
+                                e.printStackTrace();
+
+                                Platform.runLater(() -> {
+
+                                        setAmount(
+                                                        complaintCountLabel,
+                                                        "0");
+
+                                        setAmount(
+                                                        visitorCountLabel,
+                                                        "0");
+
+                                        setAmount(
+                                                        totalBillsLabel,
+                                                        "₹ 0");
+
+                                        setAmount(
+                                                        maintenanceBillsLabel,
+                                                        "₹ 0");
+
+                                        setBottom(
+                                                        maintenanceBottomLabel,
+                                                        "Unable to load");
+
+                                        showNoticeMessage(
+                                                        "Unable to load society notices.");
+
+                                        showPollMessage(
+                                                        "Unable to load community poll.");
+
+                                        showDueMessage(
+                                                        "Unable to load due information.");
+                                });
+                        }
                 });
 
-        thread.setDaemon(true);
-        thread.start();
-    }
-
-    // =========================================================
-    // UPDATE DASHBOARD
-    // =========================================================
-
-    private void updateDashboard(
-            DashboardController.DashboardData data) {
-
-        if (data == null) {
-            return;
+                thread.setDaemon(true);
+                thread.start();
         }
 
-        // Complaints
+        // =========================================================
+        // UPDATE DASHBOARD
+        // =========================================================
 
-        setAmount(
-                complaintCountLabel,
-                String.valueOf(
-                        data.getActiveComplaints()
-                )
-        );
+        private void updateDashboard(
+                        DashboardController.DashboardData data) {
 
-        // Visitors
-
-        setAmount(
-                visitorCountLabel,
-                String.valueOf(
-                        data.getVisitorsToday()
-                )
-        );
-
-        // Bills
-
-        setAmount(
-                totalBillsLabel,
-                formatMoney(
-                        data.getTotalBills()
-                )
-        );
-
-        setAmount(
-                maintenanceBillsLabel,
-                formatMoney(
-                        data.getOutstandingMaintenance()
-                )
-        );
-
-        String dueDate =
-                data.getMaintenanceDueDate();
-
-        if (dueDate == null
-                || dueDate.trim().isEmpty()) {
-
-            setBottom(
-                    maintenanceBottomLabel,
-                    "No outstanding due"
-            );
-
-        } else {
-
-            setBottom(
-                    maintenanceBottomLabel,
-                    "Due: "
-                            + formatDisplayDate(
-                            dueDate
-                    )
-            );
-        }
-
-        updateUpcoming(
-                data.getMaintenanceBills()
-        );
-
-        updateNotices(
-                data.getNotices()
-        );
-
-        updatePoll(
-                data.getPolls()
-        );
-    }
-
-    // =========================================================
-    // UPDATE UPCOMING
-    // =========================================================
-
-    private void updateUpcoming(
-            List<Map<String, Object>> maintenanceList) {
-
-        upcomingBox.getChildren().clear();
-
-        Label title =
-                new Label(
-                        "Upcoming / Due"
-                );
-
-        title.setFont(
-                Font.font(
-                        "System",
-                        FontWeight.BOLD,
-                        17
-                )
-        );
-
-        title.setTextFill(
-                Color.web("#263238")
-        );
-
-        upcomingBox.getChildren().add(
-                title
-        );
-
-        if (maintenanceList == null
-                || maintenanceList.isEmpty()) {
-
-            addDueRow(
-                    "Maintenance Due",
-                    "No outstanding due"
-            );
-
-            addDueRow(
-                    "Water Bill",
-                    "Not configured"
-            );
-
-            addDueRow(
-                    "Electricity Bill",
-                    "Not configured"
-            );
-
-            return;
-        }
-
-        Map<String, Object> next =
-                findNextOutstandingMaintenance(
-                        maintenanceList
-                );
-
-        if (next != null) {
-
-            String date =
-                    safe(
-                            next.get("date") == null
-                                    ? ""
-                                    : next.get("date").toString()
-                    );
-
-            addDueRow(
-                    "Maintenance Due",
-                    formatDisplayDate(date)
-            );
-
-        } else {
-
-            addDueRow(
-                    "Maintenance Due",
-                    "No outstanding due"
-            );
-        }
-
-        addDueRow(
-                "Water Bill",
-                "Not configured"
-        );
-
-        addDueRow(
-                "Electricity Bill",
-                "Not configured"
-        );
-    }
-
-    // =========================================================
-    // FIND NEXT OUTSTANDING MAINTENANCE
-    // =========================================================
-
-    private Map<String, Object> findNextOutstandingMaintenance(
-            List<Map<String, Object>> maintenanceList) {
-
-        Map<String, Object> selected = null;
-
-        LocalDate selectedDate =
-                LocalDate.MAX;
-
-        for (Map<String, Object> maintenance
-                : maintenanceList) {
-
-            if (maintenance == null) {
-                continue;
-            }
-
-            Object statusObject =
-                    maintenance.get("status");
-
-            String status =
-                    statusObject == null
-                            ? ""
-                            : statusObject.toString()
-                            .trim()
-                            .toLowerCase();
-
-            boolean outstanding =
-                    status.isEmpty()
-                            || "pending".equals(status)
-                            || "overdue".equals(status)
-                            || "unpaid".equals(status)
-                            || "open".equals(status);
-
-            if (!outstanding) {
-                continue;
-            }
-
-            Object dateObject =
-                    maintenance.get("date");
-
-            String date =
-                    dateObject == null
-                            ? ""
-                            : dateObject.toString()
-                            .trim();
-
-            if (date.isEmpty()) {
-
-                if (selected == null) {
-                    selected = maintenance;
+                if (data == null) {
+                        return;
                 }
 
-                continue;
-            }
+                // Complaints
 
-            try {
+                setAmount(
+                                complaintCountLabel,
+                                String.valueOf(
+                                                data.getActiveComplaints()));
 
-                LocalDate parsed =
-                        LocalDate.parse(date);
+                // Visitors
 
-                if (parsed.isBefore(
-                        selectedDate
-                )) {
+                setAmount(
+                                visitorCountLabel,
+                                String.valueOf(
+                                                data.getVisitorsToday()));
 
-                    selectedDate = parsed;
-                    selected = maintenance;
+                // Bills
+
+                setAmount(
+                                totalBillsLabel,
+                                formatMoney(
+                                                data.getTotalBills()));
+
+                // Outstanding Maintenance only
+                setAmount(
+                                maintenanceBillsLabel,
+                                formatMoney(
+                                                data.getOutstandingMaintenance()));
+
+                String dueDate = data.getMaintenanceDueDate();
+
+                if (dueDate == null
+                                || dueDate.trim().isEmpty()) {
+
+                        setBottom(
+                                        maintenanceBottomLabel,
+                                        "No outstanding due");
+
+                } else {
+
+                        setBottom(
+                                        maintenanceBottomLabel,
+                                        "Due: "
+                                                        + formatDisplayDate(
+                                                                        dueDate));
                 }
 
-            } catch (Exception ignored) {
+                updateUpcoming(
+                                data.getMaintenanceBills(),
+                                data.getElectricityBills());
 
-                if (selected == null) {
-                    selected = maintenance;
+                updateNotices(
+                                data.getNotices());
+
+                updatePoll(
+                                data.getPolls());
+        }
+
+        // =========================================================
+        // UPDATE UPCOMING / DUE
+        // =========================================================
+
+        private void updateUpcoming(
+                        // List<Map<String, Object>> maintenanceList) {}
+                        List<Map<String, Object>> maintenanceList,
+                        List<Map<String, Object>> electricityList) {
+
+                upcomingBox.getChildren().clear();
+
+                Label title = new Label(
+                                "Upcoming / Due");
+                // new Label("Upcoming / Due");
+
+                title.setFont(
+                                Font.font(
+                                                "System",
+                                                FontWeight.BOLD,
+                                                17));
+
+                title.setTextFill(
+                                Color.web("#263238"));
+
+                upcomingBox.getChildren().add(
+                                title);
+
+                if (maintenanceList == null
+                                || maintenanceList.isEmpty()) {
+
+                        addDueRow(
+                                        "Maintenance Due",
+                                        "No outstanding due");
+
+                        addDueRow(
+                                        "Water Bill",
+                                        "Not configured");
+
+                        addDueRow(
+                                        "Electricity Bill",
+                                        "Not configured");
+
+                        return;
                 }
-            }
+
+                Map<String, Object> next = findNextOutstandingMaintenance(
+                                maintenanceList);
+
+                if (next != null) {
+
+                        String date = safe(
+                                        next.get("date") == null
+                                                        ? ""
+                                                        : next.get("date").toString());
+
+                        addDueRow(
+                                        "Maintenance Due",
+                                        formatDisplayDate(date));
+
+                } else {
+
+                        addDueRow(
+                                        "Maintenance Due",
+                                        "No outstanding due");
+                }
+
+                addDueRow(
+                                "Water Bill",
+                                "Not configured");
+
+                addDueRow(
+                                "Electricity Bill",
+                                "Not configured");
         }
 
-        return selected;
-    }
+        // =========================================================
+        // FIND NEXT OUTSTANDING BILL
+        // =========================================================
 
-    // =========================================================
-    // GET STRING FROM MAINTENANCE MAP
-    // =========================================================
+        private Map<String, Object> findNextOutstandingMaintenance(
+                        List<Map<String, Object>> maintenanceList) {
 
-    private String getMapString(
-            Map<String, Object> map,
-            String key) {
+                Map<String, Object> selected = null;
 
-        if (map == null
-                || key == null) {
+                LocalDate selectedDate = LocalDate.MAX;
 
-            return "";
+                for (Map<String, Object> maintenance : maintenanceList) {
+
+                        if (maintenance == null) {
+                                continue;
+                        }
+
+                        Object statusObject = maintenance.get("status");
+
+                        String status = statusObject == null
+                                        ? ""
+                                        : statusObject.toString()
+                                                        .trim()
+                                                        .toLowerCase();
+
+                        boolean outstanding = status.isEmpty()
+                                        || "pending".equals(status)
+                                        || "overdue".equals(status)
+                                        || "unpaid".equals(status)
+                                        || "open".equals(status);
+
+                        if (!outstanding) {
+                                continue;
+                        }
+
+                        Object dateObject = maintenance.get("date");
+
+                        String date = dateObject == null
+                                        ? ""
+                                        : dateObject.toString()
+                                                        .trim();
+
+                        if (date.isEmpty()) {
+
+                                if (selected == null) {
+                                        selected = maintenance;
+                                }
+
+                                continue;
+                        }
+
+                        try {
+
+                                LocalDate parsed = LocalDate.parse(date);
+
+                                if (parsed.isBefore(
+                                                selectedDate)) {
+
+                                        selectedDate = parsed;
+                                        selected = maintenance;
+                                }
+
+                        } catch (Exception ignored) {
+
+                                if (selected == null) {
+                                        selected = maintenance;
+                                }
+                        }
+                        // List<Map<String, Object>> billList) {
+
+                        // if (billList == null || billList.isEmpty()) {
+                        // return null;
+                        // }
+
+                        // Map<String, Object> selected = null;
+
+                        // LocalDate selectedDate = LocalDate.MAX;
+
+                        // for (Map<String, Object> bill : billList) {
+
+                        // if (bill == null) {
+                        // continue;
+                        // }
+
+                        // String status =
+                        // getMapString(
+                        // bill,
+                        // "status"
+                        // ).toLowerCase();
+
+                        // boolean outstanding =
+                        // status.isEmpty()
+                        // || "pending".equals(status)
+                        // || "overdue".equals(status)
+                        // || "unpaid".equals(status)
+                        // || "due".equals(status)
+                        // || "open".equals(status);
+
+                        // if (!outstanding) {
+                        // continue;
+                        // }
+
+                        // String date =
+                        // getMapString(
+                        // bill,
+                        // "date"
+                        // );
+
+                        // if (date.isEmpty()) {
+
+                        // if (selected == null) {
+                        // selected = bill;
+                        // }
+
+                        // continue;
+                        // }
+
+                        // LocalDate parsed =
+                        // parseBillDate(date);
+
+                        // if (parsed.isBefore(selectedDate)) {
+
+                        // selectedDate = parsed;
+                        // selected = bill;
+                        // }
+                        // }
+                }
+                return selected;
         }
 
-        Object value =
-                map.get(key);
+        // =========================================================
+        // GET STRING FROM BILL MAP
+        // =========================================================
 
-        if (value == null) {
-            return "";
+        private String getMapString(
+                        Map<String, Object> map,
+                        String key) {
+
+                if (map == null
+                                || key == null) {
+
+                        return "";
+                }
+
+                Object value = map.get(key);
+
+                return value == null
+                                ? ""
+                                : value.toString().trim();
         }
 
-        return value.toString().trim();
-    }
+        // =========================================================
+        // PARSE BILL DATE
+        // =========================================================
 
-    // =========================================================
-    // UPDATE NOTICES
-    // =========================================================
+        private LocalDate parseBillDate(
+                        String date) {
 
-    private void updateNotices(
-            List<NoticeModel> notices) {
+                if (date == null || date.trim().isEmpty()) {
+                        return LocalDate.MAX;
+                }
 
-        noticeContent.getChildren().clear();
+                String[] patterns = {
+                                "dd-MM-yyyy",
+                                "dd-MM-yy",
+                                "yyyy-MM-dd"
+                };
 
-        if (notices == null
-                || notices.isEmpty()) {
+                for (String pattern : patterns) {
 
-            showNoticeMessage(
-                    "No society notices available."
-            );
+                        try {
 
-            return;
+                                return LocalDate.parse(
+                                                date.trim(),
+                                                DateTimeFormatter.ofPattern(pattern));
+
+                        } catch (Exception ignored) {
+                                // Try next format.
+                        }
+                }
+
+                return LocalDate.MAX;
         }
 
-        int count =
-                Math.min(
-                        notices.size(),
-                        3
-                );
+        // =========================================================
+        // UPDATE NOTICES
+        // =========================================================
 
-        for (int i = 0;
-             i < count;
-             i++) {
+        private void updateNotices(
+                        List<NoticeModel> notices) {
 
-            NoticeModel notice =
-                    notices.get(i);
+                noticeContent.getChildren().clear();
 
-            if (notice == null) {
-                continue;
-            }
+                if (notices == null
+                                || notices.isEmpty()) {
 
-            VBox card =
-                    new VBox(4);
+                        showNoticeMessage(
+                                        "No society notices available.");
 
-            card.setPadding(
-                    new Insets(
-                            7,
-                            0,
-                            7,
-                            0
-                    )
-            );
+                        return;
+                }
 
-            String titleText =
-                    safe(
-                            notice.getTitle()
-                    );
+                int count = Math.min(
+                                notices.size(),
+                                3);
 
-            if (titleText.isEmpty()) {
+                for (int i = 0; i < count; i++) {
 
-                titleText =
-                        "Society Notice";
-            }
+                        NoticeModel notice = notices.get(i);
 
-            Label title =
-                    new Label(
-                            "• "
-                                    + titleText
-                    );
+                        if (notice == null) {
+                                continue;
+                        }
 
-            title.setFont(
-                    Font.font(
-                            "System",
-                            FontWeight.BOLD,
-                            13
-                    )
-            );
+                        VBox card = new VBox(4);
 
-            title.setTextFill(
-                    Color.web("#263238")
-            );
+                        card.setPadding(
+                                        new Insets(
+                                                        7,
+                                                        0,
+                                                        7,
+                                                        0));
 
-            title.setWrapText(true);
+                        String titleText = safe(
+                                        notice.getTitle());
 
-            Label date =
-                    new Label(
-                            safe(
-                                    notice.getDate()
-                            )
-                    );
+                        if (titleText.isEmpty()) {
 
-            date.setFont(
-                    Font.font(
-                            "System",
-                            11
-                    )
-            );
+                                titleText = "Society Notice";
+                        }
 
-            date.setTextFill(
-                    Color.web("#789098")
-            );
+                        Label title = new Label(
+                                        "• "
+                                                        + titleText);
 
-            Label description =
-                    new Label(
-                            safe(
-                                    notice.getDescription()
-                            )
-                    );
+                        title.setFont(
+                                        Font.font(
+                                                        "System",
+                                                        FontWeight.BOLD,
+                                                        13));
 
-            description.setFont(
-                    Font.font(
-                            "System",
-                            12
-                    )
-            );
+                        title.setTextFill(
+                                        Color.web("#263238"));
 
-            description.setTextFill(
-                    Color.web("#607D8B")
-            );
+                        title.setWrapText(true);
 
-            description.setWrapText(true);
+                        Label date = new Label(
+                                        safe(
+                                                        notice.getDate()));
 
-            card.getChildren().addAll(
-                    title,
-                    date,
-                    description
-            );
+                        date.setFont(
+                                        Font.font(
+                                                        "System",
+                                                        11));
 
-            String status =
-                    safe(
-                            notice.getStatus()
-                    );
+                        date.setTextFill(
+                                        Color.web("#789098"));
 
-            if (!status.isEmpty()) {
+                        Label description = new Label(
+                                        safe(
+                                                        notice.getDescription()));
 
-                Label statusLabel =
-                        new Label(
-                                "Status: "
-                                        + status
-                        );
+                        description.setFont(
+                                        Font.font(
+                                                        "System",
+                                                        12));
 
-                statusLabel.setFont(
-                        Font.font(
-                                "System",
-                                FontWeight.BOLD,
-                                11
-                        )
-                );
+                        description.setTextFill(
+                                        Color.web("#607D8B"));
 
-                statusLabel.setTextFill(
-                        Color.web("#789098")
-                );
+                        description.setWrapText(true);
 
-                card.getChildren().add(
-                        statusLabel
-                );
-            }
+                        card.getChildren().addAll(
+                                        title,
+                                        date,
+                                        description);
 
-            noticeContent.getChildren().add(
-                    card
-            );
-        }
-    }
+                        String status = safe(
+                                        notice.getStatus());
 
-    // =========================================================
-    // UPDATE POLL
-    // =========================================================
+                        if (!status.isEmpty()) {
 
-    private void updatePoll(
-            List<PollModel> polls) {
+                                Label statusLabel = new Label(
+                                                "Status: "
+                                                                + status);
 
-        pollContent.getChildren().clear();
+                                statusLabel.setFont(
+                                                Font.font(
+                                                                "System",
+                                                                FontWeight.BOLD,
+                                                                11));
 
-        if (polls == null
-                || polls.isEmpty()) {
+                                statusLabel.setTextFill(
+                                                Color.web("#789098"));
 
-            showPollMessage(
-                    "No active community poll."
-            );
+                                card.getChildren().add(
+                                                statusLabel);
+                        }
 
-            return;
+                        noticeContent.getChildren().add(
+                                        card);
+                }
         }
 
-        PollModel poll =
-                polls.get(0);
+        // =========================================================
+        // UPDATE POLL
+        // =========================================================
 
-        if (poll == null) {
+        private void updatePoll(
+                        List<PollModel> polls) {
 
-            showPollMessage(
-                    "No active community poll."
-            );
+                pollContent.getChildren().clear();
 
-            return;
+                if (polls == null
+                                || polls.isEmpty()) {
+
+                        showPollMessage(
+                                        "No active community poll.");
+
+                        return;
+                }
+
+                PollModel poll = polls.get(0);
+
+                if (poll == null) {
+
+                        showPollMessage(
+                                        "No active community poll.");
+
+                        return;
+                }
+
+                Label question = new Label(
+                                safe(
+                                                poll.getQuestion()));
+
+                question.setWrapText(true);
+
+                question.setFont(
+                                Font.font(
+                                                "System",
+                                                FontWeight.BOLD,
+                                                13));
+
+                question.setTextFill(
+                                Color.web("#263238"));
+
+                pollContent.getChildren().add(
+                                question);
+
+                List<String> options = poll.getOptions();
+
+                Map<String, Long> counts = poll.getVoteCounts();
+
+                long totalVotes = poll.getTotalVotes();
+
+                if (options == null
+                                || options.isEmpty()) {
+
+                        showPollMessage(
+                                        "Poll has no options.");
+
+                        return;
+                }
+
+                int displayCount = Math.min(
+                                options.size(),
+                                4);
+
+                for (int i = 0; i < displayCount; i++) {
+
+                        String option = safe(
+                                        options.get(i));
+
+                        if (option.isEmpty()) {
+                                continue;
+                        }
+
+                        long votes = 0;
+
+                        if (counts != null
+                                        && counts.containsKey(option)
+                                        && counts.get(option) != null) {
+
+                                votes = counts.get(option);
+                        }
+
+                        double percentage = totalVotes <= 0
+                                        ? 0.0
+                                        : (double) votes
+                                                        / totalVotes;
+
+                        Label optionLabel = new Label(
+                                        option
+                                                        + " ("
+                                                        + Math.round(
+                                                                        percentage * 100)
+                                                        + "%)");
+
+                        optionLabel.setFont(
+                                        Font.font(
+                                                        "System",
+                                                        FontWeight.BOLD,
+                                                        12));
+
+                        ProgressBar bar = new ProgressBar(
+                                        clampPercentage(
+                                                        percentage));
+
+                        bar.setPrefWidth(250);
+
+                        pollContent.getChildren().addAll(
+                                        optionLabel,
+                                        bar);
+                }
+
+                Button openPoll = new Button(
+                                "Open Polls & Surveys");
+
+                openPoll.setStyle(
+                                "-fx-background-color:#4e342e;"
+                                                + "-fx-text-fill:white;"
+                                                + "-fx-font-weight:bold;"
+                                                + "-fx-background-radius:6;");
+
+                openPoll.setOnAction(
+                                e -> openPolls(
+                                                stageForPoll()));
+
+                pollContent.getChildren().add(
+                                openPoll);
         }
 
-        Label question =
-                new Label(
-                        safe(
-                                poll.getQuestion()
-                        )
-                );
+        // =========================================================
+        // POLL STAGE
+        // =========================================================
 
-        question.setWrapText(true);
+        private Stage stageForPoll() {
 
-        question.setFont(
-                Font.font(
-                        "System",
-                        FontWeight.BOLD,
-                        13
-                )
-        );
+                if (residentDashboardScene == null) {
+                        return null;
+                }
 
-        question.setTextFill(
-                Color.web("#263238")
-        );
-
-        pollContent.getChildren().add(
-                question
-        );
-
-        List<String> options =
-                poll.getOptions();
-
-        Map<String, Long> counts =
-                poll.getVoteCounts();
-
-        long totalVotes =
-                poll.getTotalVotes();
-
-        if (options == null
-                || options.isEmpty()) {
-
-            showPollMessage(
-                    "Poll has no options."
-            );
-
-            return;
+                return (Stage) residentDashboardScene
+                                .getWindow();
         }
 
-        int displayCount =
-                Math.min(
-                        options.size(),
-                        4
-                );
+        // =========================================================
+        // OPEN POLLS
+        // =========================================================
 
-        for (int i = 0;
-             i < displayCount;
-             i++) {
+        private void openPolls(
+                        Stage stage) {
 
-            String option =
-                    safe(
-                            options.get(i)
-                    );
+                if (stage == null) {
+                        return;
+                }
 
-            if (option.isEmpty()) {
-                continue;
-            }
+                PollsSurveys polls = new PollsSurveys(
+                                stage,
+                                this.LognEmail);
 
-            long votes = 0;
+                stage.setScene(
+                                polls.createScene(
+                                                stage,
+                                                LognEmail));
 
-            if (counts != null
-                    && counts.containsKey(option)
-                    && counts.get(option) != null) {
-
-                votes =
-                        counts.get(option);
-            }
-
-            double percentage =
-                    totalVotes <= 0
-                            ? 0.0
-                            : (double) votes
-                            / totalVotes;
-
-            Label optionLabel =
-                    new Label(
-                            option
-                                    + " ("
-                                    + Math.round(
-                                    percentage * 100
-                            )
-                                    + "%)"
-                    );
-
-            optionLabel.setFont(
-                    Font.font(
-                            "System",
-                            FontWeight.BOLD,
-                            12
-                    )
-            );
-
-            ProgressBar bar =
-                    new ProgressBar(
-                            clampPercentage(
-                                    percentage
-                            )
-                    );
-
-            bar.setPrefWidth(250);
-
-            pollContent.getChildren().addAll(
-                    optionLabel,
-                    bar
-            );
+                stage.show();
         }
 
-        Button openPoll =
-                new Button(
-                        "Open Polls & Surveys"
-                );
+        // =========================================================
+        // OPEN BILLS
+        // =========================================================
 
-        openPoll.setStyle(
-                "-fx-background-color:#4e342e;"
-                        + "-fx-text-fill:white;"
-                        + "-fx-font-weight:bold;"
-                        + "-fx-background-radius:6;"
-        );
+        private void openMyBills(
+                        Stage stage) {
 
-        openPoll.setOnAction(
-                e -> openPolls(
-                        stageForPoll()
-                )
-        );
+                if (stage == null
+                                || this.LognEmail.isEmpty()) {
 
-        pollContent.getChildren().add(
-                openPoll
-        );
-    }
+                        return;
+                }
 
-    // =========================================================
-    // POLL STAGE
-    // =========================================================
+                Mybills bills = new Mybills(
+                                this.LognEmail);
 
-    private Stage stageForPoll() {
+                stage.setScene(
+                                bills.getBillScene(stage));
 
-        if (residentDashboardScene == null) {
-            return null;
+                stage.show();
         }
 
-        return (Stage)
-                residentDashboardScene
-                        .getWindow();
-    }
+        // =========================================================
+        // OPEN COMPLAINTS
+        // =========================================================
 
-    // =========================================================
-    // OPEN POLLS
-    // =========================================================
+        private void openComplaints(
+                        Stage stage) {
 
-    private void openPolls(
-            Stage stage) {
+                if (stage == null) {
+                        return;
+                }
 
-        if (stage == null) {
-            return;
+                Complaint complaint = new Complaint();
+
+                stage.setScene(
+                                complaint.getComplaintScene(
+                                                stage));
+
+                stage.show();
         }
 
-        PollsSurveys polls =
-                new PollsSurveys(
-                        stage,
-                        this.LognEmail
-                );
+        // =========================================================
+        // OPEN VISITORS
+        // =========================================================
 
-        stage.setScene(
-                polls.createScene(
-                        stage,
-                        LognEmail
-                )
-        );
+        private void openVisitors(
+                        Stage stage) {
 
-        stage.show();
-    }
+                if (stage == null) {
+                        return;
+                }
 
-    // =========================================================
-    // OPEN BILLS
-    // =========================================================
+                Visitor visitor = new Visitor();
 
-    private void openMyBills(
-            Stage stage) {
+                Scene visitorScene = visitor.getVisitorScene(
+                                stage);
 
-        if (stage == null
-                || this.LognEmail.isEmpty()) {
+                if (visitorScene == null) {
+                        return;
+                }
 
-            return;
+                stage.setScene(
+                                visitorScene);
+
+                stage.show();
         }
 
-        Mybills bills =
-                new Mybills(
-                        this.LognEmail
-                );
+        // =========================================================
+        // LOADING DUE ROWS
+        // =========================================================
 
-        stage.setScene(
-                bills.getBillScene(stage)
-        );
+        private void addLoadingDueRows() {
 
-        stage.show();
-    }
+                addDueRow(
+                                "Maintenance Due",
+                                "Loading...");
 
-    // =========================================================
-    // OPEN COMPLAINTS
-    // =========================================================
+                addDueRow(
+                                "Water Bill",
+                                "Loading...");
 
-    private void openComplaints(
-            Stage stage) {
-
-        if (stage == null) {
-            return;
+                addDueRow(
+                                "Electricity Bill",
+                                "Loading...");
         }
 
-        Complaint complaint =
-                new Complaint();
+        // =========================================================
+        // ADD DUE ROW
+        // =========================================================
 
-        stage.setScene(
-                complaint.getComplaintScene(
-                        stage
-                )
-        );
+        private void addDueRow(
+                        String title,
+                        String value) {
 
-        stage.show();
-    }
+                HBox row = new HBox();
 
-    // =========================================================
-    // OPEN VISITORS
-    // =========================================================
+                row.setAlignment(
+                                Pos.CENTER_LEFT);
 
-    private void openVisitors(
-            Stage stage) {
+                Label titleLabel = new Label(title);
 
-        if (stage == null) {
-            return;
+                titleLabel.setFont(
+                                Font.font(
+                                                "System",
+                                                FontWeight.BOLD,
+                                                12));
+
+                Label valueLabel = new Label(value);
+
+                valueLabel.setFont(
+                                Font.font(
+                                                "System",
+                                                FontWeight.BOLD,
+                                                12));
+
+                valueLabel.setTextFill(
+                                Color.web("#607D8B"));
+
+                Region spacer = new Region();
+
+                HBox.setHgrow(
+                                spacer,
+                                Priority.ALWAYS);
+
+                row.getChildren().addAll(
+                                titleLabel,
+                                spacer,
+                                valueLabel);
+
+                upcomingBox.getChildren().add(
+                                row);
         }
 
-        Visitor visitor =
-                new Visitor();
+        // =========================================================
+        // SHOW DUE MESSAGE
+        // =========================================================
 
-        Scene visitorScene =
-                visitor.getVisitorScene(
-                        stage
-                );
+        private void showDueMessage(
+                        String message) {
 
-        if (visitorScene == null) {
-            return;
+                upcomingBox.getChildren().clear();
+
+                Label title = new Label(
+                                "Upcoming / Due");
+
+                title.setFont(
+                                Font.font(
+                                                "System",
+                                                FontWeight.BOLD,
+                                                17));
+
+                title.setTextFill(
+                                Color.web("#263238"));
+
+                Label messageLabel = new Label(message);
+
+                messageLabel.setTextFill(
+                                Color.web("#789098"));
+
+                upcomingBox.getChildren().addAll(
+                                title,
+                                messageLabel);
         }
 
-        stage.setScene(
-                visitorScene
-        );
+        // =========================================================
+        // SHOW NOTICE MESSAGE
+        // =========================================================
 
-        stage.show();
-    }
+        private void showNoticeMessage(
+                        String message) {
 
-    // =========================================================
-    // LOADING DUE ROWS
-    // =========================================================
+                noticeContent.getChildren().clear();
 
-    private void addLoadingDueRows() {
+                Label label = new Label(message);
 
-        addDueRow(
-                "Maintenance Due",
-                "Loading..."
-        );
+                label.setFont(
+                                Font.font(
+                                                "System",
+                                                13));
 
-        addDueRow(
-                "Water Bill",
-                "Loading..."
-        );
+                label.setTextFill(
+                                Color.web("#789098"));
 
-        addDueRow(
-                "Electricity Bill",
-                "Loading..."
-        );
-    }
+                label.setWrapText(true);
 
-    // =========================================================
-    // ADD DUE ROW
-    // =========================================================
-
-    private void addDueRow(
-            String title,
-            String value) {
-
-        HBox row =
-                new HBox();
-
-        row.setAlignment(
-                Pos.CENTER_LEFT
-        );
-
-        Label titleLabel =
-                new Label(title);
-
-        titleLabel.setFont(
-                Font.font(
-                        "System",
-                        FontWeight.BOLD,
-                        12
-                )
-        );
-
-        Label valueLabel =
-                new Label(value);
-
-        valueLabel.setFont(
-                Font.font(
-                        "System",
-                        FontWeight.BOLD,
-                        12
-                )
-        );
-
-        valueLabel.setTextFill(
-                Color.web("#607D8B")
-        );
-
-        Region spacer =
-                new Region();
-
-        HBox.setHgrow(
-                spacer,
-                Priority.ALWAYS
-        );
-
-        row.getChildren().addAll(
-                titleLabel,
-                spacer,
-                valueLabel
-        );
-
-        upcomingBox.getChildren().add(
-                row
-        );
-    }
-
-    // =========================================================
-    // SHOW DUE MESSAGE
-    // =========================================================
-
-    private void showDueMessage(
-            String message) {
-
-        upcomingBox.getChildren().clear();
-
-        Label title =
-                new Label(
-                        "Upcoming / Due"
-                );
-
-        title.setFont(
-                Font.font(
-                        "System",
-                        FontWeight.BOLD,
-                        17
-                )
-        );
-
-        title.setTextFill(
-                Color.web("#263238")
-        );
-
-        Label messageLabel =
-                new Label(message);
-
-        messageLabel.setTextFill(
-                Color.web("#789098")
-        );
-
-        upcomingBox.getChildren().addAll(
-                title,
-                messageLabel
-        );
-    }
-
-    // =========================================================
-    // SHOW NOTICE MESSAGE
-    // =========================================================
-
-    private void showNoticeMessage(
-            String message) {
-
-        noticeContent.getChildren().clear();
-
-        Label label =
-                new Label(message);
-
-        label.setFont(
-                Font.font(
-                        "System",
-                        13
-                )
-        );
-
-        label.setTextFill(
-                Color.web("#789098")
-        );
-
-        label.setWrapText(true);
-
-        noticeContent.getChildren().add(
-                label
-        );
-    }
-
-    // =========================================================
-    // SHOW POLL MESSAGE
-    // =========================================================
-
-    private void showPollMessage(
-            String message) {
-
-        pollContent.getChildren().clear();
-
-        Label label =
-                new Label(message);
-
-        label.setFont(
-                Font.font(
-                        "System",
-                        13
-                )
-        );
-
-        label.setTextFill(
-                Color.web("#789098")
-        );
-
-        label.setWrapText(true);
-
-        pollContent.getChildren().add(
-                label
-        );
-    }
-
-    // =========================================================
-    // SUMMARY CARD
-    // =========================================================
-
-    private VBox createSummaryCard(
-            String title,
-            String amount,
-            String bottomText) {
-
-        VBox card =
-                new VBox(7);
-
-        card.setPadding(
-                new Insets(16)
-        );
-
-        card.setPrefWidth(
-                190
-        );
-
-        card.setPrefHeight(
-                110
-        );
-
-        card.setStyle(
-                "-fx-background-color:white;"
-                        + "-fx-background-radius:10;"
-        );
-
-        Label titleLabel =
-                new Label(title);
-
-        titleLabel.setFont(
-                Font.font(
-                        "System",
-                        FontWeight.BOLD,
-                        13
-                )
-        );
-
-        titleLabel.setTextFill(
-                Color.web("#607D8B")
-        );
-
-        Label amountLabel =
-                new Label(amount);
-
-        amountLabel.setFont(
-                Font.font(
-                        "System",
-                        FontWeight.BOLD,
-                        22
-                )
-        );
-
-        amountLabel.setTextFill(
-                Color.web("#263238")
-        );
-
-        Label bottomLabel =
-                new Label(bottomText);
-
-        bottomLabel.setFont(
-                Font.font(
-                        "System",
-                        12
-                )
-        );
-
-        bottomLabel.setTextFill(
-                Color.web("#789098")
-        );
-
-        card.getChildren().addAll(
-                titleLabel,
-                amountLabel,
-                bottomLabel
-        );
-
-        return card;
-    }
-
-    // =========================================================
-    // GET AMOUNT LABEL
-    // =========================================================
-
-    private Label getAmountLabel(
-            VBox card) {
-
-        return (Label)
-                card.getChildren().get(1);
-    }
-
-    // =========================================================
-    // GET BOTTOM LABEL
-    // =========================================================
-
-    private Label getBottomLabel(
-            VBox card) {
-
-        return (Label)
-                card.getChildren().get(2);
-    }
-
-    // =========================================================
-    // GET BOTTOM BUTTON
-    // =========================================================
-
-    private Button getBottomButton(
-            VBox card) {
-
-        if (card.getChildren().size() < 3) {
-            return null;
+                noticeContent.getChildren().add(
+                                label);
         }
 
-        Label bottom =
-                (Label)
-                        card.getChildren().get(2);
+        // =========================================================
+        // SHOW POLL MESSAGE
+        // =========================================================
 
-        Button button =
-                new Button();
+        private void showPollMessage(
+                        String message) {
 
-        button.setGraphic(bottom);
+                pollContent.getChildren().clear();
 
-        button.setStyle(
-                "-fx-background-color:transparent;"
-                        + "-fx-padding:0;"
-        );
+                Label label = new Label(message);
 
-        card.getChildren().set(
-                2,
-                button
-        );
+                label.setFont(
+                                Font.font(
+                                                "System",
+                                                13));
 
-        return button;
-    }
+                label.setTextFill(
+                                Color.web("#789098"));
 
-    // =========================================================
-    // SET AMOUNT
-    // =========================================================
+                label.setWrapText(true);
 
-    private void setAmount(
-            Label label,
-            String value) {
-
-        if (label != null) {
-
-            label.setText(
-                    value == null
-                            ? ""
-                            : value
-            );
-        }
-    }
-
-    // =========================================================
-    // SET BOTTOM
-    // =========================================================
-
-    private void setBottom(
-            Label label,
-            String value) {
-
-        if (label != null) {
-
-            label.setText(
-                    value == null
-                            ? ""
-                            : value
-            );
-        }
-    }
-
-    // =========================================================
-    // SECTION TITLE
-    // =========================================================
-
-    private Label createSectionTitle(
-            String text) {
-
-        Label label =
-                new Label(text);
-
-        label.setFont(
-                Font.font(
-                        "System",
-                        FontWeight.BOLD,
-                        17
-                )
-        );
-
-        label.setTextFill(
-                Color.web("#263238")
-        );
-
-        return label;
-    }
-
-    // =========================================================
-    // ACTION BUTTON
-    // =========================================================
-
-    private Button createActionButton(
-            String title,
-            String subtitle) {
-
-        Button button =
-                new Button();
-
-        button.setPrefSize(
-                230,
-                65
-        );
-
-        button.setAlignment(
-                Pos.CENTER_LEFT
-        );
-
-        Label titleLabel =
-                new Label(title);
-
-        titleLabel.setFont(
-                Font.font(
-                        "System",
-                        FontWeight.BOLD,
-                        13
-                )
-        );
-
-        Label subtitleLabel =
-                new Label(subtitle);
-
-        subtitleLabel.setFont(
-                Font.font(
-                        "System",
-                        11
-                )
-        );
-
-        subtitleLabel.setTextFill(
-                Color.GRAY
-        );
-
-        VBox content =
-                new VBox(4);
-
-        content.getChildren().addAll(
-                titleLabel,
-                subtitleLabel
-        );
-
-        button.setGraphic(
-                content
-        );
-
-        button.setStyle(
-                "-fx-background-color:#F5F7F8;"
-                        + "-fx-border-color:#D5DDE0;"
-                        + "-fx-border-radius:7;"
-                        + "-fx-background-radius:7;"
-        );
-
-        return button;
-    }
-
-    // =========================================================
-    // FORMAT MONEY
-    // =========================================================
-
-    private String formatMoney(
-            double value) {
-
-        if (Math.abs(
-                value - Math.rint(value)
-        ) < 0.000001) {
-
-            return "₹ "
-                    + String.format(
-                    "%.0f",
-                    value
-            );
+                pollContent.getChildren().add(
+                                label);
         }
 
-        return "₹ "
-                + String.format(
-                "%.2f",
-                value
-        );
-    }
+        // =========================================================
+        // SUMMARY CARD
+        // =========================================================
 
-    // =========================================================
-    // FORMAT DATE
-    // =========================================================
+        private VBox createSummaryCard(
+                        String title,
+                        String amount,
+                        String bottomText) {
 
-    private String formatDisplayDate(
-            String value) {
+                VBox card = new VBox(7);
 
-        if (value == null
-                || value.trim().isEmpty()) {
+                card.setPadding(
+                                new Insets(16));
 
-            return "Not available";
+                card.setPrefWidth(
+                                190);
+
+                card.setPrefHeight(
+                                110);
+
+                card.setStyle(
+                                "-fx-background-color:white;"
+                                                + "-fx-background-radius:10;");
+
+                Label titleLabel = new Label(title);
+
+                titleLabel.setFont(
+                                Font.font(
+                                                "System",
+                                                FontWeight.BOLD,
+                                                13));
+
+                titleLabel.setTextFill(
+                                Color.web("#607D8B"));
+
+                Label amountLabel = new Label(amount);
+
+                amountLabel.setFont(
+                                Font.font(
+                                                "System",
+                                                FontWeight.BOLD,
+                                                22));
+
+                amountLabel.setTextFill(
+                                Color.web("#263238"));
+
+                Label bottomLabel = new Label(bottomText);
+
+                bottomLabel.setFont(
+                                Font.font(
+                                                "System",
+                                                12));
+
+                bottomLabel.setTextFill(
+                                Color.web("#789098"));
+
+                card.getChildren().addAll(
+                                titleLabel,
+                                amountLabel,
+                                bottomLabel);
+
+                return card;
         }
 
-        String clean =
-                value.trim();
+        // =========================================================
+        // GET AMOUNT LABEL
+        // =========================================================
 
-        try {
+        private Label getAmountLabel(
+                        VBox card) {
 
-            return LocalDate.parse(clean)
-                    .format(
-                            DateTimeFormatter.ofPattern(
-                                    "dd MMM yyyy"
-                            )
-                    );
-
-        } catch (Exception ignored) {
-
-            return clean;
-        }
-    }
-
-    // =========================================================
-    // CLAMP PERCENTAGE
-    // =========================================================
-
-    private double clampPercentage(
-            double value) {
-
-        if (value < 0) {
-            return 0;
+                return (Label) card.getChildren().get(1);
         }
 
-        if (value > 1) {
-            return 1;
+        // =========================================================
+        // GET BOTTOM LABEL
+        // =========================================================
+
+        private Label getBottomLabel(
+                        VBox card) {
+
+                return (Label) card.getChildren().get(2);
         }
 
-        return value;
-    }
+        // =========================================================
+        // GET BOTTOM BUTTON
+        // =========================================================
 
-    // =========================================================
-    // GREETING
-    // =========================================================
+        private Button getBottomButton(
+                        VBox card) {
 
-    private String getGreeting() {
+                if (card.getChildren().size() < 3) {
+                        return null;
+                }
 
-        int hour =
-                java.time.LocalTime.now(
-                        INDIA_ZONE
-                ).getHour();
+                Label bottom = (Label) card.getChildren().get(2);
 
-        if (hour < 12) {
-            return "Good Morning";
+                Button button = new Button();
+
+                button.setGraphic(bottom);
+
+                button.setStyle(
+                                "-fx-background-color:transparent;"
+                                                + "-fx-padding:0;");
+
+                card.getChildren().set(
+                                2,
+                                button);
+
+                return button;
         }
 
-        if (hour < 17) {
-            return "Good Afternoon";
+        // =========================================================
+        // SET AMOUNT
+        // =========================================================
+
+        private void setAmount(
+                        Label label,
+                        String value) {
+
+                if (label != null) {
+
+                        label.setText(
+                                        value == null
+                                                        ? ""
+                                                        : value);
+                }
         }
 
-        return "Good Evening";
-    }
+        // =========================================================
+        // SET BOTTOM
+        // =========================================================
 
-    // =========================================================
-    // TOWER TEXT
-    // =========================================================
+        private void setBottom(
+                        Label label,
+                        String value) {
 
-    private String getTowerText(
-            User resident) {
+                if (label != null) {
 
-        if (resident == null) {
-            return "";
+                        label.setText(
+                                        value == null
+                                                        ? ""
+                                                        : value);
+                }
         }
 
-        String[] candidates = {
+        // =========================================================
+        // SECTION TITLE
+        // =========================================================
 
-                readUserProperty(
-                        resident,
-                        "getTower"
-                ),
+        private Label createSectionTitle(
+                        String text) {
 
-                readUserProperty(
-                        resident,
-                        "getTowerNo"
-                ),
+                Label label = new Label(text);
 
-                readUserProperty(
-                        resident,
-                        "getBuilding"
-                ),
+                label.setFont(
+                                Font.font(
+                                                "System",
+                                                FontWeight.BOLD,
+                                                17));
 
-                readUserProperty(
-                        resident,
-                        "getBuildingName"
-                )
-        };
+                label.setTextFill(
+                                Color.web("#263238"));
 
-        for (String value : candidates) {
-
-            if (value != null
-                    && !value.trim().isEmpty()) {
-
-                return " • "
-                        + value.trim();
-            }
+                return label;
         }
 
-        return "";
-    }
+        // =========================================================
+        // ACTION BUTTON
+        // =========================================================
 
-    // =========================================================
-    // OPTIONAL USER PROPERTY
-    // =========================================================
+        private Button createActionButton(
+                        String title,
+                        String subtitle) {
 
-    private String readUserProperty(
-            User resident,
-            String methodName) {
+                Button button = new Button();
 
-        try {
+                button.setPrefSize(
+                                230,
+                                65);
 
-            java.lang.reflect.Method method =
-                    resident.getClass()
-                            .getMethod(
-                                    methodName
-                            );
+                button.setAlignment(
+                                Pos.CENTER_LEFT);
 
-            Object value =
-                    method.invoke(
-                            resident
-                    );
+                Label titleLabel = new Label(title);
 
-            return value == null
-                    ? ""
-                    : value.toString();
+                titleLabel.setFont(
+                                Font.font(
+                                                "System",
+                                                FontWeight.BOLD,
+                                                13));
 
-        } catch (Exception ignored) {
+                Label subtitleLabel = new Label(subtitle);
 
-            return "";
+                subtitleLabel.setFont(
+                                Font.font(
+                                                "System",
+                                                11));
+
+                subtitleLabel.setTextFill(
+                                Color.GRAY);
+
+                VBox content = new VBox(4);
+
+                content.getChildren().addAll(
+                                titleLabel,
+                                subtitleLabel);
+
+                button.setGraphic(
+                                content);
+
+                button.setStyle(
+                                "-fx-background-color:#F5F7F8;"
+                                                + "-fx-border-color:#D5DDE0;"
+                                                + "-fx-border-radius:7;"
+                                                + "-fx-background-radius:7;");
+
+                return button;
         }
-    }
 
-    // =========================================================
-    // SAFE STRING
-    // =========================================================
+        // =========================================================
+        // FORMAT MONEY
+        // =========================================================
 
-    private String safe(
-            String value) {
+        private String formatMoney(
+                        double value) {
 
-        return value == null
-                ? ""
-                : value.trim();
-    }
+                if (Math.abs(
+                                value - Math.rint(value)) < 0.000001) {
+
+                        return "₹ "
+                                        + String.format(
+                                                        "%.0f",
+                                                        value);
+                }
+
+                return "₹ "
+                                + String.format(
+                                                "%.2f",
+                                                value);
+        }
+
+        // =========================================================
+        // FORMAT DATE
+        // =========================================================
+
+        private String formatDisplayDate(
+                        String value) {
+
+                if (value == null
+                                || value.trim().isEmpty()) {
+
+                        return "Not available";
+                }
+
+                String clean = value.trim();
+
+                String[] patterns = {
+                                "dd-MM-yyyy",
+                                "dd-MM-yy",
+                                "yyyy-MM-dd"
+                };
+
+                for (String pattern : patterns) {
+
+                        try {
+
+                                return LocalDate.parse(
+                                                clean,
+                                                DateTimeFormatter.ofPattern(pattern)).format(
+                                                                DateTimeFormatter.ofPattern(
+                                                                                "dd MMM yyyy"));
+
+                        } catch (Exception ignored) {
+                                // Try next format.
+                        }
+                }
+
+                return clean;
+        }
+
+        // =========================================================
+        // CLAMP PERCENTAGE
+        // =========================================================
+
+        private double clampPercentage(
+                        double value) {
+
+                if (value < 0) {
+                        return 0;
+                }
+
+                if (value > 1) {
+                        return 1;
+                }
+
+                return value;
+        }
+
+        // =========================================================
+        // GREETING
+        // =========================================================
+
+        private String getGreeting() {
+
+                int hour = java.time.LocalTime.now(
+                                INDIA_ZONE).getHour();
+
+                if (hour < 12) {
+                        return "Good Morning";
+                }
+
+                if (hour < 17) {
+                        return "Good Afternoon";
+                }
+
+                return "Good Evening";
+        }
+
+        // =========================================================
+        // TOWER TEXT
+        // =========================================================
+
+        private String getTowerText(
+                        User resident) {
+
+                if (resident == null) {
+                        return "";
+                }
+
+                String[] candidates = {
+
+                                readUserProperty(
+                                                resident,
+                                                "getTower"),
+
+                                readUserProperty(
+                                                resident,
+                                                "getTowerNo"),
+
+                                readUserProperty(
+                                                resident,
+                                                "getBuilding"),
+
+                                readUserProperty(
+                                                resident,
+                                                "getBuildingName")
+                };
+
+                for (String value : candidates) {
+
+                        if (value != null
+                                        && !value.trim().isEmpty()) {
+
+                                return " • "
+                                                + value.trim();
+                        }
+                }
+
+                return "";
+        }
+
+        // =========================================================
+        // OPTIONAL USER PROPERTY
+        // =========================================================
+
+        private String readUserProperty(
+                        User resident,
+                        String methodName) {
+
+                try {
+
+                        java.lang.reflect.Method method = resident.getClass()
+                                        .getMethod(
+                                                        methodName);
+
+                        Object value = method.invoke(
+                                        resident);
+
+                        return value == null
+                                        ? ""
+                                        : value.toString();
+
+                } catch (Exception ignored) {
+
+                        return "";
+                }
+        }
+
+        // =========================================================
+        // SAFE STRING
+        // =========================================================
+
+        private String safe(
+                        String value) {
+
+                return value == null
+                                ? ""
+                                : value.trim();
+        }
 }

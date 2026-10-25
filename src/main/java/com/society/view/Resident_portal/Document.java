@@ -158,7 +158,7 @@ public class Document {
                         "Resident Documents"
                 );
 
-        greeting.setStyle(
+        greeting.setStyle( "-fx-font-family:'Bodoni MT';" +
                 "-fx-font-size:24px;" +
                 "-fx-font-weight:bold;" +
                 "-fx-text-fill:white;"
@@ -169,7 +169,7 @@ public class Document {
                         "Upload and manage your documents"
                 );
 
-        description.setStyle(
+        description.setStyle( "-fx-font-family:'Bodoni MT';" +
                 "-fx-font-size:12px;" +
                 "-fx-text-fill:white;"
         );

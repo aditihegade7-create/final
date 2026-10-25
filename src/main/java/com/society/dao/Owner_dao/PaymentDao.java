@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class PaymentDao {
 
@@ -191,132 +193,317 @@ public class PaymentDao {
         List<PaymentModel> payments =
                 new ArrayList<>();
 
-
         try {
 
             if (ownerEmail == null ||
                     ownerEmail.trim().isEmpty()) {
-
                 return payments;
             }
 
-
-            ownerEmail =
+            String normalizedOwnerEmail =
                     ownerEmail.trim().toLowerCase();
 
+            // =================================================
+            // 1. LOAD NORMAL PAYMENTS
+            // =================================================
 
-            // -------------------------------------------------
-            // QUERY PAYMENTS
-            // -------------------------------------------------
-
-            QuerySnapshot snapshot =
+            QuerySnapshot paymentSnapshot =
                     db.collection(COLLECTION)
                             .whereEqualTo(
                                     "ownerEmail",
-                                    ownerEmail
+                                    normalizedOwnerEmail
                             )
                             .get()
                             .get();
 
-
-            // -------------------------------------------------
-            // CONVERT DOCUMENTS
-            // -------------------------------------------------
-
             for (DocumentSnapshot document :
-                    snapshot.getDocuments()) {
+                    paymentSnapshot.getDocuments()) {
 
                 PaymentModel payment =
                         new PaymentModel();
-
 
                 payment.setPaymentId(
                         document.getId()
                 );
 
-
                 payment.setOwnerEmail(
-                        document.getString(
-                                "ownerEmail"
+                        safeString(
+                                document.getString("ownerEmail")
                         )
                 );
-
 
                 payment.setTenantEmail(
-                        document.getString(
-                                "tenantEmail"
+                        safeString(
+                                document.getString("tenantEmail")
                         )
                 );
-
 
                 payment.setDate(
-                        document.getString(
-                                "date"
+                        safeString(
+                                document.getString("date")
                         )
                 );
-
 
                 payment.setTenant(
-                        document.getString(
-                                "tenant"
+                        safeString(
+                                document.getString("tenant")
                         )
                 );
-
 
                 payment.setFlat(
-                        document.getString(
-                                "flat"
+                        safeString(
+                                document.getString("flat")
                         )
                 );
-
 
                 payment.setPaymentFor(
-                        document.getString(
-                                "paymentFor"
+                        safeString(
+                                document.getString("paymentFor")
                         )
                 );
-
 
                 payment.setAmount(
-                        document.getString(
-                                "amount"
+                        safeString(
+                                document.getString("amount")
                         )
                 );
-
 
                 payment.setStatus(
-                        document.getString(
-                                "status"
+                        normalizeStatus(
+                                document.getString("status")
                         )
                 );
 
-
-                payments.add(
-                        payment
-                );
+                payments.add(payment);
             }
 
+            // =================================================
+            // 2. FIND ALL RESIDENTS BELONGING TO OWNER
+            //
+            // Includes Tenant and Tenant Resident records because
+            // both are linked through ownerEmail.
+            // =================================================
+
+            Set<String> residentEmails =
+                    new LinkedHashSet<>();
+
+            Map<String, DocumentSnapshot> residentDocuments =
+                    new HashMap<>();
+
+            residentEmails.add(normalizedOwnerEmail);
+
+            QuerySnapshot residentSnapshot =
+                    db.collection("Residents")
+                            .whereEqualTo(
+                                    "ownerEmail",
+                                    normalizedOwnerEmail
+                            )
+                            .get()
+                            .get();
+
+            for (DocumentSnapshot resident :
+                    residentSnapshot.getDocuments()) {
+
+                String residentEmail =
+                        resident.getString("email");
+
+                if (residentEmail == null ||
+                        residentEmail.trim().isEmpty()) {
+                    residentEmail = resident.getId();
+                }
+
+                if (residentEmail != null &&
+                        !residentEmail.trim().isEmpty()) {
+
+                    String normalizedResidentEmail =
+                            residentEmail.trim().toLowerCase();
+
+                    residentEmails.add(
+                            normalizedResidentEmail
+                    );
+
+                    residentDocuments.put(
+                            normalizedResidentEmail,
+                            resident
+                    );
+                }
+            }
 
             System.out.println(
-                    "Payments found: "
-                            + payments.size()
+                    "Maintenance owners/residents searched: "
+                            + residentEmails.size()
             );
 
+            // =================================================
+            // 3. LOAD MAINTENANCE RECORDS
+            //
+            // Firestore structure:
+            // Maintenance/{email}/records/{maintenanceId}
+            //
+            // We intentionally search only the owner and residents
+            // belonging to that owner.
+            // =================================================
+
+            int maintenanceCount = 0;
+
+            for (String residentEmail : residentEmails) {
+
+                QuerySnapshot maintenanceSnapshot =
+                        db.collection("Maintenance")
+                                .document(residentEmail)
+                                .collection("records")
+                                .get()
+                                .get();
+
+                DocumentSnapshot resident =
+                        residentDocuments.get(residentEmail);
+
+                for (DocumentSnapshot document :
+                        maintenanceSnapshot.getDocuments()) {
+
+                    PaymentModel payment =
+                            new PaymentModel();
+
+                    payment.setPaymentId(
+                            "maintenance-"
+                                    + residentEmail
+                                    + "-"
+                                    + document.getId()
+                    );
+
+                    payment.setOwnerEmail(
+                            normalizedOwnerEmail
+                    );
+
+                    String recordTenantEmail =
+                            firstNonEmpty(
+                                    document.getString("tenantEmail"),
+                                    document.getString("email"),
+                                    residentEmail
+                            );
+
+                    payment.setTenantEmail(
+                            recordTenantEmail
+                    );
+
+                    payment.setDate(
+                            safeString(
+                                    document.getString("date")
+                            )
+                    );
+
+                    String tenantName =
+                            firstNonEmpty(
+                                    document.getString("tenant"),
+                                    document.getString("name"),
+                                    resident == null
+                                            ? ""
+                                            : resident.getString("name")
+                            );
+
+                    String flat =
+                            firstNonEmpty(
+                                    document.getString("flat"),
+                                    resident == null
+                                            ? ""
+                                            : resident.getString("flat")
+                            );
+
+                    payment.setTenant(tenantName);
+                    payment.setFlat(flat);
+                    payment.setPaymentFor("Maintenance");
+
+                    payment.setAmount(
+                            safeString(
+                                    document.getString("amount")
+                            )
+                    );
+
+                    payment.setStatus(
+                            normalizeStatus(
+                                    document.getString("status")
+                            )
+                    );
+
+                    payments.add(payment);
+                    maintenanceCount++;
+                }
+            }
+
+            System.out.println(
+                    "Maintenance records found: "
+                            + maintenanceCount
+            );
+
+            System.out.println(
+                    "Payments found including maintenance: "
+                            + payments.size()
+            );
 
         } catch (Exception e) {
 
             System.out.println(
-                    "Error loading payments: "
+                    "Error loading owner payments and maintenance: "
                             + e.getMessage()
             );
 
             e.printStackTrace();
         }
 
-
         return payments;
     }
 
+    // =========================================================
+    // NORMALIZE MAINTENANCE/PAYMENT STATUS
+    // =========================================================
+
+    private String normalizeStatus(
+            String status) {
+
+        String value =
+                safeString(status)
+                        .trim()
+                        .toLowerCase();
+
+        if (value.equals("paid") ||
+                value.equals("received") ||
+                value.equals("success") ||
+                value.equals("successful")) {
+            return "received";
+        }
+
+        if (value.equals("pending") ||
+                value.equals("due")) {
+            return "pending";
+        }
+
+        if (value.equals("overdue")) {
+            return "overdue";
+        }
+
+        return value;
+    }
+
+    // =========================================================
+    // FIRST NON-EMPTY VALUE
+    // =========================================================
+
+    private String firstNonEmpty(
+            String... values) {
+
+        if (values == null) {
+            return "";
+        }
+
+        for (String value : values) {
+            if (value != null &&
+                    !value.trim().isEmpty()) {
+                return value.trim();
+            }
+        }
+
+        return "";
+    }
 
     // =========================================================
     // SAFE STRING

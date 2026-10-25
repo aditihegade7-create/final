@@ -183,7 +183,7 @@ public class OwnerProfile {
         } catch (Exception e) {
 
             mainContent.setStyle(
-                    "-fx-background-color:#e8ddd5;"
+                    "-fx-background-color: #e8ddd5;"
             );
         }
 

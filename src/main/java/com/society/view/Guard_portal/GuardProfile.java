@@ -8,6 +8,7 @@ import com.society.controller.ImageUploadController;
 import com.society.controller.Guard_Controller.GuardController;
 import com.society.model.Guard_model.GuardModel;
 import com.society.view.ScreenSize;
+import com.society.view.Owner_portal.OwnerDashboard;
 import com.society.view.Welcome.LogInPage;
 
 import javafx.animation.FadeTransition;
@@ -22,6 +23,11 @@ import javafx.scene.control.Separator;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -110,6 +116,30 @@ public class GuardProfile {
         BorderPane root =
                 new BorderPane();
 
+                 Image image = new Image(
+                    OwnerDashboard.class
+                            .getResource(
+                                    "/background-Dashboard5.jpeg"
+                            )
+                            .toExternalForm()
+            );
+
+                BackgroundImage bgImage = new BackgroundImage(
+                                image,
+                                BackgroundRepeat.NO_REPEAT,
+                                BackgroundRepeat.NO_REPEAT,
+                                BackgroundPosition.CENTER,
+                                new BackgroundSize(
+                                                100,
+                                                100,
+                                                true,
+                                                true,
+                                                false,
+                                                true));
+
+                root.setBackground(
+                                new Background(bgImage));
+
         root.setLeft(
                 sidebar.getSidebar()
         );
@@ -121,9 +151,7 @@ public class GuardProfile {
         VBox mainArea =
                 new VBox();
 
-        mainArea.setStyle(
-                "-fx-background-color:#e8ddd5;"
-        );
+      
 
         // =====================================================
         // HEADER
@@ -163,7 +191,7 @@ public class GuardProfile {
 
         headerMain.setFont(
                 Font.font(
-                        "System",
+                        "Bodoni MT",
                         FontWeight.BOLD,
                         24
                 )
@@ -940,7 +968,6 @@ public class GuardProfile {
                         email
                 );
 
-        // Email is the authenticated guard identifier and must not be edited.
         emailField.setEditable(false);
 
         Label guardIdValue =
@@ -1399,6 +1426,7 @@ public class GuardProfile {
 
         // =====================================================
         // PAGE ENTRANCE ANIMATION
+        // HEADER FIXED
         // =====================================================
 
         playPageAnimation(
@@ -1423,6 +1451,7 @@ public class GuardProfile {
 
     // =========================================================
     // PAGE ENTRANCE ANIMATION
+    // HEADER FIXED - NO HEADER ANIMATION
     // =========================================================
 
     private static void playPageAnimation(
@@ -1431,64 +1460,24 @@ public class GuardProfile {
             VBox informationCard) {
 
         // =====================================================
-        // INITIAL STATE
+        // HEADER FIXED
         // =====================================================
 
         header.setOpacity(
-                0
-        );
-
-        profileCard.setOpacity(
-                0
-        );
-
-        informationCard.setOpacity(
-                0
-        );
-
-        // =====================================================
-        // HEADER FADE
-        // =====================================================
-
-        FadeTransition headerFade =
-                new FadeTransition(
-                        Duration.millis(600),
-                        header
-                );
-
-        headerFade.setFromValue(
-                0
-        );
-
-        headerFade.setToValue(
                 1
         );
 
-        // =====================================================
-        // HEADER SLIDE
-        // =====================================================
-
-        TranslateTransition headerSlide =
-                new TranslateTransition(
-                        Duration.millis(600),
-                        header
-                );
-
-        headerSlide.setFromY(
-                -25
-        );
-
-        headerSlide.setToY(
+        header.setTranslateY(
                 0
         );
-
-        headerFade.play();
-
-        headerSlide.play();
 
         // =====================================================
         // PROFILE CARD
         // =====================================================
+
+        profileCard.setOpacity(
+                0
+        );
 
         FadeTransition profileFade =
                 new FadeTransition(
@@ -1533,6 +1522,10 @@ public class GuardProfile {
         // =====================================================
         // INFORMATION CARD
         // =====================================================
+
+        informationCard.setOpacity(
+                0
+        );
 
         FadeTransition informationFade =
                 new FadeTransition(

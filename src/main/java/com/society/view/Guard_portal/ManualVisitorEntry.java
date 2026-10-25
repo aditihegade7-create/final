@@ -1,5 +1,8 @@
 package com.society.view.Guard_portal;
 
+import javafx.animation.FadeTransition;
+import javafx.animation.ScaleTransition;
+import javafx.animation.TranslateTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -8,6 +11,12 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
@@ -17,6 +26,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -27,6 +37,7 @@ import com.society.controller.Guard_Controller.GuardController;
 import com.society.model.Guard_model.GuardModel;
 import com.society.model.Guard_model.VisitorModel;
 import com.society.view.ScreenSize;
+import com.society.view.Owner_portal.OwnerDashboard;
 
 public class ManualVisitorEntry {
 
@@ -40,6 +51,30 @@ public class ManualVisitorEntry {
     public static Scene createScene(Stage stage, String guardEmail) {
 
         BorderPane root = new BorderPane();
+
+         Image image = new Image(
+                    OwnerDashboard.class
+                            .getResource(
+                                    "/background-Dashboard5.jpeg"
+                            )
+                            .toExternalForm()
+            );
+
+                BackgroundImage bgImage = new BackgroundImage(
+                                image,
+                                BackgroundRepeat.NO_REPEAT,
+                                BackgroundRepeat.NO_REPEAT,
+                                BackgroundPosition.CENTER,
+                                new BackgroundSize(
+                                                100,
+                                                100,
+                                                true,
+                                                true,
+                                                false,
+                                                true));
+
+                root.setBackground(
+                                new Background(bgImage));
 
         // =====================================================
         // GET SOCIETY FROM LOGGED-IN GUARD
@@ -94,12 +129,16 @@ public class ManualVisitorEntry {
 
         content.setFillWidth(true);
 
-        content.setStyle(
-                "-fx-background-color: #e8ddd5;"
-        );
+      
+
+        // =====================================================
+        // HEADER - FIXED
+        // =====================================================
 
         HBox header = new HBox();
-
+        header.setPrefHeight(80);
+        header.setMinHeight(80);
+        header.setMaxHeight(80);
         header.setPadding(
                 new Insets(25, 40, 25, 40)
         );
@@ -116,6 +155,7 @@ public class ManualVisitorEntry {
 
         title.setStyle(
                 "-fx-font-size:24px;" +
+                "-fx-font-family:'Bodoni MT';" +
                 "-fx-font-weight:bold;" +
                 "-fx-text-fill: white;"
         );
@@ -181,6 +221,15 @@ public class ManualVisitorEntry {
                 spacer,
                 dateBox
         );
+
+        // Header must stay fixed
+        header.setOpacity(1);
+        header.setTranslateY(0);
+        header.setTranslateX(0);
+
+        // =====================================================
+        // FORM CARD
+        // =====================================================
 
         VBox formCard =
                 new VBox();
@@ -395,6 +444,10 @@ public class ManualVisitorEntry {
                 2, 1
         );
 
+        // =====================================================
+        // BUTTONS
+        // =====================================================
+
         Button clearButton =
                 new Button("Clear");
 
@@ -434,6 +487,17 @@ public class ManualVisitorEntry {
                 Pos.CENTER_RIGHT
         );
 
+        // =====================================================
+        // BUTTON POPUP ANIMATION
+        // =====================================================
+
+        addButtonPopupAnimation(clearButton);
+        addButtonPopupAnimation(submitButton);
+
+        // =====================================================
+        // CLEAR BUTTON
+        // =====================================================
+
         clearButton.setOnAction(e -> {
 
             nameField.clear();
@@ -446,6 +510,10 @@ public class ManualVisitorEntry {
 
             purposeBox.setValue(null);
         });
+
+        // =====================================================
+        // SUBMIT BUTTON
+        // =====================================================
 
         submitButton.setOnAction(e -> {
 
@@ -642,13 +710,25 @@ public class ManualVisitorEntry {
                 formCard
         );
 
+        // =====================================================
+        // FORM CARD POPUP
+        // =====================================================
+
+        addCardPopupAnimation(formCard);
+
+        // =====================================================
+        // MAIN AREA
+        // =====================================================
+
         BorderPane mainarea =
                 new BorderPane();
 
+        // Header fixed at TOP
         mainarea.setTop(
                 header
         );
 
+        // Page content below header
         mainarea.setCenter(
                 content
         );
@@ -657,12 +737,138 @@ public class ManualVisitorEntry {
                 mainarea
         );
 
+        // =====================================================
+        // DOWN SIDE -> UP PAGE ANIMATION
+        // =====================================================
+
+        playPageAnimation(content);
+
         return new Scene(
                 root,
                 ScreenSize.getWidth(),
                 ScreenSize.getHeight()
         );
     }
+
+    // =========================================================
+    // PAGE DOWN -> UP ANIMATION
+    // =========================================================
+
+    private static void playPageAnimation(
+            VBox content) {
+
+        content.setOpacity(0);
+
+        content.setTranslateY(45);
+
+        FadeTransition fade =
+                new FadeTransition(
+                        Duration.millis(700),
+                        content
+                );
+
+        fade.setFromValue(0);
+
+        fade.setToValue(1);
+
+        TranslateTransition slide =
+                new TranslateTransition(
+                        Duration.millis(700),
+                        content
+                );
+
+        slide.setFromY(45);
+
+        slide.setToY(0);
+
+        fade.play();
+
+        slide.play();
+    }
+
+    // =========================================================
+    // BUTTON POPUP / HOVER ANIMATION
+    // =========================================================
+
+    private static void addButtonPopupAnimation(
+            Button button) {
+
+        button.setOnMouseEntered(e -> {
+
+            ScaleTransition scale =
+                    new ScaleTransition(
+                            Duration.millis(120),
+                            button
+                    );
+
+            scale.setToX(1.06);
+
+            scale.setToY(1.06);
+
+            scale.play();
+        });
+
+        button.setOnMouseExited(e -> {
+
+            ScaleTransition scale =
+                    new ScaleTransition(
+                            Duration.millis(120),
+                            button
+                    );
+
+            scale.setToX(1);
+
+            scale.setToY(1);
+
+            scale.play();
+        });
+    }
+
+    // =========================================================
+    // CARD POPUP ANIMATION
+    // =========================================================
+
+    private static void addCardPopupAnimation(
+            VBox card) {
+
+        card.setOpacity(0);
+
+        card.setScaleX(0.88);
+
+        card.setScaleY(0.88);
+
+        FadeTransition fade =
+                new FadeTransition(
+                        Duration.millis(550),
+                        card
+                );
+
+        fade.setFromValue(0);
+
+        fade.setToValue(1);
+
+        ScaleTransition scale =
+                new ScaleTransition(
+                        Duration.millis(550),
+                        card
+                );
+
+        scale.setFromX(0.88);
+
+        scale.setFromY(0.88);
+
+        scale.setToX(1);
+
+        scale.setToY(1);
+
+        fade.play();
+
+        scale.play();
+    }
+
+    // =========================================================
+    // LABEL
+    // =========================================================
 
     private static Label createLabel(
             String text) {
@@ -678,6 +884,10 @@ public class ManualVisitorEntry {
 
         return label;
     }
+
+    // =========================================================
+    // TEXT FIELD STYLE
+    // =========================================================
 
     private static void styleField(
             TextField field) {
@@ -696,6 +906,10 @@ public class ManualVisitorEntry {
         );
     }
 
+    // =========================================================
+    // COMBO BOX STYLE
+    // =========================================================
+
     private static void styleComboBox(
             ComboBox<String> box) {
 
@@ -711,6 +925,10 @@ public class ManualVisitorEntry {
                 "-fx-text-fill: #080808;"
         );
     }
+
+    // =========================================================
+    // ALERT
+    // =========================================================
 
     private static void showMessage(
             String title,

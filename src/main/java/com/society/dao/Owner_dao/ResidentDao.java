@@ -42,7 +42,7 @@ public class ResidentDao {
     // =========================================================
     // ADD RESIDENT
     //
-    // Residents/{email}
+    // Document ID = Resident Email
     // =========================================================
 
     public boolean addResident(
@@ -71,19 +71,27 @@ public class ResidentDao {
             }
 
 
+            // -------------------------------------------------
+            // EMAIL
+            // -------------------------------------------------
+
             String email =
                     resident.getEmail()
                             .trim()
                             .toLowerCase();
 
 
+            // -------------------------------------------------
+            // CREATE DATA
+            // -------------------------------------------------
+
             Map<String, Object> data =
                     new HashMap<>();
 
 
-            // =====================================================
+            // =================================================
             // BASIC INFORMATION
-            // =====================================================
+            // =================================================
 
             data.put(
                     "email",
@@ -133,9 +141,9 @@ public class ResidentDao {
             );
 
 
-            // =====================================================
+            // =================================================
             // RESIDENT TYPE
-            // =====================================================
+            // =================================================
 
             data.put(
                     "residentType",
@@ -145,9 +153,9 @@ public class ResidentDao {
             );
 
 
-            // =====================================================
-            // RELATIONSHIP INFORMATION
-            // =====================================================
+            // =================================================
+            // RELATIONSHIPS
+            // =================================================
 
             data.put(
                     "ownerEmail",
@@ -164,9 +172,9 @@ public class ResidentDao {
             );
 
 
-            // =====================================================
+            // =================================================
             // RENTAL INFORMATION
-            // =====================================================
+            // =================================================
 
             data.put(
                     "moveInDate",
@@ -197,9 +205,9 @@ public class ResidentDao {
             );
 
 
-            // =====================================================
+            // =================================================
             // OTHER INFORMATION
-            // =====================================================
+            // =================================================
 
             data.put(
                     "idProof",
@@ -230,9 +238,9 @@ public class ResidentDao {
             );
 
 
-            // =====================================================
+            // =================================================
             // STATUS
-            // =====================================================
+            // =================================================
 
             data.put(
                     "status",
@@ -242,21 +250,11 @@ public class ResidentDao {
             );
 
 
-            // =====================================================
-            // PROFILE IMAGE
-            // =====================================================
-
-            data.put(
-                    "profileImageUrl",
-                    safeString(
-                            resident.getProfileImageUrl()
-                    )
-            );
-
-
-            // =====================================================
-            // SAVE
-            // =====================================================
+            // =================================================
+            // SAVE TO FIRESTORE
+            //
+            // Residents/{email}
+            // =================================================
 
             db.collection(COLLECTION)
                     .document(email)
@@ -273,13 +271,11 @@ public class ResidentDao {
             );
 
             System.out.println(
-                    "Collection: "
-                            + COLLECTION
+                    "Collection: " + COLLECTION
             );
 
             System.out.println(
-                    "Document ID: "
-                            + email
+                    "Document ID: " + email
             );
 
             System.out.println(
@@ -312,7 +308,7 @@ public class ResidentDao {
     // =========================================================
     // ADD TENANT
     //
-    // Tenant is stored inside Residents collection.
+    // Tenant is also stored inside Residents collection.
     //
     // Document ID = Tenant Email
     // =========================================================
@@ -329,6 +325,8 @@ public class ResidentDao {
     // =========================================================
     // GET RESIDENT BY EMAIL
     //
+    // Used by Owner Profile
+    //
     // Residents/{email}
     // =========================================================
 
@@ -344,14 +342,14 @@ public class ResidentDao {
             }
 
 
-            String normalizedEmail =
+            email =
                     email.trim()
                             .toLowerCase();
 
 
             DocumentSnapshot document =
                     db.collection(COLLECTION)
-                            .document(normalizedEmail)
+                            .document(email)
                             .get()
                             .get();
 
@@ -360,7 +358,7 @@ public class ResidentDao {
 
                 System.out.println(
                         "Resident not found: "
-                                + normalizedEmail
+                                + email
                 );
 
                 return null;
@@ -389,15 +387,11 @@ public class ResidentDao {
     // =========================================================
     // GET OWNER BY EMAIL
     //
-    // Owners/{autoGeneratedId}
+    // Owners use Firestore auto-generated document IDs.
+    // Therefore we query the email FIELD, not document(email).
     //
-    // IMPORTANT:
-    // Owners use auto-generated Firestore document IDs.
-    // Therefore the owner is searched using the email FIELD.
-    //
-    // This method also stores:
-    //
-    // ownerId = Firestore document ID
+    // Owners/{autoId}
+    // email, name, mobile, flat, status
     // =========================================================
 
     public ResidentModel getOwnerByEmail(
@@ -411,219 +405,83 @@ public class ResidentDao {
                 return null;
             }
 
-
-            String normalizedEmail =
+            email =
                     email.trim()
                             .toLowerCase();
-
 
             QuerySnapshot querySnapshot =
                     db.collection("Owners")
                             .whereEqualTo(
                                     "email",
-                                    normalizedEmail
+                                    email
                             )
                             .limit(1)
                             .get()
                             .get();
 
-
             if (querySnapshot.isEmpty()) {
 
                 System.out.println(
-                        "Owner not found for email: "
-                                + normalizedEmail
+                        "Owner not found for email: " + email
                 );
 
                 return null;
             }
 
-
             DocumentSnapshot document =
-                    querySnapshot
-                            .getDocuments()
-                            .get(0);
-
+                    querySnapshot.getDocuments().get(0);
 
             ResidentModel owner =
                     new ResidentModel();
 
-
-            // =====================================================
-            // OWNER ID
-            //
-            // Owners use an auto-generated Firestore document ID.
-            // =====================================================
-
-            owner.setOwnerId(
-                    document.getId()
-            );
-
-
-            // =====================================================
-            // BASIC INFORMATION
-            // =====================================================
-
+            // Owners collection uses these exact field names.
             owner.setEmail(
-                    getString(
-                            document,
-                            "email"
-                    )
+                    document.getString("email")
             );
-
 
             owner.setName(
-                    getString(
-                            document,
-                            "name"
-                    )
+                    document.getString("name")
             );
 
-
-            /*
-             * Owners currently use "mobile".
-             *
-             * We also support "phone" as a fallback so that
-             * an older Owner document does not lose its value.
-             */
-
-            String phone =
-                    getString(
-                            document,
-                            "mobile"
-                    );
-
-            if (phone.isEmpty()) {
-
-                phone =
-                        getString(
-                                document,
-                                "phone"
-                        );
-            }
-
+            // IMPORTANT: Owners uses 'mobile', while ResidentModel
+            // uses 'phone'.
             owner.setPhone(
-                    phone
+                    document.getString("mobile")
             );
-
-
-            // =====================================================
-            // FLAT
-            // =====================================================
-
-            String flat =
-                    getString(
-                            document,
-                            "flat"
-                    );
-
-            if (flat.isEmpty()) {
-
-                flat =
-                        getString(
-                                document,
-                                "flatNo"
-                        );
-            }
-
-            if (flat.isEmpty()) {
-
-                flat =
-                        getString(
-                                document,
-                                "flatNumber"
-                        );
-            }
 
             owner.setFlat(
-                    flat
+                    document.getString("flat")
             );
 
+            owner.setStatus(
+                    document.getString("status")
+            );
+
+            owner.setResidentType(
+                    "Owner"
+            );
 
             // =====================================================
             // SOCIETY
             // =====================================================
 
             String society =
-                    getString(
-                            document,
-                            "society"
-                    );
+                    document.getString("society");
 
-            if (society.isEmpty()) {
+            if (society == null ||
+                    society.trim().isEmpty()) {
 
                 society =
-                        getString(
-                                document,
-                                "societyName"
-                        );
+                        document.getString("societyName");
             }
 
             owner.setSociety(
-                    society
+                    safeString(society)
             );
-
-
-            // =====================================================
-            // DATE OF BIRTH
-            // =====================================================
-
-            owner.setDateOfBirth(
-                    getString(
-                            document,
-                            "dateOfBirth"
-                    )
-            );
-
-
-            // =====================================================
-            // GENDER
-            // =====================================================
-
-            owner.setGender(
-                    getString(
-                            document,
-                            "gender"
-                    )
-            );
-
-
-            // =====================================================
-            // RESIDENT TYPE
-            // =====================================================
-
-            owner.setResidentType(
-                    "Owner"
-            );
-
-
-            // =====================================================
-            // STATUS
-            // =====================================================
-
-            owner.setStatus(
-                    getString(
-                            document,
-                            "status"
-                    )
-            );
-
-
-            // =====================================================
-            // PROFILE IMAGE
-            // =====================================================
 
             owner.setProfileImageUrl(
-                    getString(
-                            document,
-                            "profileImageUrl"
-                    )
+                    document.getString("profileImageUrl")
             );
-
-
-            // =====================================================
-            // PRINT OWNER INFORMATION
-            // =====================================================
 
             System.out.println(
                     "===================================="
@@ -640,51 +498,34 @@ public class ResidentDao {
 
             System.out.println(
                     "Owner Email: "
-                            + owner.getEmail()
+                            + document.getString("email")
             );
 
             System.out.println(
                     "Owner Name: "
-                            + owner.getName()
+                            + document.getString("name")
             );
 
             System.out.println(
                     "Owner Mobile: "
-                            + owner.getPhone()
+                            + document.getString("mobile")
             );
 
             System.out.println(
                     "Owner Flat: "
-                            + owner.getFlat()
-            );
-
-            System.out.println(
-                    "Owner Society: "
-                            + owner.getSociety()
-            );
-
-            System.out.println(
-                    "Owner DOB: "
-                            + owner.getDateOfBirth()
-            );
-
-            System.out.println(
-                    "Owner Gender: "
-                            + owner.getGender()
+                            + document.getString("flat")
             );
 
             System.out.println(
                     "Owner Status: "
-                            + owner.getStatus()
+                            + document.getString("status")
             );
 
             System.out.println(
                     "===================================="
             );
 
-
             return owner;
-
 
         } catch (Exception e) {
 
@@ -703,7 +544,8 @@ public class ResidentDao {
     // =========================================================
     // UPDATE OWNER PROFILE IMAGE
     //
-    // Owners/{autoGeneratedId}
+    // Owners/{autoId}
+    // Finds the owner by email and stores the Cloudinary URL.
     // =========================================================
 
     public boolean updateOwnerProfileImage(
@@ -714,22 +556,16 @@ public class ResidentDao {
 
             if (email == null ||
                     email.trim().isEmpty()) {
-
                 return false;
             }
-
 
             if (profileImageUrl == null ||
                     profileImageUrl.trim().isEmpty()) {
-
                 return false;
             }
 
-
             String normalizedEmail =
-                    email.trim()
-                            .toLowerCase();
-
+                    email.trim().toLowerCase();
 
             QuerySnapshot querySnapshot =
                     db.collection("Owners")
@@ -741,7 +577,6 @@ public class ResidentDao {
                             .get()
                             .get();
 
-
             if (querySnapshot.isEmpty()) {
 
                 System.out.println(
@@ -752,12 +587,8 @@ public class ResidentDao {
                 return false;
             }
 
-
             DocumentSnapshot document =
-                    querySnapshot
-                            .getDocuments()
-                            .get(0);
-
+                    querySnapshot.getDocuments().get(0);
 
             document.getReference()
                     .update(
@@ -766,14 +597,11 @@ public class ResidentDao {
                     )
                     .get();
 
-
             System.out.println(
                     "Owner profile image URL saved successfully."
             );
 
-
             return true;
-
 
         } catch (Exception e) {
 
@@ -789,10 +617,13 @@ public class ResidentDao {
     }
 
 
+
     // =========================================================
     // GET RESIDENTS BY OWNER EMAIL
     //
-    // Gets all Residents belonging to this owner.
+    // Used in Owner Portal
+    //
+    // Finds tenants/family belonging to owner.
     // =========================================================
 
     public List<ResidentModel> getResidentsByOwnerEmail(
@@ -811,7 +642,7 @@ public class ResidentDao {
             }
 
 
-            String normalizedOwnerEmail =
+            ownerEmail =
                     ownerEmail.trim()
                             .toLowerCase();
 
@@ -820,7 +651,7 @@ public class ResidentDao {
                     db.collection(COLLECTION)
                             .whereEqualTo(
                                     "ownerEmail",
-                                    normalizedOwnerEmail
+                                    ownerEmail
                             )
                             .get()
                             .get();
@@ -833,7 +664,6 @@ public class ResidentDao {
                         convertDocumentToModel(
                                 document
                         );
-
 
                 residents.add(
                         resident
@@ -865,18 +695,10 @@ public class ResidentDao {
     // =========================================================
     // GET ACTIVE TENANTS BY OWNER EMAIL
     //
-    // This is used by the new Remove Tenant UI.
-    //
-    // Only records satisfying BOTH conditions are returned:
-    //
-    // residentType = Tenant
-    // status       = Active
-    //
-    // Owner filtering is done using ownerEmail.
-    //
-    // We intentionally filter Tenant + Active in Java after
-    // querying ownerEmail so Firestore does not require a
-    // composite index for this screen.
+    // Only Tenant records with status = Active are returned.
+    // The query uses ownerEmail only and filters the remaining
+    // fields in Java, avoiding a Firestore composite-index
+    // requirement.
     // =========================================================
 
     public List<ResidentModel> getActiveTenants(
@@ -884,7 +706,6 @@ public class ResidentDao {
 
         List<ResidentModel> tenants =
                 new ArrayList<>();
-
 
         try {
 
@@ -894,11 +715,8 @@ public class ResidentDao {
                 return tenants;
             }
 
-
             String normalizedOwnerEmail =
-                    ownerEmail.trim()
-                            .toLowerCase();
-
+                    ownerEmail.trim().toLowerCase();
 
             QuerySnapshot querySnapshot =
                     db.collection(COLLECTION)
@@ -909,50 +727,30 @@ public class ResidentDao {
                             .get()
                             .get();
 
-
             for (DocumentSnapshot document :
                     querySnapshot.getDocuments()) {
 
                 String residentType =
-                        getString(
-                                document,
-                                "residentType"
-                        );
-
+                        document.getString("residentType");
 
                 String status =
-                        getString(
-                                document,
-                                "status"
-                        );
+                        document.getString("status");
 
-
-                if (residentType.equalsIgnoreCase(
-                        "Tenant"
-                ) &&
-                        status.equalsIgnoreCase(
-                                "Active"
-                        )) {
-
-
-                    ResidentModel tenant =
-                            convertDocumentToModel(
-                                    document
-                            );
-
+                if (residentType != null &&
+                        residentType.equalsIgnoreCase("Tenant") &&
+                        status != null &&
+                        status.equalsIgnoreCase("Active")) {
 
                     tenants.add(
-                            tenant
+                            convertDocumentToModel(document)
                     );
                 }
             }
-
 
             System.out.println(
                     "Active tenants found for owner: "
                             + tenants.size()
             );
-
 
         } catch (Exception e) {
 
@@ -964,7 +762,6 @@ public class ResidentDao {
             e.printStackTrace();
         }
 
-
         return tenants;
     }
 
@@ -972,14 +769,10 @@ public class ResidentDao {
     // =========================================================
     // GET RENTAL HISTORY
     //
-    // Returns Tenant records belonging to owner.
+    // Gets only Tenant records belonging
+    // to the owner.
     //
-    // Includes:
-    // Active tenants
-    // Inactive tenants
-    //
-    // This is intentionally filtered in Java after querying
-    // ownerEmail to avoid a Firestore composite-index dependency.
+    // Active + Inactive
     // =========================================================
 
     public List<ResidentModel> getRentalHistory(
@@ -998,7 +791,7 @@ public class ResidentDao {
             }
 
 
-            String normalizedOwnerEmail =
+            ownerEmail =
                     ownerEmail.trim()
                             .toLowerCase();
 
@@ -1007,7 +800,11 @@ public class ResidentDao {
                     db.collection(COLLECTION)
                             .whereEqualTo(
                                     "ownerEmail",
-                                    normalizedOwnerEmail
+                                    ownerEmail
+                            )
+                            .whereEqualTo(
+                                    "residentType",
+                                    "Tenant"
                             )
                             .get()
                             .get();
@@ -1016,23 +813,14 @@ public class ResidentDao {
             for (DocumentSnapshot document :
                     querySnapshot.getDocuments()) {
 
-                String residentType =
-                        getString(
-                                document,
-                                "residentType"
+                ResidentModel resident =
+                        convertDocumentToModel(
+                                document
                         );
 
-
-                if (residentType.equalsIgnoreCase(
-                        "Tenant"
-                )) {
-
-                    residents.add(
-                            convertDocumentToModel(
-                                    document
-                            )
-                    );
-                }
+                residents.add(
+                        resident
+                );
             }
 
 
@@ -1058,20 +846,11 @@ public class ResidentDao {
 
 
     // =========================================================
-    // REMOVE TENANT BY OWNER EMAIL + TENANT EMAIL
+    // REMOVE TENANT BY OWNER + EMAIL
     //
-    // NEW METHOD FOR THE NEW REMOVE TENANT UI
-    //
-    // IMPORTANT:
-    // The tenant document is NOT deleted.
-    //
-    // Instead:
-    //
-    // status        -> Inactive
-    // moveOutDate   -> selected date
-    // removalReason -> reason
-    //
-    // This preserves Rental History.
+    // Secure version used by the new Owner Portal UI.
+    // The tenant must belong to the supplied owner, be a Tenant,
+    // and currently be Active.
     // =========================================================
 
     public boolean removeTenant(
@@ -1083,75 +862,40 @@ public class ResidentDao {
         try {
 
             if (ownerEmail == null ||
-                    ownerEmail.trim().isEmpty()) {
-
-                System.out.println(
-                        "Owner email is empty."
-                );
-
-                return false;
-            }
-
-
-            if (tenantEmail == null ||
+                    ownerEmail.trim().isEmpty() ||
+                    tenantEmail == null ||
                     tenantEmail.trim().isEmpty()) {
 
-                System.out.println(
-                        "Tenant email is empty."
-                );
-
                 return false;
             }
 
-
             String normalizedOwnerEmail =
-                    ownerEmail.trim()
-                            .toLowerCase();
-
+                    ownerEmail.trim().toLowerCase();
 
             String normalizedTenantEmail =
-                    tenantEmail.trim()
-                            .toLowerCase();
-
-
-            // =====================================================
-            // GET TENANT
-            // =====================================================
+                    tenantEmail.trim().toLowerCase();
 
             DocumentSnapshot document =
                     db.collection(COLLECTION)
-                            .document(
-                                    normalizedTenantEmail
-                            )
+                            .document(normalizedTenantEmail)
                             .get()
                             .get();
-
 
             if (!document.exists()) {
 
                 System.out.println(
-                        "Tenant not found: "
-                                + normalizedTenantEmail
+                        "Tenant not found for this owner."
                 );
 
                 return false;
             }
 
-
-            // =====================================================
-            // VERIFY OWNER
-            // =====================================================
-
             String documentOwnerEmail =
-                    getString(
-                            document,
-                            "ownerEmail"
-                    );
+                    document.getString("ownerEmail");
 
-
-            if (!documentOwnerEmail.equalsIgnoreCase(
-                    normalizedOwnerEmail
-            )) {
+            if (documentOwnerEmail == null ||
+                    !documentOwnerEmail.trim().equalsIgnoreCase(
+                            normalizedOwnerEmail)) {
 
                 System.out.println(
                         "Tenant does not belong to this owner."
@@ -1160,21 +904,14 @@ public class ResidentDao {
                 return false;
             }
 
-
-            // =====================================================
-            // VERIFY RESIDENT TYPE
-            // =====================================================
-
             String residentType =
-                    getString(
-                            document,
-                            "residentType"
-                    );
+                    document.getString("residentType");
 
+            String status =
+                    document.getString("status");
 
-            if (!residentType.equalsIgnoreCase(
-                    "Tenant"
-            )) {
+            if (residentType == null ||
+                    !residentType.equalsIgnoreCase("Tenant")) {
 
                 System.out.println(
                         "Selected record is not a Tenant."
@@ -1183,21 +920,8 @@ public class ResidentDao {
                 return false;
             }
 
-
-            // =====================================================
-            // VERIFY STATUS
-            // =====================================================
-
-            String status =
-                    getString(
-                            document,
-                            "status"
-                    );
-
-
-            if (!status.equalsIgnoreCase(
-                    "Active"
-            )) {
+            if (status == null ||
+                    !status.equalsIgnoreCase("Active")) {
 
                 System.out.println(
                         "Tenant is not currently active."
@@ -1206,49 +930,27 @@ public class ResidentDao {
                 return false;
             }
 
-
-            // =====================================================
-            // PREPARE UPDATE
-            // =====================================================
-
             Map<String, Object> updates =
                     new HashMap<>();
-
 
             updates.put(
                     "status",
                     "Inactive"
             );
 
-
             updates.put(
                     "moveOutDate",
-                    safeString(
-                            moveOutDate
-                    )
+                    safeString(moveOutDate)
             );
-
 
             updates.put(
                     "removalReason",
-                    safeString(
-                            reason
-                    )
+                    safeString(reason)
             );
-
-
-            // =====================================================
-            // UPDATE FIRESTORE
-            // =====================================================
 
             document.getReference()
                     .update(updates)
                     .get();
-
-
-            System.out.println(
-                    "===================================="
-            );
 
             System.out.println(
                     "Tenant removed successfully."
@@ -1264,27 +966,7 @@ public class ResidentDao {
                             + normalizedOwnerEmail
             );
 
-            System.out.println(
-                    "Status: Inactive"
-            );
-
-            System.out.println(
-                    "Move-out Date: "
-                            + moveOutDate
-            );
-
-            System.out.println(
-                    "Reason: "
-                            + reason
-            );
-
-            System.out.println(
-                    "===================================="
-            );
-
-
             return true;
-
 
         } catch (Exception e) {
 
@@ -1303,15 +985,16 @@ public class ResidentDao {
     // =========================================================
     // REMOVE TENANT BY EMAIL
     //
-    // Compatibility method.
+    // IMPORTANT:
+    // We DO NOT delete the tenant document.
     //
-    // Used if another part of the project calls:
+    // We update:
     //
-    // removeTenant(
-    //     tenantEmail,
-    //     moveOutDate,
-    //     reason
-    // )
+    // status        -> Inactive
+    // moveOutDate   -> selected date
+    // removalReason -> reason
+    //
+    // This preserves rental history.
     // =========================================================
 
     public boolean removeTenant(
@@ -1332,16 +1015,18 @@ public class ResidentDao {
             }
 
 
-            String normalizedTenantEmail =
+            tenantEmail =
                     tenantEmail.trim()
                             .toLowerCase();
 
 
+            // -------------------------------------------------
+            // GET TENANT
+            // -------------------------------------------------
+
             DocumentSnapshot document =
                     db.collection(COLLECTION)
-                            .document(
-                                    normalizedTenantEmail
-                            )
+                            .document(tenantEmail)
                             .get()
                             .get();
 
@@ -1350,27 +1035,27 @@ public class ResidentDao {
 
                 System.out.println(
                         "Tenant not found: "
-                                + normalizedTenantEmail
+                                + tenantEmail
                 );
 
                 return false;
             }
 
 
-            // =====================================================
+            // -------------------------------------------------
             // CHECK RESIDENT TYPE
-            // =====================================================
+            // -------------------------------------------------
 
             String residentType =
-                    getString(
-                            document,
+                    document.getString(
                             "residentType"
                     );
 
 
-            if (!residentType.equalsIgnoreCase(
-                    "Tenant"
-            )) {
+            if (residentType == null ||
+                    !residentType.equalsIgnoreCase(
+                            "Tenant"
+                    )) {
 
                 System.out.println(
                         "This resident is not a Tenant."
@@ -1380,20 +1065,20 @@ public class ResidentDao {
             }
 
 
-            // =====================================================
+            // -------------------------------------------------
             // CHECK STATUS
-            // =====================================================
+            // -------------------------------------------------
 
             String status =
-                    getString(
-                            document,
+                    document.getString(
                             "status"
                     );
 
 
-            if (status.equalsIgnoreCase(
-                    "Inactive"
-            )) {
+            if (status != null &&
+                    status.equalsIgnoreCase(
+                            "Inactive"
+                    )) {
 
                 System.out.println(
                         "Tenant is already inactive."
@@ -1403,9 +1088,9 @@ public class ResidentDao {
             }
 
 
-            // =====================================================
+            // -------------------------------------------------
             // UPDATE
-            // =====================================================
+            // -------------------------------------------------
 
             Map<String, Object> updates =
                     new HashMap<>();
@@ -1416,20 +1101,14 @@ public class ResidentDao {
                     "Inactive"
             );
 
-
             updates.put(
                     "moveOutDate",
-                    safeString(
-                            moveOutDate
-                    )
+                    safeString(moveOutDate)
             );
-
 
             updates.put(
                     "removalReason",
-                    safeString(
-                            reason
-                    )
+                    safeString(reason)
             );
 
 
@@ -1448,7 +1127,7 @@ public class ResidentDao {
 
             System.out.println(
                     "Tenant Email: "
-                            + normalizedTenantEmail
+                            + tenantEmail
             );
 
             System.out.println(
@@ -1482,15 +1161,14 @@ public class ResidentDao {
     //
     // COMPATIBILITY METHOD
     //
-    // Existing UI may send:
+    // Existing RemoveTenant UI can continue
+    // sending:
     //
     // ownerEmail
     // name
     // flat
     // moveOutDate
     // reason
-    //
-    // We keep this method so existing code does not break.
     // =========================================================
 
     public boolean removeTenant(
@@ -1508,13 +1186,11 @@ public class ResidentDao {
                 return false;
             }
 
-
             if (name == null ||
                     name.trim().isEmpty()) {
 
                 return false;
             }
-
 
             if (flat == null ||
                     flat.trim().isEmpty()) {
@@ -1523,133 +1199,103 @@ public class ResidentDao {
             }
 
 
-            String normalizedOwnerEmail =
+            ownerEmail =
                     ownerEmail.trim()
                             .toLowerCase();
 
-
-            String normalizedName =
+            name =
                     name.trim();
 
-
-            String normalizedFlat =
+            flat =
                     flat.trim();
 
 
-            // =====================================================
-            // GET ALL OWNER RESIDENTS
-            //
-            // We avoid a multi-field Firestore query here.
-            // =====================================================
+            // -------------------------------------------------
+            // FIND ACTIVE TENANT
+            // -------------------------------------------------
 
             QuerySnapshot querySnapshot =
                     db.collection(COLLECTION)
                             .whereEqualTo(
                                     "ownerEmail",
-                                    normalizedOwnerEmail
+                                    ownerEmail
+                            )
+                            .whereEqualTo(
+                                    "residentType",
+                                    "Tenant"
+                            )
+                            .whereEqualTo(
+                                    "name",
+                                    name
+                            )
+                            .whereEqualTo(
+                                    "flat",
+                                    flat
+                            )
+                            .whereEqualTo(
+                                    "status",
+                                    "Active"
                             )
                             .get()
                             .get();
 
 
-            for (DocumentSnapshot document :
-                    querySnapshot.getDocuments()) {
+            if (querySnapshot.isEmpty()) {
 
-                String residentType =
-                        getString(
-                                document,
-                                "residentType"
-                        );
+                System.out.println(
+                        "Active tenant not found."
+                );
 
-
-                String status =
-                        getString(
-                                document,
-                                "status"
-                        );
-
-
-                String documentName =
-                        getString(
-                                document,
-                                "name"
-                        );
-
-
-                String documentFlat =
-                        getString(
-                                document,
-                                "flat"
-                        );
-
-
-                if (residentType.equalsIgnoreCase(
-                        "Tenant"
-                ) &&
-                        status.equalsIgnoreCase(
-                                "Active"
-                        ) &&
-                        documentName.equalsIgnoreCase(
-                                normalizedName
-                        ) &&
-                        documentFlat.equalsIgnoreCase(
-                                normalizedFlat
-                        )) {
-
-
-                    Map<String, Object> updates =
-                            new HashMap<>();
-
-
-                    updates.put(
-                            "status",
-                            "Inactive"
-                    );
-
-
-                    updates.put(
-                            "moveOutDate",
-                            safeString(
-                                    moveOutDate
-                            )
-                    );
-
-
-                    updates.put(
-                            "removalReason",
-                            safeString(
-                                    reason
-                            )
-                    );
-
-
-                    document.getReference()
-                            .update(updates)
-                            .get();
-
-
-                    System.out.println(
-                            "Tenant removed successfully."
-                    );
-
-
-                    System.out.println(
-                            "Tenant Email: "
-                                    + document.getId()
-                    );
-
-
-                    return true;
-                }
+                return false;
             }
 
 
-            System.out.println(
-                    "Active tenant not found."
+            DocumentSnapshot document =
+                    querySnapshot
+                            .getDocuments()
+                            .get(0);
+
+
+            // -------------------------------------------------
+            // UPDATE
+            // -------------------------------------------------
+
+            Map<String, Object> updates =
+                    new HashMap<>();
+
+
+            updates.put(
+                    "status",
+                    "Inactive"
+            );
+
+            updates.put(
+                    "moveOutDate",
+                    safeString(moveOutDate)
+            );
+
+            updates.put(
+                    "removalReason",
+                    safeString(reason)
             );
 
 
-            return false;
+            document.getReference()
+                    .update(updates)
+                    .get();
+
+
+            System.out.println(
+                    "Tenant removed successfully."
+            );
+
+            System.out.println(
+                    "Tenant Email: "
+                            + document.getId()
+            );
+
+
+            return true;
 
 
         } catch (Exception e) {
@@ -1669,7 +1315,9 @@ public class ResidentDao {
     // =========================================================
     // UPDATE RESIDENT PROFILE
     //
-    // Residents/{email}
+    // Document ID = Email
+    //
+    // Email itself is NOT changed.
     // =========================================================
 
     public boolean updateResidentProfile(
@@ -1684,20 +1332,26 @@ public class ResidentDao {
             if (email == null ||
                     email.trim().isEmpty()) {
 
+                System.out.println(
+                        "Resident email is empty."
+                );
+
                 return false;
             }
 
 
-            String normalizedEmail =
+            email =
                     email.trim()
                             .toLowerCase();
 
 
+            // -------------------------------------------------
+            // GET DOCUMENT
+            // -------------------------------------------------
+
             DocumentSnapshot document =
                     db.collection(COLLECTION)
-                            .document(
-                                    normalizedEmail
-                            )
+                            .document(email)
                             .get()
                             .get();
 
@@ -1706,12 +1360,16 @@ public class ResidentDao {
 
                 System.out.println(
                         "Resident not found: "
-                                + normalizedEmail
+                                + email
                 );
 
                 return false;
             }
 
+
+            // -------------------------------------------------
+            // UPDATE DATA
+            // -------------------------------------------------
 
             Map<String, Object> updates =
                     new HashMap<>();
@@ -1722,24 +1380,25 @@ public class ResidentDao {
                     safeString(name)
             );
 
-
             updates.put(
                     "phone",
                     safeString(phone)
             );
-
 
             updates.put(
                     "flat",
                     safeString(flat)
             );
 
-
             updates.put(
                     "society",
                     safeString(society)
             );
 
+
+            // -------------------------------------------------
+            // UPDATE FIRESTORE
+            // -------------------------------------------------
 
             document.getReference()
                     .update(updates)
@@ -1755,8 +1414,7 @@ public class ResidentDao {
             );
 
             System.out.println(
-                    "Email: "
-                            + normalizedEmail
+                    "Email: " + email
             );
 
             System.out.println(
@@ -1782,157 +1440,7 @@ public class ResidentDao {
 
 
     // =========================================================
-    // UPDATE OWNER PROFILE
-    //
-    // Owners/{autoGeneratedId}
-    //
-    // Owner is located using email.
-    //
-    // IMPORTANT:
-    // Owners use:
-    //
-    // mobile
-    // flat
-    // society
-    //
-    // NOT phone.
-    // =========================================================
-
-    public boolean updateOwnerProfile(
-            String email,
-            String name,
-            String phone,
-            String flat,
-            String society) {
-
-        try {
-
-            if (email == null ||
-                    email.trim().isEmpty()) {
-
-                System.out.println(
-                        "Owner email is empty."
-                );
-
-                return false;
-            }
-
-
-            String normalizedEmail =
-                    email.trim()
-                            .toLowerCase();
-
-
-            QuerySnapshot querySnapshot =
-                    db.collection("Owners")
-                            .whereEqualTo(
-                                    "email",
-                                    normalizedEmail
-                            )
-                            .limit(1)
-                            .get()
-                            .get();
-
-
-            if (querySnapshot.isEmpty()) {
-
-                System.out.println(
-                        "Owner not found for email: "
-                                + normalizedEmail
-                );
-
-                return false;
-            }
-
-
-            DocumentSnapshot ownerDocument =
-                    querySnapshot
-                            .getDocuments()
-                            .get(0);
-
-
-            Map<String, Object> updates =
-                    new HashMap<>();
-
-
-            updates.put(
-                    "name",
-                    safeString(name)
-            );
-
-
-            // =====================================================
-            // OWNER PHONE FIELD
-            // =====================================================
-
-            updates.put(
-                    "mobile",
-                    safeString(phone)
-            );
-
-
-            updates.put(
-                    "flat",
-                    safeString(flat)
-            );
-
-
-            updates.put(
-                    "society",
-                    safeString(society)
-            );
-
-
-            ownerDocument
-                    .getReference()
-                    .update(updates)
-                    .get();
-
-
-            System.out.println(
-                    "===================================="
-            );
-
-            System.out.println(
-                    "Owner profile updated successfully."
-            );
-
-            System.out.println(
-                    "Owner Email: "
-                            + normalizedEmail
-            );
-
-            System.out.println(
-                    "Owner Document ID: "
-                            + ownerDocument.getId()
-            );
-
-            System.out.println(
-                    "===================================="
-            );
-
-
-            return true;
-
-
-        } catch (Exception e) {
-
-            System.out.println(
-                    "Error updating owner profile: "
-                            + e.getMessage()
-            );
-
-            e.printStackTrace();
-
-            return false;
-        }
-    }
-
-
-    // =========================================================
-    // CONVERT RESIDENT DOCUMENT TO MODEL
-    //
-    // Used for Residents collection.
+    // CONVERT FIRESTORE DOCUMENT TO MODEL
     // =========================================================
 
     private ResidentModel convertDocumentToModel(
@@ -1943,73 +1451,47 @@ public class ResidentDao {
 
 
         // =====================================================
-        // RESIDENT ID
-        //
-        // Residents/{email}
-        // =====================================================
-
-        /*
-         * The ResidentModel getResidentId() already returns
-         * the email, because the Residents collection uses
-         * email as its document ID.
-         */
-
-
-        // =====================================================
         // BASIC INFORMATION
         // =====================================================
 
         resident.setEmail(
-                getString(
-                        document,
+                document.getString(
                         "email"
                 )
         );
 
-
         resident.setName(
-                getString(
-                        document,
+                document.getString(
                         "name"
                 )
         );
 
-
         resident.setPhone(
-                getString(
-                        document,
+                document.getString(
                         "phone"
                 )
         );
 
-
         resident.setDateOfBirth(
-                getString(
-                        document,
+                document.getString(
                         "dateOfBirth"
                 )
         );
 
-
         resident.setGender(
-                getString(
-                        document,
+                document.getString(
                         "gender"
                 )
         );
 
-
         resident.setFlat(
-                getString(
-                        document,
+                document.getString(
                         "flat"
                 )
         );
 
-
         resident.setSociety(
-                getString(
-                        document,
+                document.getString(
                         "society"
                 )
         );
@@ -2020,8 +1502,7 @@ public class ResidentDao {
         // =====================================================
 
         resident.setResidentType(
-                getString(
-                        document,
+                document.getString(
                         "residentType"
                 )
         );
@@ -2032,16 +1513,13 @@ public class ResidentDao {
         // =====================================================
 
         resident.setOwnerEmail(
-                getString(
-                        document,
+                document.getString(
                         "ownerEmail"
                 )
         );
 
-
         resident.setPrimaryResidentEmail(
-                getString(
-                        document,
+                document.getString(
                         "primaryResidentEmail"
                 )
         );
@@ -2052,32 +1530,25 @@ public class ResidentDao {
         // =====================================================
 
         resident.setMoveInDate(
-                getString(
-                        document,
+                document.getString(
                         "moveInDate"
                 )
         );
 
-
         resident.setMoveOutDate(
-                getString(
-                        document,
+                document.getString(
                         "moveOutDate"
                 )
         );
 
-
         resident.setMonthlyRent(
-                getString(
-                        document,
+                document.getString(
                         "monthlyRent"
                 )
         );
 
-
         resident.setSecurityDeposit(
-                getString(
-                        document,
+                document.getString(
                         "securityDeposit"
                 )
         );
@@ -2088,32 +1559,25 @@ public class ResidentDao {
         // =====================================================
 
         resident.setIdProof(
-                getString(
-                        document,
+                document.getString(
                         "idProof"
                 )
         );
 
-
         resident.setEmergencyContact(
-                getString(
-                        document,
+                document.getString(
                         "emergencyContact"
                 )
         );
 
-
         resident.setRemarks(
-                getString(
-                        document,
+                document.getString(
                         "remarks"
                 )
         );
 
-
         resident.setRemovalReason(
-                getString(
-                        document,
+                document.getString(
                         "removalReason"
                 )
         );
@@ -2124,59 +1588,13 @@ public class ResidentDao {
         // =====================================================
 
         resident.setStatus(
-                getString(
-                        document,
+                document.getString(
                         "status"
                 )
         );
 
 
-        // =====================================================
-        // PROFILE IMAGE
-        // =====================================================
-
-        resident.setProfileImageUrl(
-                getString(
-                        document,
-                        "profileImageUrl"
-                )
-        );
-
-
         return resident;
-    }
-
-
-    // =========================================================
-    // GET STRING SAFELY
-    //
-    // Prevents null values from reaching the UI.
-    // =========================================================
-
-    private String getString(
-            DocumentSnapshot document,
-            String fieldName) {
-
-        if (document == null ||
-                fieldName == null) {
-
-            return "";
-        }
-
-
-        String value =
-                document.getString(
-                        fieldName
-                );
-
-
-        if (value == null) {
-
-            return "";
-        }
-
-
-        return value.trim();
     }
 
 
@@ -2187,13 +1605,174 @@ public class ResidentDao {
     private String safeString(
             String value) {
 
-        if (value == null) {
+        return value == null
+                ? ""
+                : value;
+    }
 
-            return "";
+    // =========================================================
+// UPDATE OWNER PROFILE
+//
+// Owners collection:
+// Owners/{autoGeneratedId}
+//
+// Owner is located using the email FIELD.
+// =========================================================
+
+public boolean updateOwnerProfile(
+        String email,
+        String name,
+        String phone,
+        String flat,
+        String society) {
+
+    try {
+
+        // =====================================================
+        // VALIDATE EMAIL
+        // =====================================================
+
+        if (email == null ||
+                email.trim().isEmpty()) {
+
+            System.out.println(
+                    "Owner email is empty."
+            );
+
+            return false;
         }
 
 
-        return value.trim();
-    }
+        email =
+                email.trim()
+                        .toLowerCase();
 
+
+        // =====================================================
+        // FIND OWNER
+        // =====================================================
+
+        QuerySnapshot querySnapshot =
+                db.collection("Owners")
+                        .whereEqualTo(
+                                "email",
+                                email
+                        )
+                        .limit(1)
+                        .get()
+                        .get();
+
+
+        // =====================================================
+        // OWNER NOT FOUND
+        // =====================================================
+
+        if (querySnapshot.isEmpty()) {
+
+            System.out.println(
+                    "Owner not found for email: "
+                            + email
+            );
+
+            return false;
+        }
+
+
+        // =====================================================
+        // GET OWNER DOCUMENT
+        // =====================================================
+
+        DocumentSnapshot ownerDocument =
+                querySnapshot
+                        .getDocuments()
+                        .get(0);
+
+
+        // =====================================================
+        // PREPARE UPDATE
+        // =====================================================
+
+        Map<String, Object> updates =
+                new HashMap<>();
+
+
+        updates.put(
+                "name",
+                safeString(name)
+        );
+
+
+        // IMPORTANT:
+        // Owners collection uses "mobile",
+        // NOT "phone".
+
+        updates.put(
+                "mobile",
+                safeString(phone)
+        );
+
+
+        updates.put(
+                "flat",
+                safeString(flat)
+        );
+
+
+        updates.put(
+                "society",
+                safeString(society)
+        );
+
+
+        // =====================================================
+        // UPDATE FIRESTORE
+        // =====================================================
+
+        ownerDocument
+                .getReference()
+                .update(updates)
+                .get();
+
+
+        // =====================================================
+        // SUCCESS LOG
+        // =====================================================
+
+        System.out.println(
+                "===================================="
+        );
+
+        System.out.println(
+                "Owner profile updated successfully."
+        );
+
+        System.out.println(
+                "Owner Email: "
+                        + email
+        );
+
+        System.out.println(
+                "Owner Document ID: "
+                        + ownerDocument.getId()
+        );
+
+        System.out.println(
+                "===================================="
+        );
+
+
+        return true;
+
+    } catch (Exception e) {
+
+        System.out.println(
+                "Error updating owner profile: "
+                        + e.getMessage()
+        );
+
+        e.printStackTrace();
+
+        return false;
+    }
+}
 }

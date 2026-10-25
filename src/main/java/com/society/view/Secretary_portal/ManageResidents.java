@@ -1,11 +1,16 @@
+
 package com.society.view.Secretary_portal;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.society.controller.Secretary_Controller.ResidentController;
 import com.society.model.Secretary_model.Resident;
 import com.society.view.ScreenSize;
+import com.society.view.Owner_portal.OwnerDashboard;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -16,10 +21,17 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
+import javafx.scene.image.Image;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.Region;
 
 public class ManageResidents {
 
@@ -32,12 +44,14 @@ public class ManageResidents {
     // =========================================================
     // CURRENT RESIDENTS
     //
-    // This list contains ONLY the logged-in Secretary's
-    // society residents.
+    // Only logged-in Secretary's society residents.
     // =========================================================
 
     private List<Resident> currentResidents =
             new ArrayList<>();
+
+    private static final String BACKGROUND_IMAGE =
+            "/background-Dashboard5.jpeg";
 
     // =========================================================
     // CREATE SCENE
@@ -75,41 +89,191 @@ public class ManageResidents {
         );
 
         mainvb.setPadding(
-                new Insets(20)
+                new Insets(0, 0, 20, 0)
         );
 
         mainvb.setSpacing(10);
 
-        mainvb.setStyle(
-                "-fx-background-color:#b3adad;"
+        // mainvb.setStyle(
+        //         "-fx-background-color: #b3adad;"
+        // );
+
+        Image image = new Image(
+                    OwnerDashboard.class
+                            .getResource(
+                                    "/background-Dashboard5.jpeg"
+                            )
+                            .toExternalForm()
+            );
+
+                BackgroundImage bgImage = new BackgroundImage(
+                                image,
+                                BackgroundRepeat.NO_REPEAT,
+                                BackgroundRepeat.NO_REPEAT,
+                                BackgroundPosition.CENTER,
+                                new BackgroundSize(
+                                                100,
+                                                100,
+                                                true,
+                                                true,
+                                                false,
+                                                true));
+
+                mainvb.setBackground(
+                                new Background(bgImage));
+
+        // =====================================================
+        // HEADER
+        // =====================================================
+
+        HBox header = new HBox();
+
+        header.setPrefHeight(80);
+        header.setMinHeight(80);
+        header.setAlignment(Pos.CENTER_LEFT);
+        header.setPadding(new Insets(20));
+
+        header.setStyle(
+                "-fx-background-color: #4e342e;"
         );
 
-        // =====================================================
-        // TITLE
-        // =====================================================
+        Label greeting =
+                new Label( "Manage Residents");
 
-        Label title =
-                new Label("Manage Residents");
-
-        title.setStyle(
-                "-fx-font-size:28px;" +
-                "-fx-font-weight:bold;" +
-                "-fx-text-fill:black;"
+        greeting.setStyle( "-fx-font-family:'Bodoni MT';" +
+                "-fx-text-fill:white;" +
+                "-fx-font-size:20px;" +
+                "-fx-font-weight:bold;"
         );
-
-        // =====================================================
-        // SUBTITLE
-        // =====================================================
-
-        Label subtitle =
+         Label subtitle =
                 new Label(
                         "View and manage residents of your society"
                 );
 
-        subtitle.setStyle(
+        subtitle.setStyle( "-fx-font-family:'Bodoni MT';" +
                 "-fx-font-size:14px;" +
                 "-fx-text-fill:#777777;"
         );
+
+
+        Region headerSpacer = new Region();
+
+        HBox.setHgrow(
+                headerSpacer,
+                Priority.ALWAYS
+        );
+
+        Label notification =
+                new Label("🔔");
+
+        notification.setStyle(
+                "-fx-text-fill:white;" +
+                "-fx-font-size:22px;"
+        );
+
+        LocalDate today = LocalDate.now();
+
+        Label dateLabel =
+                new Label(
+                        today.format(
+                                DateTimeFormatter.ofPattern("dd MMM yyyy")
+                        )
+                );
+
+        dateLabel.setStyle(
+                "-fx-text-fill:white;" +
+                "-fx-font-size:13px;"
+        );
+
+        Label dayLabel =
+                new Label(
+                        today.format(
+                                DateTimeFormatter.ofPattern("EEEE")
+                        )
+                );
+
+        dayLabel.setStyle(
+                "-fx-text-fill:#D7CCC8;" +
+                "-fx-font-size:12px;"
+        );
+
+        VBox dateBox = new VBox(2);
+        dateBox.setAlignment(Pos.CENTER_RIGHT);
+        dateBox.getChildren().addAll(dateLabel, dayLabel);
+
+        header.getChildren().addAll(
+                greeting,
+                subtitle,
+                headerSpacer,
+                notification,
+                dateBox
+        );
+
+        // =====================================================
+        // CONTENT AREA
+        // =====================================================
+
+        VBox contentArea = new VBox(10);
+
+        contentArea.setMaxSize(
+                Double.MAX_VALUE,
+                Double.MAX_VALUE
+        );
+
+        contentArea.setPadding(
+                new Insets(20)
+        );
+
+        contentArea.setStyle(
+                "-fx-background-color:transparent;"
+
+        );
+
+        try {
+
+    Image backgroundImage =
+            new Image(
+                    getClass()
+                            .getResource("/background-Dashboard5.jpeg")
+                            .toExternalForm()
+            );
+
+    BackgroundImage bg =
+            new BackgroundImage(
+                    backgroundImage,
+                    BackgroundRepeat.NO_REPEAT,
+                    BackgroundRepeat.NO_REPEAT,
+                    BackgroundPosition.CENTER,
+                    new BackgroundSize(
+                            100,
+                            100,
+                            true,
+                            true,
+                            false,
+                            true
+                    )
+            );
+
+        contentArea.setBackground(
+                new Background(bg)
+        );
+
+        } catch (Exception ex) {
+
+        System.out.println(
+                "Background image not found: "
+                        + BACKGROUND_IMAGE
+        );
+
+        contentArea.setStyle(
+                "-fx-background-color:transparent;"
+        );
+        }
+
+
+        // =====================================================
+        // TITLE
+        // =====================================================
 
         // =====================================================
         // SEARCH FIELD
@@ -151,7 +315,7 @@ public class ManageResidents {
         refreshBtn.setPrefHeight(45);
 
         refreshBtn.setStyle(
-                "-fx-background-color:#434141;" +
+                "-fx-background-color:#4e342e;" +
                 "-fx-text-fill:white;" +
                 "-fx-font-size:22px;" +
                 "-fx-font-weight:bold;" +
@@ -179,7 +343,7 @@ public class ManageResidents {
         addResidentBtn.setPrefHeight(45);
 
         addResidentBtn.setStyle(
-                "-fx-background-color:#434141;" +
+                "-fx-background-color:#4e342e;" +
                 "-fx-text-fill:white;" +
                 "-fx-font-weight:bold;" +
                 "-fx-background-radius:8;" +
@@ -203,6 +367,11 @@ public class ManageResidents {
                 addResidentBtn
         );
 
+        VBox.setMargin(
+                searchBox,
+                new Insets(10, 0, 0, 0)
+        );
+
         // =====================================================
         // RESIDENT LIST
         // =====================================================
@@ -212,6 +381,12 @@ public class ManageResidents {
 
         residentList.setPadding(
                 new Insets(20, 0, 20, 0)
+        );
+
+        // Keep the resident list transparent so the background image
+        // from contentArea remains visible behind the resident cards.
+        residentList.setStyle(
+                "-fx-background-color:transparent;"
         );
 
         // =====================================================
@@ -227,8 +402,19 @@ public class ManageResidents {
 
         scrollPane.setFitToWidth(true);
 
+        scrollPane.setHbarPolicy(
+                ScrollPane.ScrollBarPolicy.NEVER
+        );
+
+        scrollPane.setVbarPolicy(
+                ScrollPane.ScrollBarPolicy.NEVER
+        );
+
         scrollPane.setStyle(
-                "-fx-background-color:transparent;"
+                "-fx-background-color:transparent;" +
+                "-fx-background:transparent;" +
+                "-fx-control-inner-background:transparent;" +
+                "-fx-border-color:transparent;"
         );
 
         VBox.setVgrow(
@@ -238,11 +424,6 @@ public class ManageResidents {
 
         // =====================================================
         // INITIAL LOAD
-        //
-        // IMPORTANT:
-        // getResidentsBySociety()
-        //
-        // NOT getAllResidents()
         // =====================================================
 
         loadResidents(
@@ -268,11 +449,21 @@ public class ManageResidents {
         // MAIN CONTENT
         // =====================================================
 
-        mainvb.getChildren().addAll(
-                title,
+        contentArea.getChildren().addAll(
+                
                 subtitle,
                 searchBox,
                 scrollPane
+        );
+
+        VBox.setVgrow(
+                contentArea,
+                Priority.ALWAYS
+        );
+
+        mainvb.getChildren().addAll(
+                header,
+                contentArea
         );
 
         // =====================================================
@@ -445,7 +636,7 @@ public class ManageResidents {
                 new TextField();
 
         emailField.setPromptText(
-                "Enter email"
+                "Enter registered resident email"
         );
 
         emailField.setPrefHeight(40);
@@ -607,7 +798,7 @@ public class ManageResidents {
         );
 
         // =====================================================
-        // ADD RESIDENT
+        // OPEN POPUP
         // =====================================================
 
         addResidentBtn.setOnAction(e -> {
@@ -700,9 +891,31 @@ public class ManageResidents {
             }
 
             // =================================================
-            // CHECK SECRETARY SOCIETY
+            // CHECK REGISTERED RESIDENT
             //
-            // This is an extra safety check before saving.
+            // Email is used to find the resident's existing
+            // complete details.
+            // =================================================
+
+            Resident existingResident =
+                    residentController
+                            .getResidentByEmail(email);
+
+            if (existingResident == null) {
+
+                showAlert(
+                        Alert.AlertType.WARNING,
+                        "Resident Not Found",
+                        "No registered resident found with this email."
+                                + "\n\nPlease enter the resident's"
+                                + " registered email."
+                );
+
+                return;
+            }
+
+            // =================================================
+            // CHECK SECRETARY SOCIETY
             // =================================================
 
             String secretarySociety =
@@ -722,18 +935,63 @@ public class ManageResidents {
             }
 
             // =================================================
-            // SAVE THROUGH CONTROLLER
+            // CHECK EXISTING RESIDENT SOCIETY
             //
-            // Controller automatically assigns society.
+            // If resident already belongs to another society,
+            // don't display/save that resident under this
+            // Secretary.
+            // =================================================
+
+            String existingSociety =
+                    existingResident.getSociety();
+
+            if (existingSociety != null
+                    && !existingSociety.trim().isEmpty()
+                    && !existingSociety
+                            .trim()
+                            .equalsIgnoreCase(
+                                    secretarySociety.trim()
+                            )) {
+
+                showAlert(
+                        Alert.AlertType.WARNING,
+                        "Society Mismatch",
+                        "This resident belongs to another society."
+                                + "\n\nResident Society: "
+                                + existingSociety
+                                + "\nYour Society: "
+                                + secretarySociety
+                );
+
+                return;
+            }
+
+            // =================================================
+            // SAVE
+            //
+            // Controller will preserve the complete resident
+            // information and assign the Secretary's society.
             // =================================================
 
             boolean success =
                     residentController.addResident(
                             name,
-                            flat,
-                            mobile,
                             email,
-                            status
+                            mobile,
+                            flat,
+                            status,
+                            existingResident.getAadhar(),
+                            existingResident.getAddress(),
+                            existingResident.getDob(),
+                            existingResident.getGender(),
+                            existingResident.getJoiningDate(),
+                            existingResident.getMemberSince(),
+                            existingResident.getOwnerName(),
+                            // The controller deliberately ignores this value
+                            // and obtains society from the logged-in
+                            // secretary's email.
+                            secretarySociety,
+                            existingResident.getRole()
                     );
 
             // =================================================
@@ -746,7 +1004,9 @@ public class ManageResidents {
                         Alert.AlertType.INFORMATION,
                         "Success",
                         "Resident saved successfully!"
-                                + "\n\nSociety: "
+                                + "\n\nEmail: "
+                                + email
+                                + "\nSociety: "
                                 + secretarySociety
                 );
 
@@ -761,7 +1021,7 @@ public class ManageResidents {
                 );
 
                 // =================================================
-                // RELOAD ONLY CURRENT SECRETARY SOCIETY
+                // RELOAD CURRENT SOCIETY
                 // =================================================
 
                 loadResidents(
@@ -781,12 +1041,6 @@ public class ManageResidents {
 
         // =====================================================
         // SEARCH
-        //
-        // IMPORTANT:
-        // Search currentResidents only.
-        //
-        // currentResidents already contains ONLY the
-        // logged-in Secretary's society residents.
         // =====================================================
 
         search.textProperty().addListener(
@@ -818,6 +1072,14 @@ public class ManageResidents {
                         ScreenSize.getHeight()
                 );
 
+        // Ensure the ScrollPane viewport stays transparent, so the exact
+        // background image is visible behind the resident list.
+        scene.getRoot().applyCss();
+        javafx.scene.Node viewport = scrollPane.lookup(".viewport");
+        if (viewport != null) {
+            viewport.setStyle("-fx-background-color:transparent;");
+        }
+
         Resident = scene;
 
         return Resident;
@@ -825,14 +1087,6 @@ public class ManageResidents {
 
     // =========================================================
     // LOAD RESIDENTS
-    //
-    // VERY IMPORTANT:
-    //
-    // getResidentsBySociety()
-    //
-    // NOT:
-    //
-    // getAllResidents()
     // =========================================================
 
     private void loadResidents(
@@ -848,23 +1102,15 @@ public class ManageResidents {
                 .getChildren()
                 .clear();
 
-        // =====================================================
-        // CLEAR OLD LIST
-        // =====================================================
-
         currentResidents.clear();
 
         // =====================================================
-        // GET ONLY LOGGED-IN SECRETARY SOCIETY RESIDENTS
+        // GET ONLY SECRETARY SOCIETY RESIDENTS
         // =====================================================
 
         List<Resident> residents =
                 residentController
                         .getResidentsBySociety();
-
-        // =====================================================
-        // NULL CHECK
-        // =====================================================
 
         if (residents == null) {
 
@@ -873,10 +1119,7 @@ public class ManageResidents {
         }
 
         // =====================================================
-        // EXTRA UI-SIDE SAFETY FILTER
-        //
-        // Even if DAO somehow returns wrong society,
-        // we verify it again here.
+        // GET SECRETARY SOCIETY
         // =====================================================
 
         String secretarySociety =
@@ -915,7 +1158,6 @@ public class ManageResidents {
         for (Resident resident : residents) {
 
             if (resident == null) {
-
                 continue;
             }
 
@@ -936,10 +1178,6 @@ public class ManageResidents {
             residentSociety =
                     residentSociety.trim();
 
-            // =================================================
-            // EXACT SOCIETY CHECK
-            // =================================================
-
             if (!residentSociety.equalsIgnoreCase(
                     secretarySociety
             )) {
@@ -955,10 +1193,6 @@ public class ManageResidents {
 
                 continue;
             }
-
-            // =================================================
-            // ADD TO CURRENT LIST
-            // =================================================
 
             currentResidents.add(
                     resident
@@ -1005,8 +1239,6 @@ public class ManageResidents {
 
     // =========================================================
     // DISPLAY RESIDENTS
-    //
-    // Used for both normal display and search.
     // =========================================================
 
     private void displayResidents(
@@ -1015,17 +1247,9 @@ public class ManageResidents {
             VBox residentList
     ) {
 
-        // =====================================================
-        // CLEAR UI
-        // =====================================================
-
         residentList
                 .getChildren()
                 .clear();
-
-        // =====================================================
-        // NULL / EMPTY
-        // =====================================================
 
         if (residents == null
                 || residents.isEmpty()) {
@@ -1051,10 +1275,6 @@ public class ManageResidents {
             return;
         }
 
-        // =====================================================
-        // NORMALIZE SEARCH
-        // =====================================================
-
         String query =
                 searchText == null
                         ? ""
@@ -1064,20 +1284,11 @@ public class ManageResidents {
 
         int matchCount = 0;
 
-        // =====================================================
-        // LOOP
-        // =====================================================
-
         for (Resident resident : residents) {
 
             if (resident == null) {
-
                 continue;
             }
-
-            // =================================================
-            // GET VALUES
-            // =================================================
 
             String name =
                     safeLower(
@@ -1109,14 +1320,6 @@ public class ManageResidents {
                             resident.getSociety()
                     );
 
-            // =================================================
-            // SEARCH
-            //
-            // Society is also included in search, but because
-            // currentResidents is already society-filtered,
-            // another society cannot appear.
-            // =================================================
-
             boolean matches =
                     query.isEmpty()
                             || name.contains(query)
@@ -1125,10 +1328,6 @@ public class ManageResidents {
                             || email.contains(query)
                             || status.contains(query)
                             || society.contains(query);
-
-            // =================================================
-            // ADD MATCH
-            // =================================================
 
             if (matches) {
 
@@ -1149,10 +1348,6 @@ public class ManageResidents {
                 matchCount++;
             }
         }
-
-        // =====================================================
-        // NO SEARCH RESULT
-        // =====================================================
 
         if (matchCount == 0) {
 
@@ -1183,7 +1378,6 @@ public class ManageResidents {
     ) {
 
         if (value == null) {
-
             return "";
         }
 
@@ -1205,13 +1399,9 @@ public class ManageResidents {
     ) {
 
         nameField.clear();
-
         flatField.clear();
-
         mobileField.clear();
-
         emailField.clear();
-
         statusField.clear();
     }
 
@@ -1224,7 +1414,6 @@ public class ManageResidents {
     ) {
 
         if (value == null) {
-
             return "";
         }
 
@@ -1240,7 +1429,6 @@ public class ManageResidents {
     ) {
 
         if (value == null) {
-
             return "";
         }
 
@@ -1296,7 +1484,7 @@ public class ManageResidents {
     ) {
 
         HBox residentRow =
-                new HBox(5);
+                new HBox(15);
 
         residentRow.setPrefWidth(1000);
 
@@ -1322,7 +1510,7 @@ public class ManageResidents {
         // =====================================================
 
         Label profile =
-                new Label("👤");
+                new Label("●");
 
         profile.setPrefWidth(50);
 
@@ -1335,7 +1523,8 @@ public class ManageResidents {
         profile.setStyle(
                 "-fx-background-color:#E5E7EB;" +
                 "-fx-background-radius:50%;" +
-                "-fx-font-size:22px;"
+                "-fx-font-size:22px;" +
+                "-fx-text-fill:black;"
         );
 
         // =====================================================
@@ -1395,7 +1584,7 @@ public class ManageResidents {
                                 )
                 );
 
-        mobileLabel.setPrefWidth(220);
+        mobileLabel.setPrefWidth(200);
 
         mobileLabel.setStyle(
                 "-fx-font-size:14px;" +
@@ -1434,4 +1623,12 @@ public class ManageResidents {
 
         return residentRow;
     }
+
+    // =========================================================
+    // GREETING
+    // =========================================================
+
+    
+
 }
+

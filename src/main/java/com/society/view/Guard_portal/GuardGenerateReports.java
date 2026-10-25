@@ -15,7 +15,13 @@ import com.society.model.Guard_model.GuardModel;
 import com.society.model.Guard_model.ParkingModel;
 import com.society.model.Guard_model.VisitorModel;
 import com.society.view.ScreenSize;
+import com.society.view.Owner_portal.OwnerDashboard;
 
+import javafx.animation.FadeTransition;
+import javafx.animation.Interpolator;
+import javafx.animation.ParallelTransition;
+import javafx.animation.ScaleTransition;
+import javafx.animation.TranslateTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -23,6 +29,12 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
+import javafx.scene.image.Image;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -31,6 +43,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 public class GuardGenerateReports {
 
@@ -67,8 +80,6 @@ public class GuardGenerateReports {
 
         // =================================================
         // GUARD DETAILS
-        // These are final because they are used inside
-        // JavaFX lambda expressions.
         // =================================================
 
         final String society;
@@ -129,9 +140,31 @@ public class GuardGenerateReports {
         BorderPane root =
                 new BorderPane();
 
-        root.setStyle(
-                "-fx-background-color:#E8DDD5;"
-        );
+                 Image image = new Image(
+                    OwnerDashboard.class
+                            .getResource(
+                                    "/background-Dashboard5.jpeg"
+                            )
+                            .toExternalForm()
+            );
+
+                BackgroundImage bgImage = new BackgroundImage(
+                                image,
+                                BackgroundRepeat.NO_REPEAT,
+                                BackgroundRepeat.NO_REPEAT,
+                                BackgroundPosition.CENTER,
+                                new BackgroundSize(
+                                                100,
+                                                100,
+                                                true,
+                                                true,
+                                                false,
+                                                true));
+
+                root.setBackground(
+                                new Background(bgImage));
+
+       
 
         // =================================================
         // SIDEBAR
@@ -152,26 +185,23 @@ public class GuardGenerateReports {
 
         // =================================================
         // MAIN AREA
-        //
-        // Header + content are placed together here.
-        // This prevents the header from stretching across
-        // the sidebar.
         // =================================================
 
         BorderPane mainArea =
                 new BorderPane();
 
-        mainArea.setStyle(
-                "-fx-background-color:#E8DDD5;"
-        );
+      
 
         // =================================================
         // HEADER
-        // Same design as Guard Dashboard
         // =================================================
 
         HBox header =
                 new HBox();
+
+        header.setPrefHeight(80);
+        header.setMinHeight(80);
+        header.setMaxHeight(80);
 
         header.setPadding(
                 new Insets(
@@ -180,6 +210,10 @@ public class GuardGenerateReports {
                         22,
                         45
                 )
+        );
+
+        header.setPrefHeight(
+                105
         );
 
         header.setAlignment(
@@ -200,6 +234,7 @@ public class GuardGenerateReports {
 
         title.setStyle(
                 "-fx-font-size:24px;" +
+                "-fx-font-family:'Bodoni MT';" +
                 "-fx-font-weight:bold;" +
                 "-fx-text-fill:white;"
         );
@@ -1215,10 +1250,59 @@ public class GuardGenerateReports {
                 buttonRow
         );
 
-        // =================================================
-        // PUT CONTENT INTO MAIN AREA
-        // NO SCROLL PANE
-        // =================================================
+        // =====================================================
+        // PAGE BOTTOM -> TOP ANIMATION
+        // =====================================================
+
+        content.setTranslateY(80);
+        content.setOpacity(0);
+
+        TranslateTransition pageSlide =
+                new TranslateTransition(
+                        Duration.millis(650),
+                        content
+                );
+
+        pageSlide.setFromY(80);
+        pageSlide.setToY(0);
+
+        pageSlide.setInterpolator(
+                Interpolator.EASE_OUT
+        );
+
+        FadeTransition pageFade =
+                new FadeTransition(
+                        Duration.millis(500),
+                        content
+                );
+
+        pageFade.setFromValue(0);
+        pageFade.setToValue(1);
+
+        ParallelTransition pageAnimation =
+                new ParallelTransition(
+                        pageSlide,
+                        pageFade
+                );
+
+        pageAnimation.play();
+
+        // =====================================================
+        // CARD POPUP ANIMATION
+        // =====================================================
+
+        addCardPopupAnimation(overviewCard);
+        addCardPopupAnimation(visitorCard);
+        addCardPopupAnimation(parkingCard);
+        addCardPopupAnimation(securityCard);
+        addCardPopupAnimation(notesCard);
+
+        // =====================================================
+        // BUTTON POPUP ANIMATION
+        // =====================================================
+
+        addButtonPopupAnimation(refreshButton);
+        addButtonPopupAnimation(sendButton);
 
         mainArea.setCenter(
                 content
@@ -1237,6 +1321,75 @@ public class GuardGenerateReports {
                 ScreenSize.getWidth(),
                 ScreenSize.getHeight()
         );
+    }
+
+    // =====================================================
+    // CARD POPUP ANIMATION
+    // =====================================================
+
+    private void addCardPopupAnimation(VBox card) {
+
+        card.setOnMouseClicked(e -> {
+
+            ScaleTransition scaleUp =
+                    new ScaleTransition(
+                            Duration.millis(120),
+                            card
+                    );
+
+            scaleUp.setToX(1.025);
+            scaleUp.setToY(1.025);
+
+            ScaleTransition scaleDown =
+                    new ScaleTransition(
+                            Duration.millis(150),
+                            card
+                    );
+
+            scaleDown.setToX(1);
+            scaleDown.setToY(1);
+
+            scaleUp.setOnFinished(
+                    event -> scaleDown.play()
+            );
+
+            scaleUp.play();
+        });
+    }
+
+    // =====================================================
+    // BUTTON POPUP ANIMATION
+    // =====================================================
+
+    private void addButtonPopupAnimation(Button button) {
+
+        button.setOnMousePressed(e -> {
+
+            ScaleTransition press =
+                    new ScaleTransition(
+                            Duration.millis(80),
+                            button
+                    );
+
+            press.setToX(0.94);
+            press.setToY(0.94);
+
+            press.play();
+        });
+
+        button.setOnMouseReleased(e -> {
+
+            ScaleTransition release =
+                    new ScaleTransition(
+                            Duration.millis(100),
+                            button
+                    );
+
+            release.setToX(1);
+            release.setToY(1);
+
+            release.play();
+        });
     }
 
     // =====================================================
